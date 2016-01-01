@@ -61,9 +61,8 @@
 		2198CEDA1B36D5DE00BD463F /* ResultSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211989941B2EC38B00F0D786 /* ResultSet.swift */; };
 		2198CEDB1B36D5DE00BD463F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211989961B2EC38B00F0D786 /* Theme.swift */; };
 		2198CEDC1B36D5E100BD463F /* SyntaxKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 211989951B2EC38B00F0D786 /* SyntaxKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		21F28DDB1B7AC7F8009DD1E9 /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDA1B7AC7F8009DD1E9 /* X.framework */; };
-		21F28DDD1B7AC802009DD1E9 /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDC1B7AC802009DD1E9 /* X.framework */; };
 		21F28DDF1B7AC80B009DD1E9 /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDE1B7AC80B009DD1E9 /* X.framework */; };
+		8C08C3C71C36FD6D00D8548F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C08C3C61C36FD6D00D8548F /* Color.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +137,7 @@
 		21F28DDA1B7AC7F8009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/iOS/X.framework; sourceTree = "<group>"; };
 		21F28DDC1B7AC802009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/Mac/X.framework; sourceTree = "<group>"; };
 		21F28DDE1B7AC80B009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/watchOS/X.framework; sourceTree = "<group>"; };
+		8C08C3C61C36FD6D00D8548F /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,7 +145,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F28DDB1B7AC7F8009DD1E9 /* X.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +161,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F28DDD1B7AC802009DD1E9 /* X.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +259,7 @@
 				211989931B2EC38B00F0D786 /* Result.swift */,
 				211989941B2EC38B00F0D786 /* ResultSet.swift */,
 				211989961B2EC38B00F0D786 /* Theme.swift */,
+				8C08C3C61C36FD6D00D8548F /* Color.swift */,
 				210299C11B2E8924009C61EE /* Resources */,
 				210299CD1B2E8924009C61EE /* Tests */,
 			);
@@ -525,6 +524,7 @@
 				211989C01B2EC40500F0D786 /* Capture.swift in Sources */,
 				211989C31B2EC40500F0D786 /* Language.swift in Sources */,
 				211989C41B2EC40500F0D786 /* Parser.swift in Sources */,
+				8C08C3C71C36FD6D00D8548F /* Color.swift in Sources */,
 				211989C11B2EC40500F0D786 /* CaptureCollection.swift in Sources */,
 				211989C71B2EC40500F0D786 /* ResultSet.swift in Sources */,
 				211989C51B2EC40500F0D786 /* Pattern.swift in Sources */,
@@ -614,10 +614,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "$(SRCROOT)/SyntaxKit/Resources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -638,10 +635,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "$(SRCROOT)/SyntaxKit/Resources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
