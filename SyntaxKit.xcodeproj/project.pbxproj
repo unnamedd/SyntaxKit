@@ -47,10 +47,6 @@
 		211989CE1B2EC40C00F0D786 /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210299CF1B2E8924009C61EE /* LanguageTests.swift */; };
 		211989CF1B2EC40C00F0D786 /* ThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2119898A1B2EBA2C00F0D786 /* ThemeTests.swift */; };
 		2122A6EA1B22B9320006409B /* SyntaxKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2122A6DE1B22B9320006409B /* SyntaxKit.framework */; };
-		2132B6201B7BFFA700C2F25B /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDC1B7AC802009DD1E9 /* X.framework */; };
-		2132B6211B7BFFAD00C2F25B /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDA1B7AC7F8009DD1E9 /* X.framework */; };
-		2132B6231B7BFFFD00C2F25B /* X.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDC1B7AC802009DD1E9 /* X.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		2132B6251B7C000A00C2F25B /* X.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDA1B7AC7F8009DD1E9 /* X.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2198CED21B36D5DE00BD463F /* AttributedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2119898C1B2EC38B00F0D786 /* AttributedParser.swift */; };
 		2198CED31B36D5DE00BD463F /* Capture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2119898D1B2EC38B00F0D786 /* Capture.swift */; };
 		2198CED41B36D5DE00BD463F /* CaptureCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2119898E1B2EC38B00F0D786 /* CaptureCollection.swift */; };
@@ -61,7 +57,6 @@
 		2198CEDA1B36D5DE00BD463F /* ResultSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211989941B2EC38B00F0D786 /* ResultSet.swift */; };
 		2198CEDB1B36D5DE00BD463F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211989961B2EC38B00F0D786 /* Theme.swift */; };
 		2198CEDC1B36D5E100BD463F /* SyntaxKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 211989951B2EC38B00F0D786 /* SyntaxKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		21F28DDF1B7AC80B009DD1E9 /* X.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F28DDE1B7AC80B009DD1E9 /* X.framework */; };
 		8C08C3C71C36FD6D00D8548F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C08C3C61C36FD6D00D8548F /* Color.swift */; };
 /* End PBXBuildFile section */
 
@@ -89,7 +84,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				2132B6231B7BFFFD00C2F25B /* X.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -100,7 +94,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				2132B6251B7C000A00C2F25B /* X.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -134,9 +127,6 @@
 		2122A6DE1B22B9320006409B /* SyntaxKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SyntaxKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2122A6E91B22B9320006409B /* SyntaxKitTests-OSX.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SyntaxKitTests-OSX.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2198CECA1B36D5D700BD463F /* SyntaxKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SyntaxKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		21F28DDA1B7AC7F8009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/iOS/X.framework; sourceTree = "<group>"; };
-		21F28DDC1B7AC802009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/Mac/X.framework; sourceTree = "<group>"; };
-		21F28DDE1B7AC80B009DD1E9 /* X.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = X.framework; path = Carthage/Build/watchOS/X.framework; sourceTree = "<group>"; };
 		8C08C3C61C36FD6D00D8548F /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,7 +143,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				211989B11B2EC3B600F0D786 /* SyntaxKit.framework in Frameworks */,
-				2132B6211B7BFFAD00C2F25B /* X.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -169,7 +158,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2122A6EA1B22B9320006409B /* SyntaxKit.framework in Frameworks */,
-				2132B6201B7BFFA700C2F25B /* X.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,7 +165,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F28DDF1B7AC80B009DD1E9 /* X.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,7 +216,6 @@
 			isa = PBXGroup;
 			children = (
 				2122A6E01B22B9320006409B /* SyntaxKit */,
-				21F28DD61B7AC7D0009DD1E9 /* Frameworks */,
 				2122A6DF1B22B9320006409B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -264,40 +250,6 @@
 				210299CD1B2E8924009C61EE /* Tests */,
 			);
 			path = SyntaxKit;
-			sourceTree = "<group>";
-		};
-		21F28DD61B7AC7D0009DD1E9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				21F28DD71B7AC7D6009DD1E9 /* OS X */,
-				21F28DD81B7AC7DC009DD1E9 /* iOS */,
-				21F28DD91B7AC7DF009DD1E9 /* watchOS */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		21F28DD71B7AC7D6009DD1E9 /* OS X */ = {
-			isa = PBXGroup;
-			children = (
-				21F28DDC1B7AC802009DD1E9 /* X.framework */,
-			);
-			name = "OS X";
-			sourceTree = "<group>";
-		};
-		21F28DD81B7AC7DC009DD1E9 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				21F28DDA1B7AC7F8009DD1E9 /* X.framework */,
-			);
-			name = iOS;
-			sourceTree = "<group>";
-		};
-		21F28DD91B7AC7DF009DD1E9 /* watchOS */ = {
-			isa = PBXGroup;
-			children = (
-				21F28DDE1B7AC80B009DD1E9 /* X.framework */,
-			);
-			name = watchOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -654,10 +606,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = SyntaxKit/Tests/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -672,10 +621,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = SyntaxKit/Tests/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

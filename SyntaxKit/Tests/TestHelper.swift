@@ -8,7 +8,6 @@
 
 import Foundation
 import XCTest
-import X
 @testable import SyntaxKit
 
 func fixture(name: String, _ type: String) -> String! {
