@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'SyntaxKit'
-  spec.version = '0.1.0'
+  spec.version = '0.1.1'
   spec.authors = {'Sam Soffes' => 'sam@soff.es'}
   spec.homepage = 'https://github.com/soffes/SyntaxKit'
   spec.summary = 'TextMate-style syntax highlighting.'
