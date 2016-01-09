@@ -53,6 +53,10 @@ class ParserTests: XCTestCase {
 	
 		XCTAssertEqual(NSMakeRange(39, 4), stringQuoted!)
 	}
+    
+    func testParsingGarbage() {
+        parser.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _, _ in }
+    }
 
 	func testRuby() {
 		let parser = Parser(language: language("Ruby"))

@@ -13,31 +13,47 @@ final class Pattern {
 	// MARK: - Properties
 
 	let name: String?
-	let match: String?
+    let match: NSRegularExpression?
 	let captures: CaptureCollection?
-	let begin: String?
+    let begin: NSRegularExpression?
 	let beginCaptures: CaptureCollection?
-	let end: String?
+    let end: NSRegularExpression?
 	let endCaptures: CaptureCollection?
 	private weak var parent: Pattern?
-	private let patterns: [Pattern]
+	private var patterns: Patterns
 
 	var superpattern: Pattern? {
 		return parent
 	}
 
-	var subpatterns: [Pattern] {
+	var subpatterns: Patterns {
 		return patterns
 	}
 
 	// MARK: - Initializers
 
-	init?(dictionary: [NSObject: AnyObject], parent: Pattern? = nil) {
+    init?(dictionary: [NSObject: AnyObject], repository: Repository, parent: Pattern? = nil) {
 		self.parent = parent
 		self.name = dictionary["name"] as? String
-		self.match = dictionary["match"] as? String
-		self.begin = dictionary["begin"] as? String
-		self.end = dictionary["end"] as? String
+
+        if let matchExpr = dictionary["match"] as? String {
+            self.match = try? NSRegularExpression(pattern: matchExpr, options:.AnchorsMatchLines) //[.CaseInsensitive]
+        } else {
+            self.match = nil
+        }
+        
+        if let beginExpr = dictionary["begin"] as? String {
+            self.begin = try? NSRegularExpression(pattern: beginExpr, options:.AnchorsMatchLines)
+        } else {
+            self.begin = nil
+        }
+
+        if let endExpr = dictionary["end"] as? String {
+            self.end = try? NSRegularExpression(pattern: endExpr, options:.AnchorsMatchLines)
+        } else {
+            self.end = nil
+        }
+        
 
 		if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
 			self.beginCaptures = CaptureCollection(dictionary: dictionary)
@@ -52,19 +68,27 @@ final class Pattern {
 		}
 
 		if let dictionary = dictionary["endCaptures"] as? [NSObject: AnyObject] {
-			self.endCaptures = CaptureCollection(dictionary: dictionary)
-		} else {
-			self.endCaptures = nil
-		}
-
-		var patterns = [Pattern]()
-		if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-			for value in array {
-				if let pattern = Pattern(dictionary: value, parent: parent) {
-					patterns.append(pattern)
-				}
-			}
-		}
-		self.patterns = patterns
-	}
+            self.endCaptures = CaptureCollection(dictionary: dictionary)
+        } else {
+            self.endCaptures = nil
+        }
+        
+        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
+            self.patterns = Patterns(array: array, repository: repository)
+        } else {
+            self.patterns = Patterns(array: [], repository: repository)
+        }
+    }
+    
+    init(pattern: Pattern, parent: Pattern? = nil) {
+        self.name = pattern.name
+        self.match = pattern.match
+        self.captures = pattern.captures
+        self.begin = pattern.begin
+        self.beginCaptures = pattern.beginCaptures
+        self.end = pattern.end
+        self.endCaptures = pattern.endCaptures
+        self.parent = parent
+        self.patterns = pattern.patterns
+    }
 }

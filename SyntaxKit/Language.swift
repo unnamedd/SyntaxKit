@@ -15,7 +15,7 @@ public struct Language {
 	public let UUID: String
 	public let name: String
 	public let scopeName: String
-	let patterns: [Pattern]
+	let patterns: Patterns
 
 
 	// MARK: - Initializers
@@ -30,31 +30,17 @@ public struct Language {
 		self.name = name
 		self.scopeName = scopeName
 
-		var repository = [String: Pattern]()
-		if let repo = dictionary["repository"] as? [String: [NSObject: AnyObject]] {
-			for (key, value) in repo {
-				if let pattern = Pattern(dictionary: value) {
-					repository[key] = pattern
-				}
-			}
-		}
-
-		var patterns = [Pattern]()
-		if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-			for value in array {
-				if let include = value["include"] as? String {
-					let key = include.substringFromIndex(include.startIndex.successor())
-					if let pattern = repository[key] {
-						patterns.append(pattern)
-						continue
-					}
-				}
-
-				if let pattern = Pattern(dictionary: value) {
-					patterns.append(pattern)
-				}
-			}
-		}
-		self.patterns = patterns
+        let repository: Repository
+        if let repo = dictionary["repository"] as? [String: [NSObject: AnyObject]] {
+            repository = Repository(repo: repo)
+        } else {
+            repository = Repository(repo: [:])
+        }
+        
+        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
+			self.patterns = Patterns(array: array, repository: repository)
+        } else {
+            self.patterns = Patterns(array: [], repository: repository)
+        }
 	}
 }

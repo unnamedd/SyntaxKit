@@ -46,9 +46,10 @@ public class Parser {
 
 			// Loop through the line until we reach the end
 			while range.length > 0 && range.location < limit {
-				let location = parse(string, inRange: range, callback: callback)
+				let location = parse(string, inRange: range, withPatterns: language.patterns, callback: callback)
 				range.location = Int(location)
-				range.length = max(0, range.length - paragraphRange.location - range.location)
+//                assert(range.length - (range.location - paragraphRange.location) >= 0)
+				range.length = max(0, range.length - (range.location - paragraphRange.location))
 			}
 		}
 	}
@@ -57,24 +58,27 @@ public class Parser {
 	// MARK: - Private
 
 	/// Returns new location
-	private func parse(string: String, inRange bounds: NSRange, callback: Callback) -> UInt {
-		for pattern in language.patterns {
-			// Single pattern
+    private func parse(string: String, inRange bounds: NSRange, withPatterns patterns: Patterns, callback: Callback) -> UInt {
+		for pattern in patterns.getContent() {
+//            print(pattern.name)
 			if let match = pattern.match {
-				if let resultSet = parse(string, inRange: bounds, scope: pattern.name, expression: match, captures: pattern.captures) {
+				if let resultSet = parse(string, inRange: bounds, expression: match, captures: pattern.captures, scope: pattern.name) {
 					return applyResults(resultSet, callback: callback)
-				} else {
-					continue
 				}
-			}
-
-			// Begin & end
-			if let begin = pattern.begin, end = pattern.end {
+			} else if let begin = pattern.begin, end = pattern.end {
 				guard let beginResults = parse(string, inRange: bounds, expression: begin, captures: pattern.beginCaptures),
 					beginRange = beginResults.range else { continue }
-
-				let location = NSMaxRange(beginRange)
-				let endBounds = NSMakeRange(location, bounds.length - location - bounds.location)
+                
+                var location = NSMaxRange(beginRange)
+//                assert(bounds.length - (location - bounds.location) >= 0)
+//                let midBounds = NSRange(location: location, length: bounds.length - (location - bounds.location))
+//                
+//                if pattern.subpatterns.getContent().count >= 1 {
+//                    location = Int(parse(string, inRange: midBounds, withPatterns: pattern.subpatterns, callback: callback))
+//                }
+                
+                assert(bounds.length - (location - bounds.location) >= 0)
+				let endBounds = NSRange(location: location, length: bounds.length - (location - bounds.location)) // might still need max(0, …) for extra security
 
 				guard let endResults = parse(string, inRange: endBounds, expression: end, captures: pattern.endCaptures),
 					endRange = endResults.range else { /* TODO: Rewind? */ continue }
@@ -89,22 +93,24 @@ public class Parser {
 				results.addResults(endResults)
 
 				return applyResults(results, callback: callback)
-			}
+            } else if pattern.subpatterns.getContent().count >= 1 {
+                let subPatternTry = parse(string, inRange: bounds, withPatterns: pattern.subpatterns, callback: callback)
+                if subPatternTry < UInt(NSMaxRange(bounds)) {
+                    return subPatternTry
+                }
+            }
 		}
 
 		return UInt(NSMaxRange(bounds))
 	}
 
 	/// Parse an expression with captures
-	private func parse(string: String, inRange bounds: NSRange, scope: String? = nil, expression expressionString: String, captures: CaptureCollection?) -> ResultSet? {
-		let matches: [NSTextCheckingResult]
-		do {
-			let expression = try NSRegularExpression(pattern: expressionString, options: [.CaseInsensitive])
-			matches = expression.matchesInString(string, options: [], range: bounds)
-		} catch {
-			return nil
-		}
-
+	private func parse(string: String, inRange bounds: NSRange, expression regularExpression: NSRegularExpression?, captures: CaptureCollection?, scope: String? = nil) -> ResultSet? {
+        if regularExpression == nil {
+            return nil
+        }
+		let matches = regularExpression!.matchesInString(string, options: [], range: bounds)
+        
 		guard let result = matches.first else { return nil }
 
 		var resultSet = ResultSet()
@@ -125,11 +131,7 @@ public class Parser {
 			}
 		}
 
-		if !resultSet.isEmpty {
-			return resultSet
-		}
-
-		return nil
+        return resultSet
 	}
 
 	private func applyResults(resultSet: ResultSet, callback: Callback) -> UInt {
