@@ -36,87 +36,139 @@ public class Parser {
 		var paragraphEnd = 0
 
 		while paragraphEnd < length {
-			var paragraphStart = 0
-			var contentsEnd = 0
-			s.getParagraphStart(&paragraphStart, end: &paragraphEnd, contentsEnd: &contentsEnd, forRange: NSMakeRange(paragraphEnd, 0))
+            let paragraphStart = paragraphEnd
+            var newParagraphStart = 0
+			s.getParagraphStart(&newParagraphStart, end: &paragraphEnd, contentsEnd: nil, forRange: NSMakeRange(paragraphEnd, 0))
+            if newParagraphStart < paragraphStart - 1 {
+                newParagraphStart = paragraphStart
+            }
 
-			let paragraphRange = NSMakeRange(paragraphStart, contentsEnd - paragraphStart)
+			let paragraphRange = NSMakeRange(newParagraphStart, paragraphEnd - newParagraphStart)
 			let limit = NSMaxRange(paragraphRange)
 			var range = paragraphRange
 
 			// Loop through the line until we reach the end
 			while range.length > 0 && range.location < limit {
-				let location = parse(string, inRange: range, withPatterns: language.patterns, callback: callback)
-				range.location = Int(location)
-//                assert(range.length - (range.location - paragraphRange.location) >= 0)
-				range.length = max(0, range.length - (range.location - paragraphRange.location))
+                print(range)
+                print(s.substringWithRange(range))
+                if s.substringWithRange(range).containsString("|") {
+                    print("There")
+                }
+                let matches = matchPatterns(language.patterns, withString: string, inRange: range)
+                var newLocation = limit
+                if matches != nil && matches!.results.count != 0 {
+                    let newPlace = Int(applyResults(matches!, callback: callback))
+                    if newPlace != range.location {
+                        newLocation = newPlace
+                    }
+                }
+                if newLocation > limit {
+                    paragraphEnd = newLocation
+                    break
+                }
+                assert(range.length - (newLocation - range.location) >= 0)
+				range.length = range.length - (newLocation - range.location)
+                range.location = newLocation
 			}
 		}
 	}
 
 
 	// MARK: - Private
-
-	/// Returns new location
-    private func parse(string: String, inRange bounds: NSRange, withPatterns patterns: Patterns, callback: Callback) -> UInt {
-		for pattern in patterns.getContent() {
-//            print(pattern.name)
-			if let match = pattern.match {
-				if let resultSet = parse(string, inRange: bounds, expression: match, captures: pattern.captures, scope: pattern.name) {
-					return applyResults(resultSet, callback: callback)
-				}
-			} else if let begin = pattern.begin, end = pattern.end {
-				guard let beginResults = parse(string, inRange: bounds, expression: begin, captures: pattern.beginCaptures),
-					beginRange = beginResults.range else { continue }
+    
+    private func matchPatterns(patterns: Patterns, withString string: String, inRange bounds: NSRange) -> ResultSet? {
+        for pattern in patterns.getContent() {
+            if let match = pattern.match {
+                if let resultSet = matchExpression(match, withString: string, inRange: bounds, captures: pattern.captures, baseSelector: pattern.name) {
+                    if !resultSet.isEmpty && resultSet.range!.length != 0 && resultSet.range!.location <= firstNonWhitespaceLocationInString(string, withRange: bounds) {
+                        return resultSet
+                    }
+                }
+            } else if let begin = pattern.begin, end = pattern.end {
+                let s: NSString = string
+                let startBounds = NSRange(location: bounds.location, length: s.length - bounds.location)
+                guard let beginResults = matchExpression(begin, withString: string, inRange: startBounds  , captures: pattern.beginCaptures),
+                    beginRange = beginResults.range else { continue }
                 
-                var location = NSMaxRange(beginRange)
-//                assert(bounds.length - (location - bounds.location) >= 0)
-//                let midBounds = NSRange(location: location, length: bounds.length - (location - bounds.location))
-//                
-//                if pattern.subpatterns.getContent().count >= 1 {
-//                    location = Int(parse(string, inRange: midBounds, withPatterns: pattern.subpatterns, callback: callback))
-//                }
+                if beginRange.location > firstNonWhitespaceLocationInString(string, withRange: bounds) {
+                    continue
+                }
                 
-                assert(bounds.length - (location - bounds.location) >= 0)
-				let endBounds = NSRange(location: location, length: bounds.length - (location - bounds.location)) // might still need max(0, …) for extra security
-
-				guard let endResults = parse(string, inRange: endBounds, expression: end, captures: pattern.endCaptures),
-					endRange = endResults.range else { /* TODO: Rewind? */ continue }
-
-				// Add whole scope before start and end
-				var results = ResultSet()
-				if let name = pattern.name {
-					results.addResult(Result(scope: name, range: NSUnionRange(beginRange, endRange)))
-				}
-
-				results.addResults(beginResults)
-				results.addResults(endResults)
-
-				return applyResults(results, callback: callback)
+                var newLocation = NSMaxRange(beginRange)
+                
+                
+                assert(s.length - newLocation >= 0)
+                var endBounds = NSRange(location: newLocation, length: s.length - newLocation)
+                
+                var midResults = ResultSet()
+                
+                if pattern.subpatterns.getContent().count >= 1 {
+                    let midTestResults = matchPatterns(pattern.subpatterns, withString: string, inRange: endBounds)
+                    let midRange = midTestResults?.range
+                    if midRange != nil && midRange!.location <= firstNonWhitespaceLocationInString(string, withRange: midRange!) {
+                        midResults.addResults(midTestResults!)
+                        newLocation = NSMaxRange(midRange!)
+                        assert(endBounds.length - (newLocation - endBounds.location) >= 0)
+                        endBounds = NSRange(location: newLocation, length: endBounds.length - (newLocation - endBounds.location))
+                    }
+                }
+                
+                let endResults = matchExpression(end, withString: string, inRange: endBounds, captures: pattern.endCaptures)
+                let endRange = endResults?.range
+                if endRange == nil {
+                    continue
+                }
+                
+                var results = ResultSet()
+                if let name = pattern.name {
+                    results.addResult(Result(scope: name, range: NSUnionRange(beginRange, endRange!)))
+                }
+                
+                results.addResults(beginResults)
+                results.addResults(midResults)
+                results.addResults(endResults!)
+                
+                return results
             } else if pattern.subpatterns.getContent().count >= 1 {
-                let subPatternTry = parse(string, inRange: bounds, withPatterns: pattern.subpatterns, callback: callback)
-                if subPatternTry < UInt(NSMaxRange(bounds)) {
+                let subPatternTry = matchPatterns(pattern.subpatterns, withString: string, inRange: bounds)
+                if subPatternTry != nil {
                     return subPatternTry
                 }
             }
-		}
+        }
+        return nil
+    }
+    
+    private func firstNonWhitespaceLocationInString(string: String, withRange range: NSRange) -> Int {
+        for i in range.toRange()! {
+            if isblank(Int32((string as NSString).characterAtIndex(i))) == 0 {
+                return i
+            }
+        }
+        return NSMaxRange(range)
+    }
 
-		return UInt(NSMaxRange(bounds))
-	}
-
-	/// Parse an expression with captures
-	private func parse(string: String, inRange bounds: NSRange, expression regularExpression: NSRegularExpression?, captures: CaptureCollection?, scope: String? = nil) -> ResultSet? {
+	/// Matches a given regular expression in a String
+    ///
+    ///
+    /// - returns: The resultset
+	private func matchExpression(regularExpression: NSRegularExpression?, withString string: String, inRange bounds: NSRange, captures: CaptureCollection?, baseSelector: String? = nil) -> ResultSet? {
         if regularExpression == nil {
             return nil
         }
-		let matches = regularExpression!.matchesInString(string, options: [], range: bounds)
+		let matches = regularExpression!.matchesInString(string, options: [.WithTransparentBounds], range: bounds)
+        if matches.first == nil || matches.first!.range.location == NSNotFound {
+            return nil
+        }
         
-		guard let result = matches.first else { return nil }
-
+        let result = matches.first!
+        
 		var resultSet = ResultSet()
-		if let scope = scope where result.range.location != NSNotFound {
-			resultSet.addResult(Result(scope: scope, range: result.range))
-		}
+		if baseSelector != nil {
+			resultSet.addResult(Result(scope: baseSelector!, range: result.range))
+        } else {
+            resultSet.addResult(Result(scope: "", range: result.range))
+        }
 
 		if let captures = captures {
 			for index in captures.captureIndexes {
@@ -137,7 +189,9 @@ public class Parser {
 	private func applyResults(resultSet: ResultSet, callback: Callback) -> UInt {
 		var i = 0
 		for result in resultSet.results {
-			callback(scope: result.scope, range: result.range)
+            if result.scope != "" && result.range.length > 0 {
+                callback(scope: result.scope, range: result.range)
+            }
 			i = max(NSMaxRange(result.range), i)
 		}
 		return UInt(i)
