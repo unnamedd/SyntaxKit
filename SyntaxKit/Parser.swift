@@ -49,11 +49,6 @@ public class Parser {
 
 			// Loop through the line until we reach the end
 			while range.length > 0 && range.location < limit {
-                print(range)
-                print(s.substringWithRange(range))
-                if s.substringWithRange(range).containsString("|") {
-                    print("There")
-                }
                 let matches = matchPatterns(language.patterns, withString: string, inRange: range)
                 var newLocation = limit
                 if matches != nil && matches!.results.count != 0 {
@@ -85,9 +80,7 @@ public class Parser {
                     }
                 }
             } else if let begin = pattern.begin, end = pattern.end {
-                let s: NSString = string
-                let startBounds = NSRange(location: bounds.location, length: s.length - bounds.location)
-                guard let beginResults = matchExpression(begin, withString: string, inRange: startBounds  , captures: pattern.beginCaptures),
+                guard let beginResults = matchExpression(begin, withString: string, inRange: bounds  , captures: pattern.beginCaptures),
                     beginRange = beginResults.range else { continue }
                 
                 if beginRange.location > firstNonWhitespaceLocationInString(string, withRange: bounds) {
@@ -96,7 +89,7 @@ public class Parser {
                 
                 var newLocation = NSMaxRange(beginRange)
                 
-                
+                let s: NSString = string
                 assert(s.length - newLocation >= 0)
                 var endBounds = NSRange(location: newLocation, length: s.length - newLocation)
                 
