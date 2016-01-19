@@ -55,8 +55,8 @@ public class AttributedParser: Parser {
 		}
 
 		var attributes = Attributes()
-		for i in 0..<components.count {
-			let key = (components.subarrayWithRange(NSMakeRange(0, count - 1 - i)) as NSArray).componentsJoinedByString(".")
+		for i in 0..<count {
+			let key = (components.subarrayWithRange(NSMakeRange(0, i + 1)) as NSArray).componentsJoinedByString(".")
 			if let attrs = theme.attributes[key] {
 				for (k, v) in attrs {
 					attributes[k] = v

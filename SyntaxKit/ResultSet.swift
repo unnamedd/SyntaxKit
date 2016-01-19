@@ -22,7 +22,20 @@ struct ResultSet {
 	var isEmpty: Bool {
 		return results.isEmpty
 	}
-
+    
+    // MARK: - Comparing
+    
+    func hasLowerPriorityThan(other: ResultSet?) -> Bool {
+        if other == nil || other!.range == nil {
+            return false
+        } else if self.range == nil {
+            return true
+        }  else if self.range!.location != other!.range!.location {
+            return self.range!.location > other!.range!.location
+        } else {
+            return self.range!.length < other!.range!.length
+        }
+    }
 
 	// MARK: - Adding
 
