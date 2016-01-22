@@ -23,6 +23,11 @@ class Repository {
                 self.entries[key] = pattern
             }
         }
+        for (key, value) in repo { // now that we have all dependencies, try again
+            if let pattern = Pattern(dictionary: value, repository: self) {
+                self.entries[key] = pattern
+            }
+        }
     }
     
     func allEntries() -> [String: Pattern] {

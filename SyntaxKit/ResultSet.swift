@@ -17,23 +17,25 @@ struct ResultSet {
 		return _results
 	}
 
-	var range: NSRange?
+	var range: NSRange
 
 	var isEmpty: Bool {
 		return results.isEmpty
 	}
     
+    init(startingRange range: NSRange) {
+        self.range = range
+    }
+    
     // MARK: - Comparing
     
     func hasLowerPriorityThan(other: ResultSet?) -> Bool {
-        if other == nil || other!.range == nil {
+        if other == nil {
             return false
-        } else if self.range == nil {
-            return true
-        }  else if self.range!.location != other!.range!.location {
-            return self.range!.location > other!.range!.location
+        } else if other!.range.location != self.range.location {
+            return other!.range.location < self.range.location
         } else {
-            return self.range!.length < other!.range!.length
+            return other!.range.length > self.range.length
         }
     }
 
@@ -42,15 +44,11 @@ struct ResultSet {
 	mutating func addResult(result: Result) {
 		_results.append(result)
 
-		guard let range = range else {
-			self.range = result.range
-			return
-		}
-
 		self.range = NSUnionRange(range, result.range)
 	}
 
 	mutating func addResults(resultSet: ResultSet) {
+        self.range = NSUnionRange(range, resultSet.range)
 		for result in resultSet.results {
 			addResult(result)
 		}

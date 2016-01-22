@@ -37,19 +37,19 @@ final class Pattern {
 		self.name = dictionary["name"] as? String
 
         if let matchExpr = dictionary["match"] as? String {
-            self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines]) //[.CaseInsensitive]
+            self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/]) //[.CaseInsensitive]
         } else {
             self.match = nil
         }
         
         if let beginExpr = dictionary["begin"] as? String {
-            self.begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
+            self.begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/])
         } else {
             self.begin = nil
         }
 
         if let endExpr = dictionary["end"] as? String {
-            self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
+            self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/])
         } else {
             self.end = nil
         }
@@ -78,17 +78,5 @@ final class Pattern {
         } else {
             self.patterns = Patterns(array: [], repository: repository)
         }
-    }
-    
-    init(pattern: Pattern, parent: Pattern? = nil) {
-        self.name = pattern.name
-        self.match = pattern.match
-        self.captures = pattern.captures
-        self.begin = pattern.begin
-        self.beginCaptures = pattern.beginCaptures
-        self.end = pattern.end
-        self.endCaptures = pattern.endCaptures
-        self.parent = parent
-        self.patterns = pattern.patterns
     }
 }

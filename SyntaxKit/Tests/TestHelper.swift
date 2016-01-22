@@ -83,11 +83,15 @@ extension Color {
 }
 #endif
 
-func assertEqualColors(color1: Color, _ color2: Color, accuracy: CGFloat = 0.005) {
-	XCTAssertEqualWithAccuracy(color1.redComponent, color2.redComponent, accuracy: accuracy)
-	XCTAssertEqualWithAccuracy(color1.greenComponent, color2.greenComponent, accuracy: accuracy)
-	XCTAssertEqualWithAccuracy(color1.blueComponent, color2.blueComponent, accuracy: accuracy)
-	XCTAssertEqualWithAccuracy(color1.alphaComponent, color2.alphaComponent, accuracy: accuracy)
+func assertEqualColors(color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.005) {
+    if color1 == nil || color2 == nil {
+        XCTAssert(false, "colors have to be non-nil")
+        return
+    }
+	XCTAssertEqualWithAccuracy(color1!.redComponent, color2!.redComponent, accuracy: accuracy)
+	XCTAssertEqualWithAccuracy(color1!.greenComponent, color2!.greenComponent, accuracy: accuracy)
+	XCTAssertEqualWithAccuracy(color1!.blueComponent, color2!.blueComponent, accuracy: accuracy)
+	XCTAssertEqualWithAccuracy(color1!.alphaComponent, color2!.alphaComponent, accuracy: accuracy)
 }
 
 extension NSRange: Equatable { }
