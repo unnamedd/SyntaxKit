@@ -71,7 +71,7 @@ public class Parser {
 //                        range = NSRange(location: paragraphStart, length: paragraphEnd - paragraphStart)
 //                        paragraphStart = newStart
 //                    } else {
-                        range = NSRange(location: newStart, length: range.length - (newStart - range.location))
+                        range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
                         paragraphEnd = newStart
 //                    }
                 }
