@@ -33,7 +33,7 @@ struct ResultSet {
         if other == nil {
             return false
         } else {
-            return other!.range.location < self.range.location
+            return self.range.location > other!.range.location
         }
     }
 

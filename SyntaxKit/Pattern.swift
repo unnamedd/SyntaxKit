@@ -33,9 +33,9 @@ final class Pattern {
 	// MARK: - Initializers
 
     init?(dictionary: [NSObject: AnyObject], repository: Repository, parent: Pattern? = nil) {
-		self.parent = parent
-		self.name = dictionary["name"] as? String
-
+        self.parent = parent
+        self.name = dictionary["name"] as? String
+        
         if let matchExpr = dictionary["match"] as? String {
             self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines]) //[.CaseInsensitive]
         } else {
@@ -47,15 +47,14 @@ final class Pattern {
         } else {
             self.begin = nil
         }
-
+        
         if let endExpr = dictionary["end"] as? String {
             self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
         } else {
             self.end = nil
         }
         
-
-		if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
+        if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
 			self.beginCaptures = CaptureCollection(dictionary: dictionary)
 		} else {
 			self.beginCaptures = nil
@@ -77,6 +76,14 @@ final class Pattern {
             self.patterns = Patterns(array: array, repository: repository)
         } else {
             self.patterns = Patterns(array: [], repository: repository)
+        }
+        
+        if dictionary["match"] as? String != nil && self.match == nil {
+            return nil
+        }
+        
+        if dictionary["begin"] as? String != nil && (self.begin == nil || self.end == nil) {
+            return nil
         }
     }
 }

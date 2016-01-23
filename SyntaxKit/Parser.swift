@@ -66,14 +66,8 @@ public class Parser {
                         result!.addResults(bestResultForMiddle!)
                     }
                     let newStart = NSMaxRange(bestResultForMiddle!.range)
-//                    if newStart > paragraphEnd {
-//                        s.getParagraphStart(nil, end: &paragraphEnd, contentsEnd: nil, forRange: NSMakeRange(paragraphEnd, 0))
-//                        range = NSRange(location: paragraphStart, length: paragraphEnd - paragraphStart)
-//                        paragraphStart = newStart
-//                    } else {
-                        range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
-                        paragraphEnd = newStart
-//                    }
+                    range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
+                    paragraphEnd = newStart
                 }
                 
                 if endPattern != nil {
