@@ -32,10 +32,8 @@ struct ResultSet {
     func hasLowerPriorityThan(other: ResultSet?) -> Bool {
         if other == nil {
             return false
-        } else if other!.range.location != self.range.location {
-            return other!.range.location < self.range.location
         } else {
-            return other!.range.length > self.range.length
+            return other!.range.location < self.range.location
         }
     }
 

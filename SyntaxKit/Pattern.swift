@@ -37,19 +37,19 @@ final class Pattern {
 		self.name = dictionary["name"] as? String
 
         if let matchExpr = dictionary["match"] as? String {
-            self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/]) //[.CaseInsensitive]
+            self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines]) //[.CaseInsensitive]
         } else {
             self.match = nil
         }
         
         if let beginExpr = dictionary["begin"] as? String {
-            self.begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/])
+            self.begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
         } else {
             self.begin = nil
         }
 
         if let endExpr = dictionary["end"] as? String {
-            self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines/*, .AllowCommentsAndWhitespace*/])
+            self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
         } else {
             self.end = nil
         }

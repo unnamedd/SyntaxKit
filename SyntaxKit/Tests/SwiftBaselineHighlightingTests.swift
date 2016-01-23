@@ -46,7 +46,7 @@ class SwiftBaselineHighlightingTests: XCTestCase {
         var numberRange = NSRange()
 //        print((string.string as NSString).substringWithRange(NSRange(location: 715, length: 3)))
         assertEqualColors(Color(hex: "#d33682"), string.attributesAtIndex(715, effectiveRange: &numberRange)[NSForegroundColorAttributeName] as? Color)
-        XCTAssertEqual(numberRange, NSRange(location: 715, length: 3))
+        XCTAssertEqual(numberRange, NSRange(location: 715, length: 1))
     }
 
     func testHighlightingPerformance() {
