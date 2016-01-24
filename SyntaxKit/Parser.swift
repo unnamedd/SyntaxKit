@@ -144,12 +144,9 @@ public class Parser {
     ///
     /// - returns: The set containing the results. May be nil if the expression could not match any part of the string. It may also be empty and only contain
 	private func matchExpression(regularExpression: NSRegularExpression, withString string: String, inRange bounds: NSRange, captures: CaptureCollection?, baseSelector: String? = nil) -> ResultSet? {
-		let matches = regularExpression.matchesInString(string, options: [.WithTransparentBounds], range: bounds)
-        if matches.first == nil || matches.first!.range.location == NSNotFound {
+        guard let result = regularExpression.matchesInString(string, options: [.WithTransparentBounds], range: bounds).first else {
             return nil
         }
-        
-        let result = matches.first!
         
 		var resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {

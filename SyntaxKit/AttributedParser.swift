@@ -36,11 +36,13 @@ public class AttributedParser: Parser {
 
 	public func attributedStringForString(string: String, baseAttributes: Attributes? = nil) -> NSAttributedString {
 		let output = NSMutableAttributedString(string: string, attributes: baseAttributes)
+        output.beginEditing()
 		parse(string) { _, range, attributes in
 			if let attributes = attributes {
 				output.addAttributes(attributes, range: range)
 			}
 		}
+        output.endEditing()
 		return output
 	}
 
