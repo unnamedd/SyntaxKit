@@ -26,16 +26,6 @@ struct ResultSet {
     init(startingRange range: NSRange) {
         self.range = range
     }
-    
-    // MARK: - Comparing
-    
-    func hasLowerPriorityThan(other: ResultSet?) -> Bool {
-        if other == nil {
-            return false
-        } else {
-            return self.range.location > other!.range.location
-        }
-    }
 
 	// MARK: - Adding
 
