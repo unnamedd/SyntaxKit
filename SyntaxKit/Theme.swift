@@ -9,51 +9,51 @@
 import Foundation
 
 #if os(iOS) || os(watchOS)
-	import UIKit
+    import UIKit
 #endif
 
 public typealias Attributes = [String: AnyObject]
 
 public struct Theme {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	public let UUID: String
-	public let name: String
-	public let attributes: [String: Attributes]
+    public let UUID: String
+    public let name: String
+    public let attributes: [String: Attributes]
 
 
-	// MARK: - Initializers
+    // MARK: - Initializers
 
-	public init?(dictionary: [NSObject: AnyObject]) {
-		guard let UUID = dictionary["uuid"] as? String,
-			name = dictionary["name"] as? String,
-			rawSettings = dictionary["settings"] as? [[String: AnyObject]]
-			else { return nil }
+    public init?(dictionary: [NSObject: AnyObject]) {
+        guard let UUID = dictionary["uuid"] as? String,
+            name = dictionary["name"] as? String,
+            rawSettings = dictionary["settings"] as? [[String: AnyObject]]
+            else { return nil }
 
-		self.UUID = UUID
-		self.name = name
+        self.UUID = UUID
+        self.name = name
 
-		var attributes = [String: Attributes]()
-		for raw in rawSettings {
-			guard let scopes = raw["scope"] as? String else { continue }
-			guard var setting = raw["settings"] as? [String: AnyObject] else { continue }
+        var attributes = [String: Attributes]()
+        for raw in rawSettings {
+            guard let scopes = raw["scope"] as? String else { continue }
+            guard var setting = raw["settings"] as? [String: AnyObject] else { continue }
 
-			if let value = setting.removeValueForKey("foreground") as? String {
-				setting[NSForegroundColorAttributeName] = Color(hex: value)
-			}
+            if let value = setting.removeValueForKey("foreground") as? String {
+                setting[NSForegroundColorAttributeName] = Color(hex: value)
+            }
 
-			if let value = setting.removeValueForKey("background") as? String {
-				setting[NSBackgroundColorAttributeName] = Color(hex: value)
-			}
+            if let value = setting.removeValueForKey("background") as? String {
+                setting[NSBackgroundColorAttributeName] = Color(hex: value)
+            }
 
-			// TODO: caret, invisibles, lightHighlight, selection, font style
+            // TODO: caret, invisibles, lightHighlight, selection, font style
 
-			for scope in scopes.componentsSeparatedByString(",") {
-				let key = scope.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-				attributes[key] = setting
-			}
-		}
-		self.attributes = attributes
-	}
+            for scope in scopes.componentsSeparatedByString(",") {
+                let key = scope.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                attributes[key] = setting
+            }
+        }
+        self.attributes = attributes
+    }
 }

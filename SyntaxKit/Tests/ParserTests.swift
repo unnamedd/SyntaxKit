@@ -11,57 +11,57 @@ import SyntaxKit
 
 class ParserTests: XCTestCase {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	let parser = Parser(language: language("YAML"))
+    let parser = Parser(language: language("YAML"))
 
 
-	// MARK: - Tests
+    // MARK: - Tests
 
-	func testParsingBeginEnd() {
-		var stringQuoted: NSRange?
-		var punctuationBegin: NSRange?
-		var punctuationEnd: NSRange?
+    func testParsingBeginEnd() {
+        var stringQuoted: NSRange?
+        var punctuationBegin: NSRange?
+        var punctuationEnd: NSRange?
 
-		parser.parse("title: \"Hello World\"\n") { scope, range in
-			if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
-				stringQuoted = range
-			}
-		
-			if punctuationBegin == nil && scope.hasPrefix("punctuation.definition.string.begin") {
-				punctuationBegin = range
-			}
-		
-			if punctuationEnd == nil && scope.hasPrefix("punctuation.definition.string.end") {
-				punctuationEnd = range
-			}
-		}
-	
-		XCTAssertEqual(NSMakeRange(7, 13), stringQuoted)
-		XCTAssertEqual(NSMakeRange(7, 1), punctuationBegin)
-		XCTAssertEqual(NSMakeRange(19, 1), punctuationEnd)
-	}
+        parser.parse("title: \"Hello World\"\n") { scope, range in
+            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
+                stringQuoted = range
+            }
 
-	func testParsingBeginEndCrap() {
-		var stringQuoted: NSRange?
+            if punctuationBegin == nil && scope.hasPrefix("punctuation.definition.string.begin") {
+                punctuationBegin = range
+            }
 
-		parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { scope, range in
-			if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
-				stringQuoted = range
-			}
-		}
-	
-		XCTAssertEqual(NSMakeRange(39, 4), stringQuoted)
-	}
-    
+            if punctuationEnd == nil && scope.hasPrefix("punctuation.definition.string.end") {
+                punctuationEnd = range
+            }
+        }
+
+        XCTAssertEqual(NSMakeRange(7, 13), stringQuoted)
+        XCTAssertEqual(NSMakeRange(7, 1), punctuationBegin)
+        XCTAssertEqual(NSMakeRange(19, 1), punctuationEnd)
+    }
+
+    func testParsingBeginEndCrap() {
+        var stringQuoted: NSRange?
+
+        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { scope, range in
+            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
+                stringQuoted = range
+            }
+        }
+
+        XCTAssertEqual(NSMakeRange(39, 4), stringQuoted)
+    }
+
     func testParsingGarbage() {
         parser.parse("") { _, _ in }
         parser.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _, _ in }
     }
 
-	func testRuby() {
-		let parser = Parser(language: language("Ruby"))
-		let input = fixture("test.rb", "txt")
-		parser.parse(input, match: { _, _ in return })
-	}
+    func testRuby() {
+        let parser = Parser(language: language("Ruby"))
+        let input = fixture("test.rb", "txt")
+        parser.parse(input, match: { _, _ in return })
+    }
 }

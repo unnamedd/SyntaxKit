@@ -10,16 +10,16 @@ import Foundation
 
 struct Result {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	let scope: String
-	let range: NSRange
+    let scope: String
+    let range: NSRange
 
 
-	// MARK: - Initializers
+    // MARK: - Initializers
 
-	init(scope: String, range: NSRange) {
-		self.scope = scope
-		self.range = range
-	}
+    init(scope: String, range: NSRange) {
+        self.scope = scope
+        self.range = range
+    }
 }

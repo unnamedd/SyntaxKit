@@ -10,15 +10,15 @@ import Foundation
 
 struct Capture {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	let name: String
+    let name: String
 
 
-	// MARK: - Initializers
-	
-	init?(dictionary: [NSObject: AnyObject]) {
-		guard let name = dictionary["name"] as? String else { return nil }
-		self.name = name
-	}
+    // MARK: - Initializers
+
+    init?(dictionary: [NSObject: AnyObject]) {
+        guard let name = dictionary["name"] as? String else { return nil }
+        self.name = name
+    }
 }

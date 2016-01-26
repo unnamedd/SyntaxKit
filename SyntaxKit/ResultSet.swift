@@ -10,35 +10,35 @@ import Foundation
 
 struct ResultSet {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	private var _results = [Result]()
-	var results: [Result] {
-		return _results
-	}
+    private var _results = [Result]()
+    var results: [Result] {
+        return _results
+    }
 
-	var range: NSRange
+    var range: NSRange
 
-	var isEmpty: Bool {
-		return results.isEmpty
-	}
-    
+    var isEmpty: Bool {
+        return results.isEmpty
+    }
+
     init(startingRange range: NSRange) {
         self.range = range
     }
 
-	// MARK: - Adding
+    // MARK: - Adding
 
-	mutating func addResult(result: Result) {
-		_results.append(result)
+    mutating func addResult(result: Result) {
+        _results.append(result)
 
-		self.range = NSUnionRange(range, result.range)
-	}
+        self.range = NSUnionRange(range, result.range)
+    }
 
-	mutating func addResults(resultSet: ResultSet) {
+    mutating func addResults(resultSet: ResultSet) {
         self.range = NSUnionRange(range, resultSet.range)
-		for result in resultSet.results {
-			addResult(result)
-		}
-	}
+        for result in resultSet.results {
+            addResult(result)
+        }
+    }
 }

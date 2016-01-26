@@ -10,9 +10,9 @@ import Foundation
 
 class Patterns {
     private var content: [Pattern]
-    
+
     init(array: [[NSObject: AnyObject]], repository: Repository) {
-        
+
         content = []
         for value in array {
             if let include = value["include"] as? String {
@@ -32,7 +32,7 @@ class Patterns {
             }
         }
     }
-    
+
     func getContent() -> [Pattern] {
         return content
     }

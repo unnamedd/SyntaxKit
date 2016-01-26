@@ -10,7 +10,7 @@ import Foundation
 
 class Repository {
     private var entries: [String: Pattern]
-    
+
     init(repo: [String: [NSObject: AnyObject]]) {
         self.entries = [:]
         for (key, value) in repo {
@@ -29,11 +29,11 @@ class Repository {
             }
         }
     }
-    
+
     func allEntries() -> [String: Pattern] {
         return entries
     }
-    
+
     subscript(index: String) -> Pattern? {
         return entries[index]
     }

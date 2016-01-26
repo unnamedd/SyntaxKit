@@ -10,35 +10,35 @@ import Foundation
 
 struct CaptureCollection {
 
-	// MARK: - Properties
+    // MARK: - Properties
 
-	private let captures: [UInt: Capture]
+    private let captures: [UInt: Capture]
 
-	var captureIndexes: [UInt] {
-		var keys = Array(captures.keys)
-		keys.sortInPlace() { $0 < $1 }
-		return keys
-	}
-
-
-	// MARK: - Initializers
-
-	init?(dictionary: [NSObject: AnyObject]) {
-		guard let dictionary = dictionary as? [String: [String: String]]  else { return nil }
-
-		var captures = [UInt: Capture]()
-		for (key, value) in dictionary {
-			if let key = UInt(key), capture = Capture(dictionary: value) {
-				captures[key] = capture
-			}
-		}
-		self.captures = captures
-	}
+    var captureIndexes: [UInt] {
+        var keys = Array(captures.keys)
+        keys.sortInPlace() { $0 < $1 }
+        return keys
+    }
 
 
-	// MARK: - Accessing Captures
+    // MARK: - Initializers
 
-	subscript(index: UInt) -> Capture? {
-		return captures[index]
-	}
+    init?(dictionary: [NSObject: AnyObject]) {
+        guard let dictionary = dictionary as? [String: [String: String]]  else { return nil }
+
+        var captures = [UInt: Capture]()
+        for (key, value) in dictionary {
+            if let key = UInt(key), capture = Capture(dictionary: value) {
+                captures[key] = capture
+            }
+        }
+        self.captures = captures
+    }
+
+
+    // MARK: - Accessing Captures
+
+    subscript(index: UInt) -> Capture? {
+        return captures[index]
+    }
 }
