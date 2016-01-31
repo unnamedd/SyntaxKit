@@ -25,7 +25,7 @@ class Patterns {
 //                        self.patterns.append(newSelf)
 //                    }
                 } else if include == "$self" {
-                    // TODO: recursive stuff
+                    // TODO: recursive inclusion
                 }
             } else if let pattern = Pattern(dictionary: value, repository: repository) {
                 content.append(pattern)

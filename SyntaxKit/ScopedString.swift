@@ -7,11 +7,11 @@
 //  attribute assciated with it for the callers convenience.
 //  The ranges can be nested. The datastrucuture could be visualized like this:
 //  
-//  Top:                            ----
-//                            -------------
-//                    -----------------------------
-//  Bottom:  ----------------------------------------
-//  String: "This is (string (with (nest)ed) scopes)!"
+//  Top:                              ----
+//                              -------------
+//            -------   -----------------------------
+//  Bottom:  ------------------------------------------
+//  String: "(This is) (string (with (nest)ed) scopes)!"
 //  
 //  Note:
 //  The bottom-most layer is implicit and is not stored. Unlike shown above the
