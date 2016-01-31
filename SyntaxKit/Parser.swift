@@ -57,14 +57,9 @@ public class Parser {
     // MARK: - Public
     
     //  Algorithmic notes:
-    //  Basically there are four possibilities for the range that has to be
-    //  parsed.
-    //  1. Change is in the global scope: The line(s) has/have to be reparsed.
-    //  1. Change is in a block: The body of the block has to be reparsed.
-    //  1. Change is in header of a block: The entire block has to be reparsed
-    //  1. Change is in between two blocs or spans multiple blocks: reparse the
-    //      union of the blocks in which the change starts and the one in which 
-    //      it ends
+    //  If change occurred in a block reparse the lines in which the change
+    //  happened and the range of the block from this point on. If the change
+    //  occurred in the global scope just reparse the lines that changed.
 
     /// Returns the range in the given string that should be re-parsed after the
     /// given change.
@@ -107,41 +102,13 @@ public class Parser {
             return nil
         }
 
+        let linesRanges = s.lineRangeForRange(range)
         let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
-        let scopeAtPreviousIndex = scopesString!.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
-        let linesRange = s.lineRangeForRange(range)
-        
-        if let pattern1 = scopeAtIndex.attribute as! Pattern?, pattern2 = scopeAtPreviousIndex.attribute as! Pattern? {
-            if pattern1 == pattern2 {
-                if scopeAtIndex.range.isInBody(range.location) && scopeAtIndex.range.isInBody(range.location - 1) {
-                    return scopeAtIndex.range.bodyRange
-                } else {
-                    return scopeAtIndex.range.entireRange
-                }
-            } else {
-                if insertion {
-                    assert(false, "dead end")
-                    return nil
-                } else {
-                    let preceedingScope = scopesString!.topLevelScopeAtIndex(range.location - 1, onlyBodyResults: false)
-                    return NSUnionRange(preceedingScope.range.entireRange, scopeAtIndex.range.entireRange)
-                }
-            }
-        } else if scopeAtIndex.attribute as! Pattern? == nil && scopeAtPreviousIndex.attribute as! Pattern? == nil {
-            return rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
+        if scopeAtIndex == potentialNewString.baseScope {
+            return linesRanges
         } else {
-            if insertion {
-                return rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
-            } else {
-                if scopeAtIndex.attribute as! Pattern? == nil {
-                    let preceedingScope = scopesString!.topLevelScopeAtIndex(range.location - 1, onlyBodyResults: false)
-                    let rangeAfter = rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
-                    return NSUnionRange(preceedingScope.range.entireRange, rangeAfter)
-                } else {
-                    let rangeBefore = rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
-                    return NSUnionRange(rangeBefore, scopeAtIndex.range.entireRange)
-                }
-            }
+            let endOfCurrentScope = NSMaxRange(scopeAtIndex.range.entireRange)
+            return NSUnionRange(linesRanges, NSRange(location: range.location, length: endOfCurrentScope - range.location))
         }
     }
     
@@ -201,11 +168,11 @@ public class Parser {
             }
             
             if results.range.length != 0 {
+                allResults.addResults(results)
+                startIndex = NSMaxRange(results.range)
                 if endScope != nil {
                     endScope = self.scopesString!.lowerScopeForScope(endScope!, AtIndex: startIndex)
                 }
-                startIndex = NSMaxRange(results.range)
-                allResults.addResults(results)
             } else {
                 startIndex = endIndex
             }
@@ -217,15 +184,16 @@ public class Parser {
     
     // MARK: - Private
     
-    // MARK: Range Finding Helpers
+    // MARK: Range Helpers
     
-    // on true: scopeString not nil and is newString before the given change
-    private func stringChangeIsCompatible(newString: String, isInsertion insertion: Bool, changedRange range: NSRange) -> Bool {
+    /// - returns:  true if scopeString not nil and the number of characters
+    ///             changed is consistent with the new string
+    private func stringChangeIsCompatible(newString: NSString, isInsertion insertion: Bool, changedRange range: NSRange) -> Bool {
         if scopesString == nil {
             return false
         }
         
-        var oldLength = (newString as NSString).length
+        var oldLength = newString.length
         if insertion {
             oldLength -= range.length
         } else {
@@ -238,6 +206,8 @@ public class Parser {
         return true
     }
     
+    /// - returns:  true if diff not nil and predicted change from diff matches
+    ///             the characters from the new string in that range
     private func diffRepresentsChangesFromOldStringToNewString(newStr: NSString) -> Bool {
         if diff == nil {
             return false
@@ -257,18 +227,7 @@ public class Parser {
         
         return true
     }
-    
-    /// - returns:  The range of the lines starting at the point where the scope
-    ///             begins.
-    private func rangeTakingPreviousScopeIntoAccount(start: Int, linesRange: NSRange, potentialString: ScopedString) -> NSRange {
-        for var i = start; i >= linesRange.location; i-- {
-            if potentialString.topLevelScopeAtIndex(i, onlyBodyResults: false) != potentialString.baseScope {
-                return NSRange(location: i + 1, length: linesRange.length - (i + 1 - linesRange.location))
-            }
-        }
-        return linesRange
-    }
-    
+        
     // MARK: Parsing
 
     //  Algorithmic notes:
@@ -399,7 +358,7 @@ public class Parser {
             if pattern.name != nil {
                 result.addResult(Result(scope: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
             }
-            self.scopesString?.addScopeToBottomWithName(pattern.name ?? "", inRange: HeadedRange(location: beginResults.range.location, headerLength: beginResults.range.length, bodyLength: result.range.length - beginResults.range.length), withAttribute: pattern)
+            self.scopesString?.addScopeAtBottomWithName(pattern.name ?? "", inRange: HeadedRange(location: beginResults.range.location, headerLength: beginResults.range.length, bodyLength: result.range.length - beginResults.range.length), withAttribute: pattern)
 //            print("Added scope \(pattern.name) for range: loc: \(beginResults.range.location), headerLen: \(beginResults.range.length), bodyLen: \(result.range.length - beginResults.range.length))")
             result.addResults(beginResults)
             result.addResults(endResults)

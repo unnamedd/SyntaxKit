@@ -97,7 +97,7 @@ class ScopedString: NSObject, NSCopying {
         return levels.count + 1
     }
     
-    func addScopeToTopWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
+    func addScopeAtTopWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
         assert(NSIntersectionRange(range.entireRange, baseScope.range.entireRange).length == range.entireRange.length)
         let newScope = Scope(name: name, range: range, attribute: attribute)
         var added = false
@@ -113,7 +113,7 @@ class ScopedString: NSObject, NSCopying {
         }
     }
     
-    func addScopeToBottomWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
+    func addScopeAtBottomWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
         assert(NSIntersectionRange(range.entireRange, baseScope.range.entireRange).length == range.entireRange.length)
         let newScope = Scope(name: name, range: range, attribute: attribute)
         var added = false

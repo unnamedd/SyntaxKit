@@ -31,27 +31,27 @@ class IncrementalParsingTests: XCTestCase {
         
         var newInput = stringByReplacingRange(NSRange(location: 20, length: 0), inString: input, withString: " ")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 20, length: 1))
-        XCTAssertEqual(rangeToParse, NSRange(location: 5, length: 17))
+        XCTAssertEqual(rangeToParse, NSRange(location: 3, length: 19))
         
         newInput = stringByReplacingRange(NSRange(location: 162, length: 0), inString: input, withString: "i")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 162, length: 1))
-        XCTAssertEqual(rangeToParse, NSRange(location: 162, length: 2))
+        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 5))
         
         parser.parse(newInput) { _, _ in return }
         
         newInput = stringByReplacingRange(NSRange(location: 162, length: 1), inString: newInput, withString: "")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: false, changedRange: NSRange(location: 162, length: 1))
-        XCTAssertEqual(rangeToParse, NSRange(location: 162, length: 1))
+        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 4))
         
         parser.parse(input) { _, _ in return }
         
         newInput = stringByReplacingRange(NSRange(location: 160, length: 0), inString: input, withString: "756")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 160, length: 3))
-        XCTAssertEqual(rangeToParse, NSRange(location: 142, length: 23))
+        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 7))
         
         newInput = stringByReplacingRange(NSRange(location: 159, length: 0), inString: input, withString: "756")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 159, length: 3))
-        XCTAssertEqual(rangeToParse, NSRange(location: 142, length: 23))
+        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 7))
     }
 
     func testPerformanceInScope() {

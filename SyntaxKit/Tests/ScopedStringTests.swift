@@ -28,7 +28,7 @@ class ScopedStringTests: XCTestCase {
         XCTAssert(newScopedString.topLevelScopeAtIndex(2, onlyBodyResults: true) == newScopedString.baseScope)
         
         let newScope1 = Scope(name: "bogus", range: HeadedRange(location: 1, headerLength: 1, bodyLength: 2), attribute: nil)
-        newScopedString.addScopeToTopWithName(newScope1.name, inRange: newScope1.range)
+        newScopedString.addScopeAtTopWithName(newScope1.name, inRange: newScope1.range)
         XCTAssert(newScopedString.numberOfScopes() == 2)
         XCTAssert(newScopedString.numberOfLevels() == 2)
         
@@ -38,7 +38,7 @@ class ScopedStringTests: XCTestCase {
         XCTAssert(newScopedString.lowerScopeForScope(newScope1, AtIndex: 1) == newScopedString.baseScope)
         
         let newScope2 = Scope(name: "bogus2", range: HeadedRange(location: 2, headerLength: 0, bodyLength: 1), attribute: nil)
-        newScopedString.addScopeToTopWithName(newScope2.name, inRange: newScope2.range)
+        newScopedString.addScopeAtTopWithName(newScope2.name, inRange: newScope2.range)
         XCTAssert(newScopedString.numberOfScopes() == 3)
         XCTAssert(newScopedString.numberOfLevels() == 3)
         
