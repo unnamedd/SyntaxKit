@@ -2,13 +2,33 @@
 //  ScopedString.swift
 //  SyntaxKit
 //
+//  A datastructure that facilitates working with strings that have nested 
+//  scopes associated with them. A scope being a named range that can have an 
+//  attribute assciated with it for the callers convenience.
+//  The ranges can be nested. The datastrucuture could be visualized like this:
+//  
+//  Top:                            ----
+//                            -------------
+//                    -----------------------------
+//  Bottom:  ----------------------------------------
+//  String: "This is (string (with (nest)ed) scopes)!"
+//  
+//  Note:
+//  The bottom-most layer is implicit and is not stored. Unlike shown above the
+//  ranges of the scopesare actually headed.
+//  If no layer can actually hold the inserted scope a new layer is added.
+//
+//  The datastructure might be optimized with binary search for insertions at 
+//  the individual levels.
+//
 //  Created by Alexander Hedges on 29/01/16.
 //  Copyright © 2016 Sam Soffes. All rights reserved.
 //
 
 import Foundation
 
-struct HeadedRange {
+/// A range divided into a head and body part
+struct HeadedRange: Equatable {
     var location: Int
     var headerLength: Int
     var bodyLength: Int
@@ -51,7 +71,9 @@ func ==(lhs: HeadedRange, rhs: HeadedRange) -> Bool {
     return lhs.location == rhs.location && lhs.headerLength == rhs.headerLength && lhs.bodyLength == rhs.bodyLength
 }
 
-struct Scope {
+
+/// A scope of a
+struct Scope: Equatable {
     var name: String
     var range: HeadedRange
     var attribute: AnyObject?
@@ -61,9 +83,6 @@ func ==(lhs: Scope, rhs: Scope) -> Bool {
     return lhs.name == rhs.name && lhs.range == rhs.range
 }
 
-func !=(lhs: Scope, rhs: Scope) -> Bool {
-    return !(lhs == rhs)
-}
 
 class ScopedString: NSObject, NSCopying {
     
@@ -99,6 +118,7 @@ class ScopedString: NSObject, NSCopying {
     
     func addScopeAtTopWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
         assert(NSIntersectionRange(range.entireRange, baseScope.range.entireRange).length == range.entireRange.length)
+        
         let newScope = Scope(name: name, range: range, attribute: attribute)
         var added = false
         for level in 0..<levels.count {
@@ -115,6 +135,7 @@ class ScopedString: NSObject, NSCopying {
     
     func addScopeAtBottomWithName(name: String, inRange range: HeadedRange, withAttribute attribute: AnyObject? = nil) {
         assert(NSIntersectionRange(range.entireRange, baseScope.range.entireRange).length == range.entireRange.length)
+        
         let newScope = Scope(name: name, range: range, attribute: attribute)
         var added = false
         for var level = levels.count - 1; level >= 0; level-- {
@@ -131,6 +152,7 @@ class ScopedString: NSObject, NSCopying {
     
     func topLevelScopeAtIndex(index: Int, onlyBodyResults body: Bool) -> Scope {
         assert(index >= 0 && index < baseScope.range.entireRange.length)
+        
         let indexRange = NSRange(location: index, length: 1)
         for var i = levels.count - 1; i >= 0; i-- {
             let level = levels[i]
@@ -146,6 +168,7 @@ class ScopedString: NSObject, NSCopying {
     
     func lowerScopeForScope(scope: Scope, AtIndex index: Int) -> Scope {
         assert(index >= 0 && index < baseScope.range.entireRange.length)
+        
         var foundScope = false
         let indexRange = NSRange(location: index, length: 1)
         for var i = levels.count - 1; i >= 0; i-- {
@@ -164,6 +187,7 @@ class ScopedString: NSObject, NSCopying {
     
     func removeScopesInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range.entireRange).length == range.length)
+        
         for var level = levels.count-1; level >= 0; level-- {
             for var scope = levels[level].count-1; scope >= 0; scope-- {
                 let theScope = levels[level][scope]
@@ -179,6 +203,7 @@ class ScopedString: NSObject, NSCopying {
     
     func insertString(string: String, atIndex index: Int) {
         assert(index >= 0 && index < baseScope.range.entireRange.length)
+        
         let s = underlyingString as NSString
         let length = (string as NSString).length
         let indexRange = NSRange(location: index, length: 1)
@@ -200,6 +225,7 @@ class ScopedString: NSObject, NSCopying {
     
     func deleteCharactersInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range.entireRange).length == range.length)
+        
         let mutableString = (self.underlyingString as NSString).mutableCopy() as! NSMutableString
         mutableString.deleteCharactersInRange(range)
         self.underlyingString = mutableString.copy() as! String
