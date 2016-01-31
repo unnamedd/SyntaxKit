@@ -28,8 +28,8 @@ public class AttributedParser: Parser {
 
     // MARK: - Parsing
 
-    public func parse(string: String, match callback: AttributedCallback) {
-        parse(string) { scope, range in
+    public func parse(string: String, inRange bounds: NSRange? = nil, match callback: AttributedCallback) {
+        parse(string, inRange: bounds) { scope, range in
             callback(scope: scope, range: range, attributes: self.attributesForScope(scope))
         }
     }

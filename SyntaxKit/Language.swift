@@ -17,6 +17,7 @@ public struct Language {
     public let scopeName: String
     let patterns: Patterns
 
+    static let globalScope = "GLOBAL"
 
     // MARK: - Initializers
 

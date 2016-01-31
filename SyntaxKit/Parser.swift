@@ -7,6 +7,10 @@
 //  Turns out TextMate doesn't highlight things it should highlight according to
 //  the grammar so this is not entirely straight forward.
 //
+//  It supports incremental parsing. The recommmend use case is to ask the class
+//  for the range it should be reparsed on the given change. This range can then 
+//  be passed to parsed.
+//
 //  Created by Sam Soffes on 9/19/14. Edited by Alexander Hedges
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
@@ -24,8 +28,25 @@ public class Parser {
 
     public let language: Language
 
-//    private var scopesString: NSMutableAttributedString?
-
+    //  Contains the string previously passed to parse() if parse has already
+    //  been called. It stores all the associated scopes with hierarchical 
+    //  information and ranges. The attributes of the scopes are values of type 
+    //  Pattern, the begin/end pattern associated with the scope. The scopes
+    //  might not be fully populated after a call to parse with a limited range.
+    private var scopesString: ScopedString?
+    
+    //  Contains information on the previously generated outdated range. This
+    //  property is invalidated after every call to parse. The diff stores
+    //  information on the change that was analysed in outdateRange and is used
+    //  in parse. 
+    //  If the inspected change is an addition the string is set to the 
+    //  potentially inserted string and the range is set to 
+    //  (insertion, length: 0).
+    //  If the inspected change is a deletion the string is nil and the range is
+    //  the range that would potentially be deleted.
+    private var diff: (String?, NSRange)?
+    
+    
     // MARK: - Initializers
 
     public init(language: Language) {
@@ -33,18 +54,222 @@ public class Parser {
     }
 
 
-    // MARK: - Parsing
+    // MARK: - Public
+    
+    //  Algorithmic notes:
+    //  Basically there are four possibilities for the range that has to be
+    //  parsed.
+    //  1. Change is in the global scope: The line(s) has/have to be reparsed.
+    //  1. Change is in a block: The body of the block has to be reparsed.
+    //  1. Change is in header of a block: The entire block has to be reparsed
+    //  1. Change is in between two blocs or spans multiple blocks: reparse the
+    //      union of the blocks in which the change starts and the one in which 
+    //      it ends
 
-//    public func scopeForChangeInString(newString: String, atLocation location: Int) -> NSRange {
-//        return NSRange(location: 0, length: (newString as NSString).length)
-//    }
+    /// Returns the range in the given string that should be re-parsed after the
+    /// given change.
+    ///
+    /// This method returns a range that can be safely passed into parse so that
+    /// only a part of the string has to be reparsed.
+    /// In fact passing anything other than this range or nil to parse might 
+    /// lead to uninteded results but is not prohibited.
+    /// This method is only guaranteed to possibly not return nil if parse was 
+    /// called on the old string before this call. The only kinds of changed 
+    /// supported are single insertions and deletions of strings.
+    ///
+    /// - parameter newString:  The examined new string. Should be the product 
+    ///                         of previously parsed + change.
+    /// - parameter insertion:  If the change applied to the old value is an 
+    ///                         insertion as opposed to a deletion.
+    /// - parameter range:      The range in which the change occurred. In case
+    ///                         of an insertion the range in the new string that
+    ///                         was inserted. For a deletion it is the range in 
+    ///                         the old string that was deleted.
+    ///
+    /// - returns:  A range in newString that can be safely re-parsed. Or nil if
+    ///             everything has to be reparsed.
+    public func outdatedRangeForChangeInString(newString: String, changeIsInsertion insertion: Bool, changedRange range: NSRange) -> NSRange? {
+        let s = newString as NSString
+        if !stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range) {
+            return nil
+        }
+        
+        let potentialNewString = scopesString!.copy() as! ScopedString
+        
+        if insertion {
+            potentialNewString.insertString(s.substringWithRange(range), atIndex: range.location)
+            diff = (s.substringWithRange(range), NSRange(location: range.location, length: 0))
+        } else {
+            potentialNewString.deleteCharactersInRange(range)
+            diff = (nil, range)
+        }
+        if potentialNewString.underlyingString != newString {
+            return nil
+        }
 
-    public func parse(string: String, inScope scope: NSRange? = nil, match callback: Callback) {
-        let results = self.matchPatterns(language.patterns, withString: string, withEndPatternFromPattern: nil, startingAtIndex: 0)
-        self.applyResults(results, callback: callback)
+        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
+        let scopeAtPreviousIndex = scopesString!.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
+        let linesRange = s.lineRangeForRange(range)
+        
+        if let pattern1 = scopeAtIndex.attribute as! Pattern?, pattern2 = scopeAtPreviousIndex.attribute as! Pattern? {
+            if pattern1 == pattern2 {
+                if scopeAtIndex.range.isInBody(range.location) && scopeAtIndex.range.isInBody(range.location - 1) {
+                    return scopeAtIndex.range.bodyRange
+                } else {
+                    return scopeAtIndex.range.entireRange
+                }
+            } else {
+                if insertion {
+                    assert(false, "dead end")
+                    return nil
+                } else {
+                    let preceedingScope = scopesString!.topLevelScopeAtIndex(range.location - 1, onlyBodyResults: false)
+                    return NSUnionRange(preceedingScope.range.entireRange, scopeAtIndex.range.entireRange)
+                }
+            }
+        } else if scopeAtIndex.attribute as! Pattern? == nil && scopeAtPreviousIndex.attribute as! Pattern? == nil {
+            return rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
+        } else {
+            if insertion {
+                return rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
+            } else {
+                if scopeAtIndex.attribute as! Pattern? == nil {
+                    let preceedingScope = scopesString!.topLevelScopeAtIndex(range.location - 1, onlyBodyResults: false)
+                    let rangeAfter = rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
+                    return NSUnionRange(preceedingScope.range.entireRange, rangeAfter)
+                } else {
+                    let rangeBefore = rangeTakingPreviousScopeIntoAccount(range.location - 1, linesRange: linesRange, potentialString: potentialNewString)
+                    return NSUnionRange(rangeBefore, scopeAtIndex.range.entireRange)
+                }
+            }
+        }
     }
-
+    
+    //  Implementation notes:
+    //  The first part tries to find the context in which parsing should take 
+    //  place (which block we are in), if any.
+    //  The second part parses the string the until the full range is consumed.
+    
+    /// Parses the given string in the given range and calls the callback on 
+    /// every match of a scope
+    ///
+    /// If a range is treated more of a recommendation than a requirement.
+    /// For best results supply a range that was returned from 
+    /// outdatedRangeForChangeInString called before the call to this method.
+    ///
+    /// - parameter string:     The string that is parsed
+    /// - parameter range:      The range in which the string should be parsed.
+    ///                         On nil the entire string will be parsed.
+    /// - parameter callback:   The callback to call on every match of a
+    ///                         language scope
+    public func parse(string: String, var inRange bounds: NSRange? = nil, match callback: Callback) {
+        var endScope: Scope? = nil
+        if bounds == nil {
+            bounds = NSRange(location: 0, length: (string as NSString).length)
+            scopesString = ScopedString(string: string)
+        } else if diffRepresentsChangesFromOldStringToNewString(string) {
+            endScope = self.scopesString!.topLevelScopeAtIndex(bounds!.location, onlyBodyResults: true)
+            if diff!.0 == nil {
+                scopesString!.deleteCharactersInRange(diff!.1)
+            } else {
+                scopesString!.insertString(diff!.0!, atIndex: diff!.1.location)
+            }
+            if scopesString!.underlyingString != string { // recover from inconsistecy (for instance "." shortcut)
+                print("Used the emergency trick")
+                bounds = NSRange(location: 0, length: (string as NSString).length)
+                endScope = nil
+                scopesString = ScopedString(string: string)
+            } else {
+                scopesString!.removeScopesInRange(bounds!)
+            }
+        } else {
+            // here we don't guarantee best results, the user passed in a range we didn't give him
+            scopesString = ScopedString(string: string)
+        }
+        
+        var startIndex = bounds!.location
+        let endIndex = NSMaxRange(bounds!)
+        var allResults = ResultSet(startingRange: bounds!)
+        allResults.addResult(Result(scope: Language.globalScope, range: bounds!))
+        
+        while startIndex < endIndex {
+            let endPattern = endScope?.attribute as! Pattern?
+            let results = self.matchPatterns(endPattern?.subpatterns ?? language.patterns, withString: string, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex)
+            
+            if endScope != nil {
+                allResults.addResult(Result(scope: endScope!.name, range: results.range))
+            }
+            
+            if results.range.length != 0 {
+                if endScope != nil {
+                    endScope = self.scopesString!.lowerScopeForScope(endScope!, AtIndex: startIndex)
+                }
+                startIndex = NSMaxRange(results.range)
+                allResults.addResults(results)
+            } else {
+                startIndex = endIndex
+            }
+        }
+        self.applyResults(allResults, callback: callback)
+        diff = nil
+    }
+    
+    
     // MARK: - Private
+    
+    // MARK: Range Finding Helpers
+    
+    // on true: scopeString not nil and is newString before the given change
+    private func stringChangeIsCompatible(newString: String, isInsertion insertion: Bool, changedRange range: NSRange) -> Bool {
+        if scopesString == nil {
+            return false
+        }
+        
+        var oldLength = (newString as NSString).length
+        if insertion {
+            oldLength -= range.length
+        } else {
+            oldLength += range.length
+        }
+        
+        if (scopesString!.underlyingString as NSString).length != oldLength {
+            return false
+        }
+        return true
+    }
+    
+    private func diffRepresentsChangesFromOldStringToNewString(newStr: NSString) -> Bool {
+        if diff == nil {
+            return false
+        }
+        if diff!.0 == nil {
+            if !stringChangeIsCompatible(newStr as String, isInsertion: false, changedRange: diff!.1) {
+                return false
+            }
+        } else {
+            if !stringChangeIsCompatible(newStr as String, isInsertion: true, changedRange: NSRange(location: diff!.1.location, length: (diff!.0! as NSString).length)) {
+                return false
+            }
+            if newStr.substringWithRange(NSRange(location: diff!.1.location, length: (diff!.0! as NSString).length)) != diff!.0! {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    /// - returns:  The range of the lines starting at the point where the scope
+    ///             begins.
+    private func rangeTakingPreviousScopeIntoAccount(start: Int, linesRange: NSRange, potentialString: ScopedString) -> NSRange {
+        for var i = start; i >= linesRange.location; i-- {
+            if potentialString.topLevelScopeAtIndex(i, onlyBodyResults: false) != potentialString.baseScope {
+                return NSRange(location: i + 1, length: linesRange.length - (i + 1 - linesRange.location))
+            }
+        }
+        return linesRange
+    }
+    
+    // MARK: Parsing
 
     //  Algorithmic notes:
     //  A pattern expression can not match a substring spanning multiple lines
@@ -64,59 +289,52 @@ public class Parser {
     /// - parameter patterns:       The patterns to match the sting against
     /// - parameter string:         The matched string
     /// - parameter endPattern:     If specified, the pattern at which to stop
-    ///                             the matching process. Otherwise it will just
-    ///                             match the entire string.
+    ///                             the matching process, overrides stopIndex. 
+    ///                             On nil it will match up to stopIndex.
     /// - parameter startingIndex:  The index at which to start matching
+    /// - parameter stopIndex:      The index at which to stop matching
     ///
     /// - returns:  The result set containing the lexical scope names with range
-    ///             information or nil of nothing could be found.
-    private func matchPatterns(patterns: Patterns, withString string: String, withEndPatternFromPattern endPattern: Pattern?, startingAtIndex startIndex: Int) -> ResultSet? {
+    ///             information. May exceed stopIndex.
+    private func matchPatterns(patterns: Patterns, withString string: String, withEndPatternFromPattern endPattern: Pattern?, startingAtIndex startIndex: Int, stopIndex stop: Int) -> ResultSet {
         assert(endPattern == nil || endPattern!.end != nil)
-
+        
         let s: NSString = string
-        let length = s.length
-        var paragraphStart = startIndex
-        var paragraphEnd = startIndex
-        var result: ResultSet?
+        assert(s.length >= stop)
+        var lineStart = startIndex
+        var lineEnd = startIndex
+        var result = ResultSet(startingRange: NSRange(location: startIndex, length: 0))
 
-        while paragraphEnd < length {
-            s.getLineStart(nil, end: &paragraphEnd, contentsEnd: nil, forRange: NSMakeRange(paragraphEnd, 0))
-            var range = NSRange(location: paragraphStart, length: paragraphEnd - paragraphStart)
+        while lineEnd < stop {
+            s.getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSMakeRange(lineEnd, 0))
+            var range = NSRange(location: lineStart, length: lineEnd - lineStart)
 
             while range.length > 0 {
                 let bestResultForMiddle = findBestPatternInPatterns(patterns, inString: string, inRange: range)
 
                 if bestResultForMiddle != nil && !bestResultForMiddle!.isEmpty && bestResultForMiddle!.range.length != 0 {
-                    if result == nil {
-                        result = bestResultForMiddle
-                    } else {
-                        result!.addResults(bestResultForMiddle!)
-                    }
+                    result.addResults(bestResultForMiddle!)
                     let newStart = NSMaxRange(bestResultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
-                    paragraphEnd = newStart
+                    lineEnd = max(lineEnd, newStart)
                 }
 
                 if endPattern != nil {
-                    var endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
-                    if result != nil {
-                        endMatchResult?.addResults(result!)
-                    }
+                    let endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
                     if endMatchResult != nil {
-                        return endMatchResult
+                        result.addResults(endMatchResult!)
+                        return result
                     }
                 }
 
                 if bestResultForMiddle == nil || bestResultForMiddle!.isEmpty || bestResultForMiddle!.range.length == 0 {
-                    range = NSRange(location: paragraphEnd, length: 0)
+                    range = NSRange(location: lineEnd, length: 0)
                 }
             }
-            paragraphStart = paragraphEnd++
+            lineStart = lineEnd++
         }
 
-        if endPattern != nil { // failed to match end pattern
-            return nil
-        }
+        result.extendWithRange(NSRange(location: startIndex, length: stop - startIndex))
         return result
     }
 
@@ -176,13 +394,13 @@ public class Parser {
             }
 
             let newLocation = NSMaxRange(beginResults.range)
-            guard let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation) else {
-                return nil
-            }
+            let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation, stopIndex: (string as NSString).length)
             var result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
                 result.addResult(Result(scope: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
             }
+            self.scopesString?.addScopeToBottomWithName(pattern.name ?? "", inRange: HeadedRange(location: beginResults.range.location, headerLength: beginResults.range.length, bodyLength: result.range.length - beginResults.range.length), withAttribute: pattern)
+//            print("Added scope \(pattern.name) for range: loc: \(beginResults.range.location), headerLen: \(beginResults.range.length), bodyLen: \(result.range.length - beginResults.range.length))")
             result.addResults(beginResults)
             result.addResults(endResults)
             return result

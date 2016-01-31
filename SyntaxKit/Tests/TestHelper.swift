@@ -54,6 +54,12 @@ func simpleTheme() -> Theme! {
     ])
 }
 
+func stringByReplacingRange(range: NSRange, inString string: String, withString inserted: String) -> String {
+    let newInput = string.mutableCopy() as! NSMutableString
+    newInput.replaceCharactersInRange(range, withString: inserted)
+    return newInput.copy() as! String
+}
+
 #if os(iOS)
 import UIKit
 extension Color {

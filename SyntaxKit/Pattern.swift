@@ -19,12 +19,7 @@ final class Pattern {
     let beginCaptures: CaptureCollection?
     let end: NSRegularExpression?
     let endCaptures: CaptureCollection?
-    private weak var parent: Pattern?
     private var patterns: Patterns
-
-    var superpattern: Pattern? {
-        return parent
-    }
 
     var subpatterns: Patterns {
         return patterns
@@ -32,8 +27,7 @@ final class Pattern {
 
     // MARK: - Initializers
 
-    init?(dictionary: [NSObject: AnyObject], repository: Repository, parent: Pattern? = nil) {
-        self.parent = parent
+    init?(dictionary: [NSObject: AnyObject], repository: Repository) {
         self.name = dictionary["name"] as? String
 
         if let matchExpr = dictionary["match"] as? String {
@@ -86,4 +80,15 @@ final class Pattern {
             return nil
         }
     }
+}
+
+func ==(lhs: Pattern, rhs: Pattern) -> Bool {
+    if lhs.name != rhs.name ||
+        lhs.match != rhs.match ||
+        lhs.begin != rhs.begin ||
+        lhs.end != rhs.end ||
+        lhs.patterns.getContent().count != rhs.patterns.getContent().count {
+            return false
+    }
+    return true
 }

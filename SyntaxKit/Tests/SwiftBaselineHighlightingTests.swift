@@ -6,7 +6,7 @@
 //  Copyright © 2016 Sam Soffes. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import XCTest
 import SyntaxKit
 

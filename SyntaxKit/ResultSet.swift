@@ -28,6 +28,10 @@ struct ResultSet {
     }
 
     // MARK: - Adding
+    
+    mutating func extendWithRange(range: NSRange) {
+        self.range = NSUnionRange(self.range, range)
+    }
 
     mutating func addResult(result: Result) {
         _results.append(result)
