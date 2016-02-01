@@ -56,6 +56,9 @@ struct HeadedRange: Equatable {
     mutating func subtractRange(range: NSRange) {
         bodyLength -= max(0, NSIntersectionRange(range, NSRange(location: location + headerLength, length: bodyLength)).length)
         headerLength -= max(0, NSIntersectionRange(range, NSRange(location: location, length: headerLength)).length)
+        if (range.location < self.location) {
+            self.location -= NSIntersectionRange(range, NSRange(location: 0, length: self.location)).length
+        }
     }
     
     mutating func insertRange(range: NSRange) {
@@ -151,7 +154,7 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func topLevelScopeAtIndex(index: Int, onlyBodyResults body: Bool) -> Scope {
-        assert(index >= 0 && index < baseScope.range.entireRange.length)
+        assert(index >= 0 && index <= baseScope.range.entireRange.length)
         
         let indexRange = NSRange(location: index, length: 1)
         for var i = levels.count - 1; i >= 0; i-- {
@@ -167,7 +170,7 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func lowerScopeForScope(scope: Scope, AtIndex index: Int) -> Scope {
-        assert(index >= 0 && index < baseScope.range.entireRange.length)
+        assert(index >= 0 && index <= baseScope.range.entireRange.length)
         
         var foundScope = false
         let indexRange = NSRange(location: index, length: 1)
@@ -202,7 +205,7 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func insertString(string: String, atIndex index: Int) {
-        assert(index >= 0 && index < baseScope.range.entireRange.length)
+        assert(index >= 0 && index <= baseScope.range.entireRange.length)
         
         let s = underlyingString as NSString
         let length = (string as NSString).length

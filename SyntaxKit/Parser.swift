@@ -91,18 +91,21 @@ public class Parser {
         
         let potentialNewString = scopesString!.copy() as! ScopedString
         
+        let linesRanges: NSRange
+        
         if insertion {
             potentialNewString.insertString(s.substringWithRange(range), atIndex: range.location)
             diff = (s.substringWithRange(range), NSRange(location: range.location, length: 0))
+            linesRanges = s.lineRangeForRange(range)
         } else {
             potentialNewString.deleteCharactersInRange(range)
             diff = (nil, range)
+            linesRanges = s.lineRangeForRange(NSRange(location: range.location, length: 0))
         }
         if potentialNewString.underlyingString != newString {
             return nil
         }
 
-        let linesRanges = s.lineRangeForRange(range)
         let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
         if scopeAtIndex == potentialNewString.baseScope {
             return linesRanges
