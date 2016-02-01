@@ -160,7 +160,6 @@ public class Parser {
         var startIndex = bounds!.location
         let endIndex = NSMaxRange(bounds!)
         var allResults = ResultSet(startingRange: bounds!)
-        allResults.addResult(Result(scope: Language.globalScope, range: bounds!))
         
         while startIndex < endIndex {
             let endPattern = endScope?.attribute as! Pattern?
