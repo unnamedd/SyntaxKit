@@ -62,24 +62,22 @@ class IncrementalParsingTests: XCTestCase {
         var newInput = stringByReplacingRange(NSRange(location: 2, length: 1), inString: input, withString: "")
         var rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: false, changedRange: NSRange(location: 2, length: 1))
         XCTAssertEqual(rangeToParse, NSRange(location: 0, length: 13))
-        print(newInput)
         
         parser.parse(newInput, inRange: rangeToParse) { _, _ in return }
         
         newInput = stringByReplacingRange(NSRange(location: 2, length: 0), inString: newInput, withString: " ")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 2, length: 1))
         XCTAssertEqual(rangeToParse, NSRange(location: 0, length: 14))
-        print(newInput)
         
         parser.parse(newInput, inRange: rangeToParse) { _, _ in return }
         
         newInput = stringByReplacingRange(NSRange(location: 17, length: 0), inString: newInput, withString: "\n")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 17, length: 1))
         XCTAssertEqual(rangeToParse, NSRange(location: 14, length: 4))
-        print(newInput)
         
         parser.parse(newInput, inRange: rangeToParse) { _, _ in return }
-        print(newInput)
+        
+        parser.parse("") { _, _ in return }
     }
 
     func testPerformanceInScope() {

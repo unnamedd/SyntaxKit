@@ -35,7 +35,7 @@ class SwiftBaselineHighlightingTests: XCTestCase {
         assertEqualColors(Color(hex: "#93A1A1"), string.attributesAtIndex(157, effectiveRange: nil)[NSForegroundColorAttributeName] as? Color)
         
         // string literal
-        print((string.string as NSString).substringWithRange(NSRange(location: 744, length: 6)))
+//        print((string.string as NSString).substringWithRange(NSRange(location: 744, length: 6)))
         assertEqualColors(Color(hex: "#839496"), string.attributesAtIndex(744, effectiveRange: nil)[NSForegroundColorAttributeName] as? Color)
         var stringRange = NSRange()
         assertEqualColors(Color(hex: "#2aa198"), string.attributesAtIndex(745, effectiveRange: &stringRange)[NSForegroundColorAttributeName] as? Color)

@@ -30,6 +30,14 @@ public struct Theme {
         }
     }
     
+    public var foregroundColor: UIColor {
+        if let color = attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? UIColor {
+            return color
+        } else {
+            return UIColor.blackColor()
+        }
+    }
+    
     // MARK: - Initializers
 
     public init?(dictionary: [NSObject: AnyObject]) {

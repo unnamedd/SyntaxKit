@@ -106,7 +106,7 @@ public class Parser {
             return nil
         }
 
-        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(range.location, onlyBodyResults: false)
+        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(NSMaxRange(linesRanges)-1, onlyBodyResults: false)
         if scopeAtIndex == potentialNewString.baseScope {
             return linesRanges
         } else {
