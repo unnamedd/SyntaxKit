@@ -23,17 +23,17 @@ class LanguageTests: XCTestCase {
         XCTAssertEqual("YAML", yaml.name)
         XCTAssertEqual("source.yaml", yaml.scopeName)
 
-        XCTAssertEqual("meta.embedded.line.ruby", yaml.patterns.getContent()[0].name!)
-        XCTAssertEqual("punctuation.definition.embedded.begin.ruby", yaml.patterns.getContent()[0].beginCaptures![0]!.name)
-        XCTAssertEqual("punctuation.definition.embedded.end.ruby", yaml.patterns.getContent()[0].endCaptures![0]!.name)
-        XCTAssertEqual("punctuation.definition.comment.ruby", yaml.patterns.getContent()[0].subpatterns.getContent()[0].captures![1]!.name)
-        XCTAssertEqual("string.unquoted.block.yaml", yaml.patterns.getContent()[1].name!)
-        XCTAssertEqual("punctuation.definition.entry.yaml", yaml.patterns.getContent()[1].beginCaptures![2]!.name)
-        XCTAssertEqual("punctuation.separator.key-value.yaml", yaml.patterns.getContent()[1].beginCaptures![5]!.name)
-        XCTAssertEqual("constant.numeric.yaml", yaml.patterns.getContent()[2].name!)
+        XCTAssertEqual("meta.embedded.line.ruby", yaml.patterns[0].name)
+        XCTAssertEqual("punctuation.definition.embedded.begin.ruby", yaml.patterns[0].beginCaptures?[0]?.name)
+        XCTAssertEqual("punctuation.definition.embedded.end.ruby", yaml.patterns[0].endCaptures?[0]?.name)
+        XCTAssertEqual("punctuation.definition.comment.ruby", yaml.patterns[0].subpatterns[0].captures?[1]?.name)
+        XCTAssertEqual("string.unquoted.block.yaml", yaml.patterns[1].name)
+        XCTAssertEqual("punctuation.definition.entry.yaml", yaml.patterns[1].beginCaptures?[2]?.name)
+        XCTAssertEqual("punctuation.separator.key-value.yaml", yaml.patterns[1].beginCaptures?[5]?.name)
+        XCTAssertEqual("constant.numeric.yaml", yaml.patterns[2].name)
 
-        let pattern = yaml.patterns.getContent()[3]
-        XCTAssertEqual("string.unquoted.yaml", pattern.name!)
-        XCTAssertEqual("punctuation.definition.entry.yaml", pattern.captures![1]!.name)
+        let pattern = yaml.patterns[3]
+        XCTAssertEqual("string.unquoted.yaml", pattern.name)
+        XCTAssertEqual("punctuation.definition.entry.yaml", pattern.captures?[1]?.name)
     }
 }

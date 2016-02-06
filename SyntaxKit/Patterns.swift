@@ -9,31 +9,30 @@
 import Foundation
 
 class Patterns {
-    private var content: [Pattern]
-
-    init(array: [[NSObject: AnyObject]], repository: Repository) {
-
-        content = []
-        for value in array {
-            if let include = value["include"] as? String {
-                if include.hasPrefix("#") {
-                    let key = include.substringFromIndex(include.startIndex.successor())
-                    if let pattern = repository[key] {
-                        content.append(pattern)
-                    } //else if key == self.name {
-//                        let newSelf = Pattern(pattern: self, parent: nil)
-//                        self.patterns.append(newSelf)
-//                    }
-                } else if include == "$self" {
-                    // TODO: recursive inclusion
-                }
-            } else if let pattern = Pattern(dictionary: value, repository: repository) {
-                content.append(pattern)
+    
+    private static var includes: [Include] = []
+    
+    class func reset() {
+        self.includes = []
+    }
+    
+    class func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: Pattern?) -> [Pattern] {
+        var results: [Pattern] = []
+        for rawPattern in patterns {
+            if let include = rawPattern["include"] as? String {
+                let reference = Include(reference: include, inRepository: repository, parent: caller)
+                self.includes.append(reference)
+                results.append(reference)
+            } else if let pattern = Pattern(dictionary: rawPattern, parent: caller, withRepository: repository) {
+                results.append(pattern)
             }
         }
+        return results
     }
-
-    func getContent() -> [Pattern] {
-        return content
+    
+    class func resolveReferencesWithRepository(repository: Repository, inLanguage language: Language) {
+        for include in self.includes {
+            include.resolveReferenceWithRepository(repository, inLanguage: language)
+        }
     }
 }

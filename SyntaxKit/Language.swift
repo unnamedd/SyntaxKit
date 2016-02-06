@@ -15,7 +15,7 @@ public struct Language {
     public let UUID: String
     public let name: String
     public let scopeName: String
-    let patterns: Patterns
+    var patterns: [Pattern]
 
     static let globalScope = "GLOBAL"
 
@@ -24,24 +24,24 @@ public struct Language {
     public init?(dictionary: [NSObject: AnyObject]) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
-            scopeName = dictionary["scopeName"] as? String
+            scopeName = dictionary["scopeName"] as? String,
+            array = dictionary["patterns"] as? [[NSObject: AnyObject]]
             else { return nil }
 
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
-
+        Patterns.reset()
+        self.patterns = Patterns.patternsForArray(array, inRepository: nil, caller: nil)
+        
         let repository: Repository
         if let repo = dictionary["repository"] as? [String: [NSObject: AnyObject]] {
-            repository = Repository(repo: repo)
+            repository = Repository(repo: repo, inParent: nil, inLanguage: self)
         } else {
-            repository = Repository(repo: [:])
+            repository = Repository(repo: [:], inParent: nil, inLanguage: self)
         }
-
-        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-            self.patterns = Patterns(array: array, repository: repository)
-        } else {
-            self.patterns = Patterns(array: [], repository: repository)
-        }
+        
+        Patterns.resolveReferencesWithRepository(repository, inLanguage: self)
+        Patterns.reset()
     }
 }

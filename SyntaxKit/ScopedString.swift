@@ -75,7 +75,7 @@ func ==(lhs: HeadedRange, rhs: HeadedRange) -> Bool {
 }
 
 
-/// A scope of a
+/// A Lexical Scope (Not strictly a lexical scope but can be used to represent one)
 struct Scope: Equatable {
     var name: String
     var range: HeadedRange
