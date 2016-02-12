@@ -9,14 +9,14 @@
 import Foundation
 
 struct Capture {
-
+    
     // MARK: - Properties
-
+    
     let name: String
-
-
+    
+    
     // MARK: - Initializers
-
+    
     init?(dictionary: [NSObject: AnyObject]) {
         guard let name = dictionary["name"] as? String else { return nil }
         self.name = name

@@ -15,9 +15,9 @@ import Foundation
 public typealias Attributes = [String: AnyObject]
 
 public struct Theme {
-
+    
     // MARK: - Properties
-
+    
     public let UUID: String
     public let name: String
     public let attributes: [String: Attributes]
@@ -39,13 +39,13 @@ public struct Theme {
     }
     
     // MARK: - Initializers
-
+    
     public init?(dictionary: [NSObject: AnyObject]) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
             rawSettings = dictionary["settings"] as? [[String: AnyObject]]
             else { return nil }
-
+        
         self.UUID = UUID
         self.name = name
         

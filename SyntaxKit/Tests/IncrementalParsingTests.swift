@@ -12,7 +12,7 @@ import SyntaxKit
 class IncrementalParsingTests: XCTestCase {
     
     let parser = Parser(language: language("Swift"))
-
+    
     override func setUp() {
         super.setUp()
     }
@@ -20,7 +20,7 @@ class IncrementalParsingTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
     }
-
+    
     func testEdits() {
         let input = fixture("swifttest.swift", "txt")
         
@@ -79,7 +79,7 @@ class IncrementalParsingTests: XCTestCase {
         
         parser.parse("") { _, _ in return }
     }
-
+    
     func testPerformanceInScope() {
         let input = fixture("swifttest.swift", "txt")
         self.parser.parse(input) { _, _ in return }
@@ -114,5 +114,5 @@ class IncrementalParsingTests: XCTestCase {
             
             self.parser.parse(input, inRange: rangeToParse) { _, _ in return }
         }
-    } 
+    }
 }

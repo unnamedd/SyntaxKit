@@ -9,9 +9,15 @@
 import Foundation
 
 class Repository {
+    
+    // MARK: - Properties
+    
     private var entries: [String: Pattern]
     private weak var parentRepository: Repository?
-
+    
+    
+    // MARK: - Initializers
+    
     init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, inLanguage language: Language) {
         self.entries = [:]
         self.parentRepository = parent
@@ -26,7 +32,10 @@ class Repository {
             }
         }
     }
-
+    
+    
+    // MARK: - Accessing Patterns
+    
     subscript(index: String) -> Pattern? {
         if let resultAtLevel = entries[index] {
             return resultAtLevel

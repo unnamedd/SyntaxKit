@@ -9,29 +9,28 @@
 import Foundation
 
 public struct Language {
-
+    
     // MARK: - Properties
-
+    
     public let UUID: String
     public let name: String
     public let scopeName: String
-    var patterns: [Pattern]
-
+    let patterns: [Pattern]
+    
     static let globalScope = "GLOBAL"
-
+    
     // MARK: - Initializers
-
+    
     public init?(dictionary: [NSObject: AnyObject]) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
             scopeName = dictionary["scopeName"] as? String,
             array = dictionary["patterns"] as? [[NSObject: AnyObject]]
             else { return nil }
-
+        
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
-        Patterns.reset()
         self.patterns = Patterns.patternsForArray(array, inRepository: nil, caller: nil)
         
         let repository: Repository
@@ -42,6 +41,5 @@ public struct Language {
         }
         
         Patterns.resolveReferencesWithRepository(repository, inLanguage: self)
-        Patterns.reset()
     }
 }

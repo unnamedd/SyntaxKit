@@ -22,7 +22,7 @@
 //  the individual levels.
 //
 //  Created by Alexander Hedges on 29/01/16.
-//  Copyright © 2016 Sam Soffes. All rights reserved.
+//  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
 import Foundation
@@ -30,7 +30,7 @@ import Foundation
 extension NSRange {
     
     func isEmpty() -> Bool {
-        return  length == 0
+        return length == 0
     }
     
     func containsIndex(index: Int) -> Bool {
@@ -55,6 +55,8 @@ extension NSRange {
 
 class ScopedString: NSObject, NSCopying {
     
+    // MARK: - Properties
+    
     var underlyingString: String
     
     private var levels: [[Scope]] = []
@@ -63,9 +65,15 @@ class ScopedString: NSObject, NSCopying {
         return Scope(identifier: "BaseNameString", range: NSRange(location: 0, length: (underlyingString as NSString).length), attribute: nil)
     }
     
+    
+    // MARK: - Initializers
+    
     init(string: String) {
         self.underlyingString = string
     }
+    
+    
+    // MARK: - Interface
     
     func copyWithZone(zone: NSZone) -> AnyObject {
         let newScopedString = ScopedString(string: self.underlyingString)

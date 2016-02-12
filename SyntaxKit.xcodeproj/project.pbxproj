@@ -81,9 +81,6 @@
 		8CEEC0E21C411F9700BF3E85 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E11C411F9700BF3E85 /* Repository.swift */; };
 		8CEEC0E31C411F9700BF3E85 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E11C411F9700BF3E85 /* Repository.swift */; };
 		8CEEC0E41C411F9700BF3E85 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E11C411F9700BF3E85 /* Repository.swift */; };
-		8CEEC0E61C4120A900BF3E85 /* Include.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E51C4120A900BF3E85 /* Include.swift */; };
-		8CEEC0E71C4120A900BF3E85 /* Include.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E51C4120A900BF3E85 /* Include.swift */; };
-		8CEEC0E81C4120A900BF3E85 /* Include.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEEC0E51C4120A900BF3E85 /* Include.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -164,7 +161,6 @@
 		8CE8D1161C4EBF8F005A86B3 /* SwiftBaselineHighlightingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftBaselineHighlightingTests.swift; sourceTree = "<group>"; };
 		8CEEC0DD1C411C8600BF3E85 /* Patterns.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Patterns.swift; sourceTree = "<group>"; };
 		8CEEC0E11C411F9700BF3E85 /* Repository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
-		8CEEC0E51C4120A900BF3E85 /* Include.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Include.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -286,7 +282,6 @@
 				211989901B2EC38B00F0D786 /* Language.swift */,
 				8CEEC0DD1C411C8600BF3E85 /* Patterns.swift */,
 				211989921B2EC38B00F0D786 /* Pattern.swift */,
-				8CEEC0E51C4120A900BF3E85 /* Include.swift */,
 				2119898E1B2EC38B00F0D786 /* CaptureCollection.swift */,
 				2119898D1B2EC38B00F0D786 /* Capture.swift */,
 				8CEEC0E11C411F9700BF3E85 /* Repository.swift */,
@@ -535,7 +530,6 @@
 				211989C11B2EC40500F0D786 /* CaptureCollection.swift in Sources */,
 				8CEEC0DF1C411C8600BF3E85 /* Patterns.swift in Sources */,
 				211989C71B2EC40500F0D786 /* ResultSet.swift in Sources */,
-				8CEEC0E71C4120A900BF3E85 /* Include.swift in Sources */,
 				211989C51B2EC40500F0D786 /* Pattern.swift in Sources */,
 				211989C81B2EC40500F0D786 /* Theme.swift in Sources */,
 				211989C61B2EC40500F0D786 /* Result.swift in Sources */,
@@ -572,7 +566,6 @@
 				2119899F1B2EC38B00F0D786 /* ResultSet.swift in Sources */,
 				2119899D1B2EC38B00F0D786 /* Pattern.swift in Sources */,
 				8C6C24C81C6BD66A0087E156 /* Scope.swift in Sources */,
-				8CEEC0E61C4120A900BF3E85 /* Include.swift in Sources */,
 				211989A11B2EC38B00F0D786 /* Theme.swift in Sources */,
 				2119899E1B2EC38B00F0D786 /* Result.swift in Sources */,
 				8C9003331C5C0B0D00CBA5B0 /* ScopedString.swift in Sources */,
@@ -609,7 +602,6 @@
 				8CEEC0E41C411F9700BF3E85 /* Repository.swift in Sources */,
 				2198CEDA1B36D5DE00BD463F /* ResultSet.swift in Sources */,
 				2198CED81B36D5DE00BD463F /* Pattern.swift in Sources */,
-				8CEEC0E81C4120A900BF3E85 /* Include.swift in Sources */,
 				2198CEDB1B36D5DE00BD463F /* Theme.swift in Sources */,
 				2198CED91B36D5DE00BD463F /* Result.swift in Sources */,
 				2198CED21B36D5DE00BD463F /* AttributedParser.swift in Sources */,

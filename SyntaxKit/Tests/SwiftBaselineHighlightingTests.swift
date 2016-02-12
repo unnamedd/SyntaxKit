@@ -13,7 +13,7 @@ import SyntaxKit
 class SwiftBaselineHighlightingTests: XCTestCase {
     
     let parser = AttributedParser(language: language("Swift"), theme: theme("Solarized"))
-
+    
     override func setUp() {
         super.setUp()
     }
@@ -21,7 +21,7 @@ class SwiftBaselineHighlightingTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
     }
-
+    
     func testColors() {
         let input = fixture("swifttest.swift", "txt")
         let string = parser.attributedStringForString(input)
@@ -48,7 +48,7 @@ class SwiftBaselineHighlightingTests: XCTestCase {
         assertEqualColors(Color(hex: "#d33682"), string.attributesAtIndex(715, effectiveRange: &numberRange)[NSForegroundColorAttributeName] as? Color)
         XCTAssertEqual(numberRange, NSRange(location: 715, length: 1))
     }
-
+    
     func testHighlightingPerformance() {
         let input = fixture("swifttest.swift", "txt")
         self.measureBlock {

@@ -2,8 +2,16 @@
 //  Patterns.swift
 //  SyntaxKit
 //
+//  A utility class to facilitate the creation of pattern arrays.
+//  It works it the following fashion: First all the pattern arrays should be 
+//  created with patternsForArray:inRepository:caller:. Then
+//  resolveReferencesWithRepository:inLanguage: has to be called to resolve all
+//  the references in the passed out patterns. So first lots of calls to 
+//  patternsForArray and then one call to resolveReferences to validate the
+//  patterns.
+//
 //  Created by Alexander Hedges on 09/01/16.
-//  Copyright © 2016 Sam Soffes. All rights reserved.
+//  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
 import Foundation
@@ -11,10 +19,6 @@ import Foundation
 class Patterns {
     
     private static var includes: [Include] = []
-    
-    class func reset() {
-        self.includes = []
-    }
     
     class func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: Pattern?) -> [Pattern] {
         var results: [Pattern] = []
@@ -34,5 +38,6 @@ class Patterns {
         for include in self.includes {
             include.resolveReferenceWithRepository(repository, inLanguage: language)
         }
+        self.includes = []
     }
 }

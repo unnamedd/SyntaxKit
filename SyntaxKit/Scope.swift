@@ -11,7 +11,7 @@ import Foundation
 class Scope: Result {
     
     // MARK: - Properties
-
+    
     let attribute: AnyObject?
     
     

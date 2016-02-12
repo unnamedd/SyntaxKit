@@ -11,7 +11,7 @@ import XCTest
 import SyntaxKit
 
 class ScopedStringTests: XCTestCase {
-
+    
     override func setUp() {
         super.setUp()
     }
@@ -19,7 +19,7 @@ class ScopedStringTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
     }
-
+    
     func testScopesString() {
         let newScopedString = ScopedString(string: "Test")
         XCTAssert(newScopedString.numberOfScopes() == 1)

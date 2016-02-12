@@ -2,6 +2,12 @@
 //  Pattern.swift
 //  SyntaxKit
 //
+//  Represents a pattern from a TextMate Language Bundle
+//
+//  The Include class represents a Pattern that is a reference to another part
+//  of the Bundle. It is only fully functional as a pattern after it has been 
+//  resolved via the provided method.
+//
 //  Created by Sam Soffes on 9/18/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
@@ -9,82 +15,77 @@
 import Foundation
 
 class Pattern {
-
+    
     // MARK: - Properties
-
-    var name: String?
-    var match: NSRegularExpression?
-    var captures: CaptureCollection?
-    var begin: NSRegularExpression?
-    var beginCaptures: CaptureCollection?
-    var end: NSRegularExpression?
-    var endCaptures: CaptureCollection?
-    var parent: Pattern?
-    var patterns: [Pattern]
-
-    var subpatterns: [Pattern] {
-        return patterns
-    }
+    
+    var name: String?                       { return _name }
+    var match: NSRegularExpression?         { return _match }
+    var captures: CaptureCollection?        { return _captures }
+    var begin: NSRegularExpression?         { return _begin }
+    var beginCaptures: CaptureCollection?   { return _beginCaptures }
+    var end: NSRegularExpression?           { return _end }
+    var endCaptures: CaptureCollection?     { return _endCaptures }
+    var parent: Pattern?                    { return _parent }
+    var subpatterns: [Pattern]              { return _subpatterns }
+    
+    private var _name: String?
+    private var _match: NSRegularExpression?
+    private var _captures: CaptureCollection?
+    private var _begin: NSRegularExpression?
+    private var _beginCaptures: CaptureCollection?
+    private var _end: NSRegularExpression?
+    private var _endCaptures: CaptureCollection?
+    private var _parent: Pattern?
+    private var _subpatterns: [Pattern]
+    
     
     // MARK: - Initializers
     
-    init() {
-        self.name = nil
-        self.match = nil
-        self.captures = nil
-        self.begin = nil
-        self.beginCaptures = nil
-        self.end = nil
-        self.endCaptures = nil
-        self.patterns = []
-
-    }
-    
     init?(dictionary: [NSObject: AnyObject], parent: Pattern?, withRepository repository: Repository?) {
-        self.parent = parent
-        self.name = dictionary["name"] as? String
+        _parent = parent
+        _name = dictionary["name"] as? String
         
         if let matchExpr = dictionary["match"] as? String {
-            self.match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines]) //[.CaseInsensitive]
+            _match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines])
         } else {
-            self.match = nil
+            _match = nil
         }
         
         if let beginExpr = dictionary["begin"] as? String {
-            self.begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
+            _begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
         } else {
-            self.begin = nil
+            _begin = nil
         }
         
         if let endExpr = dictionary["end"] as? String {
-            self.end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
+            _end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
         } else {
-            self.end = nil
+            _end = nil
         }
         
         if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
-            self.beginCaptures = CaptureCollection(dictionary: dictionary)
+            _beginCaptures = CaptureCollection(dictionary: dictionary)
         } else {
-            self.beginCaptures = nil
+            _beginCaptures = nil
         }
         
         if let dictionary = dictionary["captures"] as? [NSObject: AnyObject] {
-            self.captures = CaptureCollection(dictionary: dictionary)
+            _captures = CaptureCollection(dictionary: dictionary)
         } else {
-            self.captures = nil
+            _captures = nil
         }
         
         if let dictionary = dictionary["endCaptures"] as? [NSObject: AnyObject] {
-            self.endCaptures = CaptureCollection(dictionary: dictionary)
+            _endCaptures = CaptureCollection(dictionary: dictionary)
         } else {
-            self.endCaptures = nil
+            _endCaptures = nil
         }
         
         if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-            self.patterns = []
-            self.patterns = Patterns.patternsForArray(array, inRepository: repository, caller: self)
+            _subpatterns = []
+            _subpatterns = Patterns.patternsForArray(array, inRepository: repository, caller: self)
         } else {
-            self.patterns = []
+            _subpatterns = []
         }
         
         if dictionary["match"] as? String != nil && self.match == nil {
@@ -93,29 +94,72 @@ class Pattern {
             return nil
         }
         
-        if self.match == nil && self.begin == nil && self.end == nil && (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || dictionary["patterns"] as! [[NSObject: AnyObject]] == []) {
+        if self.match == nil &&
+            self.begin == nil &&
+            self.end == nil &&
+            (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || dictionary["patterns"] as! [[NSObject: AnyObject]] == []) {
             return nil
         }
     }
-     
-    func replaceWithPattern(pattern: Pattern) {
-        self.name = pattern.name
-        self.match = pattern.match
-        self.captures = pattern.captures
-        self.begin = pattern.begin
-        self.beginCaptures = pattern.beginCaptures
-        self.end = pattern.end
-        self.endCaptures = pattern.endCaptures
-        self.patterns = pattern.patterns ?? []
+    
+    private init() {
+        _name = nil
+        _match = nil
+        _captures = nil
+        _begin = nil
+        _beginCaptures = nil
+        _end = nil
+        _endCaptures = nil
+        _subpatterns = []
     }
 }
 
-func ==(lhs: Pattern, rhs: Pattern) -> Bool {
-    if  lhs.name != rhs.name ||
-        lhs.match != rhs.match ||
-        lhs.begin != rhs.begin ||
-        lhs.end != rhs.end {
-            return false
+
+class Include: Pattern {
+    
+    // MARK: - Properties
+    
+    private let referenceName: String
+    private var associatedRepository: Repository?
+    
+    
+    // MARK: - Initializers
+    
+    init(reference: String, inRepository repository: Repository? = nil, parent: Pattern?) {
+        self.referenceName = reference
+        self.associatedRepository = repository
+        super.init()
+        _parent = parent
     }
-    return true
+    
+    
+    // MARK: - Public
+    
+    func resolveReferenceWithRepository(repository: Repository, inLanguage language: Language) {
+        if referenceName.hasPrefix("#") {
+            let key = referenceName.substringFromIndex(referenceName.startIndex.successor())
+            if let pattern = (associatedRepository ?? repository)[key] {
+                self.replaceWithPattern(pattern)
+            }
+        } else if referenceName == "$self" {
+            self.parent!._subpatterns = language.patterns
+        } else {
+            // TODO: import from other language
+        }
+        self.associatedRepository = nil
+    }
+    
+    
+    // MARK: - Private
+    
+    private func replaceWithPattern(pattern: Pattern) {
+        _name = pattern._name
+        _match = pattern.match
+        _captures = pattern.captures
+        _begin = pattern.begin
+        _beginCaptures = pattern.beginCaptures
+        _end = pattern.end
+        _endCaptures = pattern.endCaptures
+        _subpatterns = pattern._subpatterns ?? []
+    }
 }
