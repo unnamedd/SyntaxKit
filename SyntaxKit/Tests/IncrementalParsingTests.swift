@@ -113,6 +113,6 @@ class IncrementalParsingTests: XCTestCase {
             XCTAssertEqual(rangeToParse, NSRange(location: 139, length: 4))
             
             self.parser.parse(input, inRange: rangeToParse) { _, _ in return }
-        } 
+        }
     } 
 }

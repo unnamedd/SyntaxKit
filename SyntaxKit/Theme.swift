@@ -63,9 +63,9 @@ public struct Theme {
             
             // TODO: caret, invisibles, lightHighlight, selection, font style
             
-            if let scopes = raw["scope"] as? String {
-                for scope in scopes.componentsSeparatedByString(",") {
-                    let key = scope.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            if let patternIdentifiers = raw["scope"] as? String {
+                for patternIdentifier in patternIdentifiers.componentsSeparatedByString(",") {
+                    let key = patternIdentifier.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
                     attributes[key] = setting
                 }
             } else if !setting.isEmpty {

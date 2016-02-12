@@ -91,27 +91,26 @@ public class Parser {
         
         let potentialNewString = scopesString!.copy() as! ScopedString
         
-        let linesRanges: NSRange
-        
+        let linesRange: NSRange
         if insertion {
             potentialNewString.insertString(s.substringWithRange(range), atIndex: range.location)
             diff = (s.substringWithRange(range), NSRange(location: range.location, length: 0))
-            linesRanges = s.lineRangeForRange(range)
+            linesRange = s.lineRangeForRange(range)
         } else {
             potentialNewString.deleteCharactersInRange(range)
             diff = (nil, range)
-            linesRanges = s.lineRangeForRange(NSRange(location: range.location, length: 0))
+            linesRange = s.lineRangeForRange(NSRange(location: range.location, length: 0))
         }
         if potentialNewString.underlyingString != newString {
             return nil
         }
 
-        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(NSMaxRange(linesRanges)-1, onlyBodyResults: false)
+        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(NSMaxRange(linesRange) - 1)
         if scopeAtIndex == potentialNewString.baseScope {
-            return linesRanges
+            return linesRange
         } else {
-            let endOfCurrentScope = NSMaxRange(scopeAtIndex.range.entireRange)
-            return NSUnionRange(linesRanges, NSRange(location: range.location, length: endOfCurrentScope - range.location))
+            let endOfCurrentScope = NSMaxRange(scopeAtIndex.range)
+            return NSUnionRange(linesRange, NSRange(location: range.location, length: endOfCurrentScope - range.location))
         }
     }
     
@@ -138,7 +137,7 @@ public class Parser {
             bounds = NSRange(location: 0, length: (string as NSString).length)
             scopesString = ScopedString(string: string)
         } else if diffRepresentsChangesFromOldStringToNewString(string) {
-            endScope = self.scopesString!.topLevelScopeAtIndex(bounds!.location, onlyBodyResults: true)
+            endScope = self.scopesString!.topLevelScopeAtIndex(bounds!.location)
             if diff!.0 == nil {
                 scopesString!.deleteCharactersInRange(diff!.1)
             } else {
@@ -149,16 +148,15 @@ public class Parser {
                 bounds = NSRange(location: 0, length: (string as NSString).length)
                 endScope = nil
                 scopesString = ScopedString(string: string)
-            } else {
-                scopesString!.removeScopesInRange(bounds!)
             }
         } else {
             // here we don't guarantee best results, the user passed in a range we didn't give him
             scopesString = ScopedString(string: string)
+            print("Warning: No guarantee for optimal results")
         }
         
         var startIndex = bounds!.location
-        let endIndex = NSMaxRange(bounds!)
+        var endIndex = NSMaxRange(bounds!)
         var allResults = ResultSet(startingRange: bounds!)
         
         while startIndex < endIndex {
@@ -166,7 +164,7 @@ public class Parser {
             let results = self.matchPatterns(endPattern?.subpatterns ?? language.patterns, withString: string, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex)
             
             if endScope != nil {
-                allResults.addResult(Result(scope: endScope!.name, range: results.range))
+                allResults.addResult(Result(identifier: endScope!.patternIdentifier, range: results.range))
             }
             
             if results.range.length != 0 {
@@ -178,7 +176,15 @@ public class Parser {
             } else {
                 startIndex = endIndex
             }
+            
+            if startIndex > endIndex && scopesString!.isInString(startIndex + 1) {
+                let scopeAtIndex = scopesString!.topLevelScopeAtIndex(startIndex + 1)
+                if endScope == nil && scopesString!.levelForScope(scopeAtIndex) > 0 || endScope != nil && scopesString!.levelForScope(scopeAtIndex) > scopesString!.levelForScope(endScope!) {
+                    endIndex = NSMaxRange(scopeAtIndex.range)
+                }
+            }
         }
+        scopesString!.removeScopesInRange(allResults.range)
         self.applyResults(allResults, callback: callback)
         diff = nil
     }
@@ -203,6 +209,7 @@ public class Parser {
         }
         
         if (scopesString!.underlyingString as NSString).length != oldLength {
+            print("Warning: incompatible change")
             return false
         }
         return true
@@ -212,6 +219,7 @@ public class Parser {
     ///             the characters from the new string in that range
     private func diffRepresentsChangesFromOldStringToNewString(newStr: NSString) -> Bool {
         if diff == nil {
+            print("Warning: Diff is nil")
             return false
         }
         if diff!.0 == nil {
@@ -223,6 +231,7 @@ public class Parser {
                 return false
             }
             if newStr.substringWithRange(NSRange(location: diff!.1.location, length: (diff!.0! as NSString).length)) != diff!.0! {
+                print("Warning: Passed in a wierd string")
                 return false
             }
         }
@@ -357,16 +366,16 @@ public class Parser {
             let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation, stopIndex: (string as NSString).length)
             var result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
-                result.addResult(Result(scope: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
+                result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
             }
-            self.scopesString?.addScopeAtBottomWithName(pattern.name ?? "", inRange: HeadedRange(location: beginResults.range.location, headerLength: beginResults.range.length, bodyLength: result.range.length - beginResults.range.length), withAttribute: pattern)
+            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: beginResults.range.location + beginResults.range.length, length: result.range.length - beginResults.range.length), attribute: pattern))
             result.addResults(beginResults)
             result.addResults(endResults)
             return result
         } else if pattern.subpatterns.count >= 1 {
             var result = findBestPatternInPatterns(pattern.subpatterns, inString: string, inRange: bounds)
             if pattern.name != nil {
-                result?.addResult(Result(scope: pattern.name!, range: result!.range))
+                result?.addResult(Result(identifier: pattern.name!, range: result!.range))
             }
             return result
         }
@@ -394,7 +403,7 @@ public class Parser {
 
         var resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {
-            resultSet.addResult(Result(scope: baseSelector!, range: result.range))
+            resultSet.addResult(Result(identifier: baseSelector!, range: result.range))
         }
 
         if let captures = captures {
@@ -409,18 +418,25 @@ public class Parser {
                 }
 
                 if let scope = captures[index]?.name {
-                    resultSet.addResult(Result(scope: scope, range: range))
+                    resultSet.addResult(Result(identifier: scope, range: range))
                 }
             }
         }
 
         return resultSet
     }
-
+    
     private func applyResults(resultSet: ResultSet?, callback: Callback) {
-        for result in resultSet?.results ?? [] {
-            if result.scope != "" && result.range.length > 0 {
-                callback(scope: result.scope, range: result.range)
+        guard let results = resultSet else {
+            return
+        }
+        
+        callback(scope: Language.globalScope, range: results.range)
+        for result in results.results where result.patternIdentifier != "" && result.range.length > 0 {
+            if let scope = result as? Scope {
+                self.scopesString?.addScopeAtBottom(scope)
+            } else {
+                callback(scope: result.patternIdentifier, range: result.range)
             }
         }
     }

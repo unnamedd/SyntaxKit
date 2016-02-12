@@ -22,11 +22,15 @@ struct ResultSet {
     var isEmpty: Bool {
         return results.isEmpty
     }
+    
 
+    // MARK: - Initializers
+    
     init(startingRange range: NSRange) {
         self.range = range
     }
 
+    
     // MARK: - Adding
     
     mutating func extendWithRange(range: NSRange) {
@@ -35,14 +39,13 @@ struct ResultSet {
 
     mutating func addResult(result: Result) {
         _results.append(result)
-
-        self.range = NSUnionRange(range, result.range)
+        self.extendWithRange(result.range)
     }
 
     mutating func addResults(resultSet: ResultSet) {
-        self.range = NSUnionRange(range, resultSet.range)
+        self.extendWithRange(resultSet.range)
         for result in resultSet.results {
-            addResult(result)
+            _results.append(result)
         }
     }
 }

@@ -8,18 +8,22 @@
 
 import Foundation
 
-struct Result {
+class Result: Equatable {
 
     // MARK: - Properties
 
-    let scope: String
-    let range: NSRange
+    let patternIdentifier: String
+    var range: NSRange
 
 
     // MARK: - Initializers
 
-    init(scope: String, range: NSRange) {
-        self.scope = scope
+    init(identifier: String, range: NSRange) {
+        self.patternIdentifier = identifier
         self.range = range
     }
+}
+
+func ==(lhs: Result, rhs: Result) -> Bool {
+    return lhs.patternIdentifier == rhs.patternIdentifier && lhs.range.toRange() == rhs.range.toRange()
 }
