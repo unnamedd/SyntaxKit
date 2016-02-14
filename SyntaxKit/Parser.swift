@@ -287,7 +287,7 @@ public class Parser {
                 
                 if endPattern != nil {
                     let endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
-                    if endMatchResult != nil && (bestResultForMiddle == nil || endMatchResult!.range.location <= bestResultForMiddle!.range.location) {
+                    if endMatchResult != nil && (bestResultForMiddle == nil || endMatchResult!.range.location < bestResultForMiddle!.range.location) {
                         result.addResults(endMatchResult!)
                         return result
                     }
@@ -440,10 +440,10 @@ public class Parser {
         }
         
         callback(scope: Language.globalScope, range: results.range)
-        for result in results.results where result.patternIdentifier != "" && result.range.length > 0 {
+        for result in results.results where result.range.length > 0 {
             if let scope = result as? Scope {
                 self.scopesString?.addScopeAtBottom(scope)
-            } else {
+            } else if result.patternIdentifier != "" {
                 callback(scope: result.patternIdentifier, range: result.range)
             }
         }
