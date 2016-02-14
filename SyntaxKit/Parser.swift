@@ -287,7 +287,7 @@ public class Parser {
                 
                 if endPattern != nil {
                     let endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
-                    if endMatchResult != nil && (bestResultForMiddle == nil || endMatchResult!.range.location < bestResultForMiddle!.range.location) {
+                    if endMatchResult != nil && (bestResultForMiddle == nil || endMatchResult!.range.location <= bestResultForMiddle!.range.location) {
                         result.addResults(endMatchResult!)
                         return result
                     }

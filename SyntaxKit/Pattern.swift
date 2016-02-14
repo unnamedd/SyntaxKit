@@ -36,7 +36,9 @@ class Pattern {
     private var _end: NSRegularExpression?
     private var _endCaptures: CaptureCollection?
     private var _parent: Pattern?
-    private var _subpatterns: [Pattern]
+    private var _subpatterns: [Pattern] = []
+    
+    private let debug = true
     
     
     // MARK: - Initializers
@@ -47,45 +49,35 @@ class Pattern {
         
         if let matchExpr = dictionary["match"] as? String {
             _match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines])
-        } else {
-            _match = nil
+            if debug && _match == nil {
+                print("Problem parsing match expression \(matchExpr)")
+            }
         }
         
         if let beginExpr = dictionary["begin"] as? String {
             _begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
-        } else {
-            _begin = nil
+            if debug && _begin == nil {
+                print("Problem parsing begin expression \(beginExpr)")
+            }
         }
         
         if let endExpr = dictionary["end"] as? String {
             _end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
-        } else {
-            _end = nil
+            if debug && _end == nil {
+                print("Problem parsing end expression \(endExpr)")
+            }
         }
         
         if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
             _beginCaptures = CaptureCollection(dictionary: dictionary)
-        } else {
-            _beginCaptures = nil
         }
         
         if let dictionary = dictionary["captures"] as? [NSObject: AnyObject] {
             _captures = CaptureCollection(dictionary: dictionary)
-        } else {
-            _captures = nil
         }
         
         if let dictionary = dictionary["endCaptures"] as? [NSObject: AnyObject] {
             _endCaptures = CaptureCollection(dictionary: dictionary)
-        } else {
-            _endCaptures = nil
-        }
-        
-        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-            _subpatterns = []
-            _subpatterns = Patterns.patternsForArray(array, inRepository: repository, caller: self)
-        } else {
-            _subpatterns = []
         }
         
         if dictionary["match"] as? String != nil && self.match == nil {
@@ -98,20 +90,16 @@ class Pattern {
             self.begin == nil &&
             self.end == nil &&
             (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || dictionary["patterns"] as! [[NSObject: AnyObject]] == []) {
-            return nil
+                print("Attention: pattern not recognized: \(self.name)")
+                return nil
+        }
+        
+        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
+            _subpatterns = Patterns.patternsForArray(array, inRepository: repository, caller: self)
         }
     }
     
-    private init() {
-        _name = nil
-        _match = nil
-        _captures = nil
-        _begin = nil
-        _beginCaptures = nil
-        _end = nil
-        _endCaptures = nil
-        _subpatterns = []
-    }
+    private init() {}
 }
 
 
@@ -129,7 +117,7 @@ class Include: Pattern {
         self.referenceName = reference
         self.associatedRepository = repository
         super.init()
-        _parent = parent
+        self._parent = parent
     }
     
     
@@ -142,7 +130,13 @@ class Include: Pattern {
                 self.replaceWithPattern(pattern)
             }
         } else if referenceName == "$self" {
-            self.parent!._subpatterns = language.patterns
+            let position = self.parent!.subpatterns.indexOf { [unowned self] pattern in
+                if let include = pattern as? Include  {
+                    return include.referenceName == self.referenceName
+                }
+                return false
+            }
+            self.parent!._subpatterns.replaceRange(NSRange(location: position!, length: 1).toRange()!, with: language.patterns)
         } else {
             // TODO: import from other language
         }
@@ -160,6 +154,6 @@ class Include: Pattern {
         _beginCaptures = pattern.beginCaptures
         _end = pattern.end
         _endCaptures = pattern.endCaptures
-        _subpatterns = pattern._subpatterns ?? []
+        _subpatterns = pattern._subpatterns
     }
 }
