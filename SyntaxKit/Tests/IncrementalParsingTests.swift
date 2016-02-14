@@ -31,7 +31,7 @@ class IncrementalParsingTests: XCTestCase {
         
         var newInput = stringByReplacingRange(NSRange(location: 20, length: 0), inString: input, withString: " ")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 20, length: 1))
-        XCTAssertEqual(rangeToParse, NSRange(location: 3, length: 19))
+        XCTAssertEqual(rangeToParse, NSRange(location: 3, length: 136))
         
         newInput = stringByReplacingRange(NSRange(location: 162, length: 0), inString: input, withString: "i")
         rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 162, length: 1))
