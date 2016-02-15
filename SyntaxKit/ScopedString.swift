@@ -138,8 +138,6 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func topLevelScopeAtIndex(index: Int) -> Scope {
-        assert(index >= 0 && index <= baseScope.range.length)
-        
         let indexRange = NSRange(location: index, length: 1)
         for var i = levels.count - 1; i >= 0; i-- {
             let level = levels[i]
