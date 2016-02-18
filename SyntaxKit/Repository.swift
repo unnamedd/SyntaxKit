@@ -18,15 +18,13 @@ class Repository {
     
     // MARK: - Initializers
     
-    init() {}
-    
-    init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, inLanguage language: Language, withReferenceManager refman: ReferenceManager) {
+    init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, withReferenceManager refman: ReferenceManager) {
         self.parentRepository = parent
         
         for (key, value) in repo {
             var subRepo: Repository?
             if let containedRepo = value["repository"] as? [String: [NSObject: AnyObject]] {
-                 subRepo = Repository(repo: containedRepo, inParent: self, inLanguage: language, withReferenceManager: refman)
+                 subRepo = Repository(repo: containedRepo, inParent: self, withReferenceManager: refman)
             }
             if let pattern = Pattern(dictionary: value, parent: nil, withRepository: subRepo, withReferenceManager: refman) {
                 self.entries[key] = pattern

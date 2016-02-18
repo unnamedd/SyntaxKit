@@ -2,25 +2,23 @@
 //  Language.swift
 //  SyntaxKit
 //
-//  Created by Alexander Hedges on 17/02/16.
-//  Copyright © 2016 Sam Soffes. All rights reserved.
+//  Created by Sam Soffes on 9/18/14.
+//  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
 import Foundation
 
 public struct Language {
     
-    public let UUID: String//         {return _UUID}
-    public let name: String//         {return _name}
-    public let scopeName: String//    {return _scopeName}
+    // MARK: - Properties
     
-//    private var _UUID = ""
-//    private var _name = ""
-//    private var _scopeName = ""
+    public let UUID: String
+    public let name: String
+    public let scopeName: String
     
-    var pattern: Pattern = Pattern()
-    var referenceManager = ReferenceManager()
-    var repository = Repository()
+    let pattern: Pattern = Pattern()
+    let referenceManager = ReferenceManager()
+    let repository: Repository
     
     static let globalScope = "GLOBAL"
     
@@ -36,25 +34,23 @@ public struct Language {
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
+        
         self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
-        self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, inLanguage: self, withReferenceManager: referenceManager)
-        referenceManager.resolveRepositoryReferences(repository)
-        referenceManager.resolveSelfReferences(self)
+        self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, withReferenceManager: referenceManager)
+        referenceManager.resolveInternalReferences(repository, inLanguage: self)
     }
     
+    /// Resolves all external reference the language has to the given languages.
+    /// Only after a call to this method the Language is fit for general use.
+    ///
+    /// - parameter helperLanguages: The languages that the language has 
+    ///     references to resolve agains. This should at least contain the 
+    ///     language itself.
     mutating func validateWithHelperLanguages(helperLanguages: [Language]) {
-        let resolvedProtoLanguage = resolveReferencesBetweenThisAndProtoLanguages(helperLanguages)
-        self.pattern = resolvedProtoLanguage.pattern
-    }
-    
-    private func resolveReferencesBetweenThisAndProtoLanguages(otherLanguages: [Language]) -> Language {
         let newLanguage = self
-        var copyOfProtoLanguages: [Language] = []
-        for language in otherLanguages {
-            let newOtherLang = ReferenceManager.copyLanguage(language)
-            copyOfProtoLanguages.append(newOtherLang)
-        }
-        ReferenceManager.resolveInterLanguageReferences(copyOfProtoLanguages, basename: self.scopeName)
-        return newLanguage
+        let copyOfHelperLanguages = helperLanguages.map { ReferenceManager.copyLanguage($0) }
+        
+        ReferenceManager.resolveExternalReferencesBetweenLanguages(copyOfHelperLanguages, basename: self.scopeName)
+        self.pattern.subpatterns = newLanguage.pattern.subpatterns
     }
 }

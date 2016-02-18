@@ -4,7 +4,7 @@
 
 SyntaxKit makes TextMate-style syntax highlighting easy. It works on iOS, watchOS, and OS X.
 
-SyntaxKit was abstracted from [Whiskey](http://usewhiskey.com).
+A fork from Sam Soffes' SyntaxKit which was originally abstracted from [Whiskey](http://usewhiskey.com).
 
 
 ## Building
@@ -40,9 +40,10 @@ Once you have a language, you can get started:
 ```swift
 import SyntaxKit
 
-let path = "path to your .tmLanguage file"
-let plist = NSDictionary(contentsOfFile: path)! as [NSObject: AnyObject]
-let yaml = Language(dictionary: plist)
+BundleManager.initializeDefaultManagerWithLocationCallback { identifier, isLanguage in
+    NSURL(string: "Location of Bundles/" + identifier + ".plist")
+}
+let yaml = BundleManager.defaultManager!.languageWithIdentifier("source.yaml")!
 
 let parser = Parser(language: yaml)
 ```
@@ -64,7 +65,7 @@ parser.parse(input) { scope, range in
 SyntaxKit also comes with `AttributedParser`. This is a simple subclass of `Parser` that knows how to work with themes.
 
 ```swift
-let tomorrow = Theme(dictionary: themePlist)
+let tomorrow = BundleManager.defaultManager!.themeWithIdentifier("tomorrow")!
 let attributedParser = AttributedParser(language: yaml, theme: tomorrow)
 
 attributedParser.parse(input) { scope, range, attributes in
@@ -72,7 +73,7 @@ attributedParser.parse(input) { scope, range, attributes in
 }
 ```
 
-Notice that `attributes` is the third paramenter to the block now. This is a dictionary of attributes you can give to `NSAttributedString`. Other values may be included here that don't work with `NSAttributedString`. You can do your own inspection and do something custom if you want.
+Notice that `attributes` is the third parameter to the block now. This is a dictionary of attributes you can give to `NSAttributedString`.
 
 `AttributedParser` includes a convenience method for turning a `String` of source code into an `NSAttributedString`:
 

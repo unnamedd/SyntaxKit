@@ -23,16 +23,16 @@ class LanguageTests: XCTestCase {
         XCTAssertEqual("YAML", yaml.name)
         XCTAssertEqual("source.yaml", yaml.scopeName)
         
-        XCTAssertEqual("meta.embedded.line.ruby", yaml.patterns[0].name)
-        XCTAssertEqual("punctuation.definition.embedded.begin.ruby", yaml.patterns[0].beginCaptures?[0]?.name)
-        XCTAssertEqual("punctuation.definition.embedded.end.ruby", yaml.patterns[0].endCaptures?[0]?.name)
-        XCTAssertEqual("punctuation.definition.comment.ruby", yaml.patterns[0].subpatterns[0].captures?[1]?.name)
-        XCTAssertEqual("string.unquoted.block.yaml", yaml.patterns[1].name)
-        XCTAssertEqual("punctuation.definition.entry.yaml", yaml.patterns[1].beginCaptures?[2]?.name)
-        XCTAssertEqual("punctuation.separator.key-value.yaml", yaml.patterns[1].beginCaptures?[5]?.name)
-        XCTAssertEqual("constant.numeric.yaml", yaml.patterns[2].name)
+        XCTAssertEqual("meta.embedded.line.ruby", yaml.pattern.subpatterns[0].name)
+        XCTAssertEqual("punctuation.definition.embedded.begin.ruby", yaml.pattern.subpatterns[0].beginCaptures?[0]?.name)
+        XCTAssertEqual("punctuation.definition.embedded.end.ruby", yaml.pattern.subpatterns[0].endCaptures?[0]?.name)
+        XCTAssertEqual("punctuation.definition.comment.ruby", yaml.pattern.subpatterns[0].subpatterns[0].captures?[1]?.name)
+        XCTAssertEqual("string.unquoted.block.yaml", yaml.pattern.subpatterns[1].name)
+        XCTAssertEqual("punctuation.definition.entry.yaml", yaml.pattern.subpatterns[1].beginCaptures?[2]?.name)
+        XCTAssertEqual("punctuation.separator.key-value.yaml", yaml.pattern.subpatterns[1].beginCaptures?[5]?.name)
+        XCTAssertEqual("constant.numeric.yaml", yaml.pattern.subpatterns[2].name)
         
-        let pattern = yaml.patterns[3]
+        let pattern = yaml.pattern.subpatterns[3]
         XCTAssertEqual("string.unquoted.yaml", pattern.name)
         XCTAssertEqual("punctuation.definition.entry.yaml", pattern.captures?[1]?.name)
     }

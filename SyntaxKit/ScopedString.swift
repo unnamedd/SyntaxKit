@@ -53,6 +53,8 @@ extension NSRange {
     }
 }
 
+typealias Scope = Result
+
 class ScopedString: NSObject, NSCopying {
     
     // MARK: - Properties
@@ -77,15 +79,7 @@ class ScopedString: NSObject, NSCopying {
     
     func copyWithZone(zone: NSZone) -> AnyObject {
         let newScopedString = ScopedString(string: self.underlyingString)
-        newScopedString.levels = []
-        for level in levels {
-            var newLevel: [Scope] = []
-            for scope in level {
-                let newScope = Scope(identifier: scope.patternIdentifier, range: scope.range, attribute: scope.attribute)
-                newLevel.append(newScope)
-            }
-            newScopedString.levels.append(newLevel)
-        }
+        newScopedString.levels = levels
         return newScopedString
     }
     

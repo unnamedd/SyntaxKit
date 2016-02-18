@@ -22,13 +22,13 @@ public class BundleManager {
     private var bundleCallback: BundleLocationCallback
     private var dependencies: [Language] = []
     private var cachedLanguages: [String: Language] = [:]
-    private var cachedProtoLanguages: [String: Language] = [:]
+    private var cachedUnresolvedLanguages: [String: Language] = [:]
     private var cachedThemes: [String: Theme] = [:]
     
     
     // MARK: - Initializers
     
-    public class func initializeGlobalManagerWithCallback(callback: BundleLocationCallback) {
+    public class func initializeDefaultManagerWithLocationCallback(callback: BundleLocationCallback) {
         defaultManager = BundleManager(callback: callback)
     }
     
@@ -39,20 +39,20 @@ public class BundleManager {
     
     // MARK: - Public
     
-    public func getLanguageWithIdentifier(identifier: String) -> Language? {
+    public func languageWithIdentifier(identifier: String) -> Language? {
         if let language = self.cachedLanguages[identifier] {
             return language
         }
         
         self.dependencies = []
-        var language = self.getProtoLanguageWithIdentifier(identifier)!
+        var language = self.getUnvalidatedLanguageWithIdentifier(identifier)!
         language.validateWithHelperLanguages(self.dependencies)
         
         self.cachedLanguages[identifier] = language
         return language
     }
     
-    public func getThemeWithIdentifier(identifier: String) -> Theme? {
+    public func themeWithIdentifier(identifier: String) -> Theme? {
         if let theme = cachedThemes[identifier] {
             return theme
         }
@@ -70,8 +70,8 @@ public class BundleManager {
     
     // MARK: - Internal Interface
     
-    func getProtoLanguageWithIdentifier(identifier: String) -> Language? {
-        if let language = cachedProtoLanguages[identifier] {
+    func getUnvalidatedLanguageWithIdentifier(identifier: String) -> Language? {
+        if let language = cachedUnresolvedLanguages[identifier] {
             if self.dependencies.indexOf({$0.UUID == language.UUID}) == nil {
                 self.dependencies.append(language)
             }
@@ -85,7 +85,7 @@ public class BundleManager {
         }
         
         self.dependencies.append(newLanguage)
-        cachedProtoLanguages[identifier] = newLanguage
+        cachedUnresolvedLanguages[identifier] = newLanguage
         return newLanguage
     }
 }

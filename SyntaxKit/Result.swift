@@ -8,19 +8,21 @@
 
 import Foundation
 
-class Result: Equatable {
+struct Result: Equatable {
     
     // MARK: - Properties
     
     let patternIdentifier: String
     var range: NSRange
+    let attribute: AnyObject?
     
     
     // MARK: - Initializers
     
-    init(identifier: String, range: NSRange) {
+    init(identifier: String, range: NSRange, attribute: AnyObject? = nil) {
         self.patternIdentifier = identifier
         self.range = range
+        self.attribute = attribute
     }
 }
 

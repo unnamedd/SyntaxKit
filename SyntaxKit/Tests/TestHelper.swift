@@ -18,8 +18,9 @@ func fixture(name: String, _ type: String) -> String! {
 func language(name: String) -> Language! {
     let path = NSBundle(forClass: LanguageTests.self).pathForResource(name, ofType: "tmLanguage")!
     let plist = NSDictionary(contentsOfFile: path)! as [NSObject: AnyObject]
-    let language = Language(dictionary: plist)!
-    return language.validatedLanguage()
+    var language = Language(dictionary: plist)!
+    language.validateWithHelperLanguages([])
+    return language
 }
 
 func theme(name: String) -> Theme! {

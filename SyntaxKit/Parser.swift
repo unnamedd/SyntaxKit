@@ -429,6 +429,10 @@ public class Parser {
         return resultSet
     }
     
+    //  Implementation note:
+    //  In this project the difference between a Result and a Scope is that
+    //  the scope has the attribute set while the Result does not.
+    
     /// Uses the callback to communicate the result of the parsing pass back
     /// to the caller of parse.
     ///
@@ -441,8 +445,8 @@ public class Parser {
         
         callback(scope: Language.globalScope, range: results.range)
         for result in results.results where result.range.length > 0 {
-            if let scope = result as? Scope {
-                self.scopesString?.addScopeAtBottom(scope)
+            if result.attribute != nil {
+                self.scopesString?.addScopeAtBottom(result as Scope)
             } else if result.patternIdentifier != "" {
                 callback(scope: result.patternIdentifier, range: result.range)
             }

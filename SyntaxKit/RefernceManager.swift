@@ -18,10 +18,13 @@ import Foundation
 
 class ReferenceManager {
     
-    var includes: [Include] = []
+    // MARK: - Properties
     
-    init() {}
+    private var includes: [Include] = []
     
+    
+    // MARK: - Pattern Creation and Resolution
+        
     func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: Pattern?) -> [Pattern] {
         var results: [Pattern] = []
         for rawPattern in patterns {
@@ -36,19 +39,13 @@ class ReferenceManager {
         return results
     }
     
-    func resolveRepositoryReferences(repository: Repository) {
-        for include in includes where include.type == .toRepository {
-            include.resolveRepositoryReferences(repository)
+    func resolveInternalReferences(repository: Repository, inLanguage language: Language) {
+        for include in includes {
+            include.resolveInternalReference(repository, inLanguage: language)
         }
     }
     
-    func resolveSelfReferences(language: Language) {
-        for include in includes where include.type == .toSelf {
-            include.resolveSelfReferences(language)
-        }
-    }
-    
-    class func resolveInterLanguageReferences(languages: [Language], basename: String) {
+    class func resolveExternalReferencesBetweenLanguages(languages: [Language], basename: String) {
         var otherLanguages: [String: Language] = [:]
         for language in languages {
             otherLanguages[language.scopeName] = language
@@ -61,14 +58,17 @@ class ReferenceManager {
         }
     }
     
+    
+    // MARK: - Language Copying
+    
     class func copyLanguage(language: Language) -> Language {
         let newLanguage = language
         newLanguage.referenceManager.includes = []
-        newLanguage.pattern.subpatterns = ReferenceManager.copyPatternTree(language.pattern.subpatterns, inLanguage: newLanguage)
+        newLanguage.pattern.subpatterns = copyPatternsRecursively(language.pattern.subpatterns, inLanguage: newLanguage)
         return newLanguage
     }
     
-    private class func copyPatternTree(patterns: [Pattern], parent: Pattern? = nil, foundPatterns: [Pattern: Pattern] = [:], inLanguage language: Language) -> [Pattern] {
+    private class func copyPatternsRecursively(patterns: [Pattern], parent: Pattern? = nil, foundPatterns: [Pattern: Pattern] = [:], inLanguage language: Language) -> [Pattern] {
         var newFoundPatterns = foundPatterns
         var result: [Pattern] = []
         for pattern in patterns {
@@ -83,7 +83,7 @@ class ReferenceManager {
                     newPattern = Pattern(pattern: pattern, parent: parent)
                 }
                 newFoundPatterns[pattern] = newPattern
-                newPattern.subpatterns = copyPatternTree(pattern.subpatterns, parent: newPattern, foundPatterns: newFoundPatterns, inLanguage: language)
+                newPattern.subpatterns = copyPatternsRecursively(pattern.subpatterns, parent: newPattern, foundPatterns: newFoundPatterns, inLanguage: language)
                 result.append(newPattern)
             }
         }
