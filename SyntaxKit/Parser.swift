@@ -404,10 +404,6 @@ public class Parser {
             return nil
         }
         
-        if (string as NSString).substringWithRange(bounds).containsString("@interface flickrCDTagsTableViewController ()") {
-//            print("string found")
-        }
-        
         var resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {
             resultSet.addResult(Result(identifier: baseSelector!, range: result.range))

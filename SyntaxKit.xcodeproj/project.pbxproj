@@ -283,9 +283,8 @@
 				2119898C1B2EC38B00F0D786 /* AttributedParser.swift */,
 				211989911B2EC38B00F0D786 /* Parser.swift */,
 				8C9003321C5C0B0D00CBA5B0 /* ScopedString.swift */,
-				8CDD6F1A1C71594B0063915A /* BundleManager.swift */,
-				8CEEC0DD1C411C8600BF3E85 /* RefernceManager.swift */,
 				8CE64FE21C74B48D0007BA57 /* Language.swift */,
+				8CEEC0DD1C411C8600BF3E85 /* RefernceManager.swift */,
 				211989921B2EC38B00F0D786 /* Pattern.swift */,
 				2119898E1B2EC38B00F0D786 /* CaptureCollection.swift */,
 				2119898D1B2EC38B00F0D786 /* Capture.swift */,
@@ -294,6 +293,7 @@
 				211989931B2EC38B00F0D786 /* Result.swift */,
 				8C6C24C71C6BD66A0087E156 /* Scope.swift */,
 				211989961B2EC38B00F0D786 /* Theme.swift */,
+				8CDD6F1A1C71594B0063915A /* BundleManager.swift */,
 				210299C11B2E8924009C61EE /* Resources */,
 				210299CD1B2E8924009C61EE /* Tests */,
 			);

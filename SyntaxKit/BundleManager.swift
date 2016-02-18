@@ -10,7 +10,14 @@ import UIKit
 
 public class BundleManager {
     
+    // MARK: - Types
+    
     public typealias BundleLocationCallback = (identifier: String, isLanguage: Bool) -> (NSURL?)
+    
+    
+    // MARK: - Properties
+    
+    public static var defaultManager: BundleManager?
     
     private var bundleCallback: BundleLocationCallback
     private var dependencies: [Language] = []
@@ -18,15 +25,19 @@ public class BundleManager {
     private var cachedProtoLanguages: [String: Language] = [:]
     private var cachedThemes: [String: Theme] = [:]
     
-    public static var defaultManager: BundleManager?
+    
+    // MARK: - Initializers
     
     public class func initializeGlobalManagerWithCallback(callback: BundleLocationCallback) {
         defaultManager = BundleManager(callback: callback)
     }
     
-    public init(callback: BundleLocationCallback) {
+    init(callback: BundleLocationCallback) {
         self.bundleCallback = callback
     }
+    
+    
+    // MARK: - Public
     
     public func getLanguageWithIdentifier(identifier: String) -> Language? {
         if let language = self.cachedLanguages[identifier] {
@@ -34,30 +45,11 @@ public class BundleManager {
         }
         
         self.dependencies = []
-        let language = self.getProtoLanguageWithIdentifier(identifier)!
+        var language = self.getProtoLanguageWithIdentifier(identifier)!
         language.validateWithHelperLanguages(self.dependencies)
         
         self.cachedLanguages[identifier] = language
         return language
-    }
-    
-    func getProtoLanguageWithIdentifier(identifier: String) -> Language? {
-        if let language = cachedProtoLanguages[identifier] {
-            if self.dependencies.indexOf({$0.UUID == language.UUID}) == nil {
-                self.dependencies.append(language)
-            }
-            return language
-        }
-        
-        guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
-            plist = NSDictionary(contentsOfURL: dictURL),
-            newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
-             return nil
-        }
-        
-        self.dependencies.append(newLanguage)
-        cachedProtoLanguages[identifier] = newLanguage
-        return newLanguage
     }
     
     public func getThemeWithIdentifier(identifier: String) -> Theme? {
@@ -73,5 +65,27 @@ public class BundleManager {
         
         cachedThemes[identifier] = newTheme
         return newTheme
+    }
+    
+    
+    // MARK: - Internal Interface
+    
+    func getProtoLanguageWithIdentifier(identifier: String) -> Language? {
+        if let language = cachedProtoLanguages[identifier] {
+            if self.dependencies.indexOf({$0.UUID == language.UUID}) == nil {
+                self.dependencies.append(language)
+            }
+            return language
+        }
+        
+        guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
+            plist = NSDictionary(contentsOfURL: dictURL),
+            newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
+                return nil
+        }
+        
+        self.dependencies.append(newLanguage)
+        cachedProtoLanguages[identifier] = newLanguage
+        return newLanguage
     }
 }

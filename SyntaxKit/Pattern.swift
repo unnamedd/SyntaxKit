@@ -192,22 +192,21 @@ class Include: Pattern {
     }
     
     func resolveInterLanguageReferences(ownLanguage: Language, inLanguages languages: [String: Language], baseName: String?) {
+        let toReplacePattern: Pattern?
         if type == .toBase {
-            let baseLanguage = languages[baseName!]!
-            self.replaceWithPattern(baseLanguage.pattern)
-            self.type = .resolved
+            toReplacePattern = languages[baseName!]!.pattern
         } else if type == .toForeignRepository {
-            let newLanguage = languages[languageRef!]
-            if let pattern = newLanguage?.repository[repositoryRef!] {
-                self.replaceWithPattern(pattern)
-            }
-            self.type = .resolved
+            toReplacePattern = languages[languageRef!]?.repository[repositoryRef!]
         } else if type == .toForeign {
-            if let includedLang = languages[languageRef!] {
-                self.replaceWithPattern(includedLang.pattern)
-            }
-            self.type = .resolved
+            toReplacePattern = languages[languageRef!]?.pattern
+        } else {
+            return
         }
+        
+        if toReplacePattern != nil {
+            self.replaceWithPattern(toReplacePattern!)
+        }
+        self.type = .resolved
     }
         
     // MARK: - Private
