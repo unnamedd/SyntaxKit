@@ -2,26 +2,27 @@
 //  Language.swift
 //  SyntaxKit
 //
-//  Created by Sam Soffes on 9/18/14.
-//  Copyright © 2014-2015 Sam Soffes. All rights reserved.
+//  Created by Alexander Hedges on 17/02/16.
+//  Copyright © 2016 Sam Soffes. All rights reserved.
 //
 
 import Foundation
 
-public struct Language {
+public class Language {
     
-    // MARK: - Properties
+    public var UUID: String = ""
+    public var name: String = ""
+    public var scopeName: String = ""
+    var referenceManager = ReferenceManager()
     
-    public let UUID: String
-    public let name: String
-    public let scopeName: String
-    let patterns: [Pattern]
+    var patterns: [ProtoPattern] = []
+    var repository = Repository()
     
     static let globalScope = "GLOBAL"
     
     // MARK: - Initializers
     
-    public init?(dictionary: [NSObject: AnyObject]) {
+    init?(dictionary: [NSObject: AnyObject]) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
             scopeName = dictionary["scopeName"] as? String,
@@ -31,15 +32,29 @@ public struct Language {
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
-        self.patterns = Patterns.patternsForArray(array, inRepository: nil, caller: nil)
-        
-        let repository: Repository
-        if let repo = dictionary["repository"] as? [String: [NSObject: AnyObject]] {
-            repository = Repository(repo: repo, inParent: nil, inLanguage: self)
-        } else {
-            repository = Repository(repo: [:], inParent: nil, inLanguage: self)
-        }
-        
-        Patterns.resolveReferencesWithRepository(repository, inLanguage: self)
+        self.patterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
+        self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, inLanguage: self, withReferenceManager: referenceManager)
+        referenceManager.resolveRepositoryReferences(repository)
+        referenceManager.resolveSelfReferences(self)
     }
+    
+    func validateWithHelperLanguages(helperLanguages: [Language]) {
+        let resolvedProtoLanguage = Language.resolveReferencesBetweenThisAndProtoLanguages(self, andOtherLanguages: helperLanguages)
+        self.UUID = resolvedProtoLanguage.UUID
+        self.name = resolvedProtoLanguage.name
+        self.scopeName = resolvedProtoLanguage.scopeName
+        self.patterns = resolvedProtoLanguage.patterns
+    }
+    
+    private class func resolveReferencesBetweenThisAndProtoLanguages(thisLanguage: Language, andOtherLanguages otherLanguages: [Language]) -> Language {
+        let newLanguage = thisLanguage
+        var copyOfProtoLanguages: [Language] = []
+        for language in otherLanguages {
+            let newOtherLang = ReferenceManager.copyLanguage(language)
+            copyOfProtoLanguages.append(newOtherLang)
+        }
+        ReferenceManager.resolveInterLanguageReferences(copyOfProtoLanguages, basename: thisLanguage.scopeName)
+        return newLanguage
+    }
+
 }

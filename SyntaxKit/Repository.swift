@@ -12,22 +12,23 @@ class Repository {
     
     // MARK: - Properties
     
-    private var entries: [String: Pattern]
+    private var entries: [String: ProtoPattern] = [:]
     private weak var parentRepository: Repository?
     
     
     // MARK: - Initializers
     
-    init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, inLanguage language: Language) {
-        self.entries = [:]
+    init() {}
+    
+    init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, inLanguage language: Language, withReferenceManager refman: ReferenceManager) {
         self.parentRepository = parent
         
         for (key, value) in repo {
             var subRepo: Repository?
             if let containedRepo = value["repository"] as? [String: [NSObject: AnyObject]] {
-                 subRepo = Repository(repo: containedRepo, inParent: self, inLanguage: language)
+                 subRepo = Repository(repo: containedRepo, inParent: self, inLanguage: language, withReferenceManager: refman)
             }
-            if let pattern = Pattern(dictionary: value, parent: nil, withRepository: subRepo) {
+            if let pattern = ProtoPattern(dictionary: value, parent: nil, withRepository: subRepo, withReferenceManager: refman) {
                 self.entries[key] = pattern
             }
         }
@@ -36,7 +37,7 @@ class Repository {
     
     // MARK: - Accessing Patterns
     
-    subscript(index: String) -> Pattern? {
+    subscript(index: String) -> ProtoPattern? {
         if let resultAtLevel = entries[index] {
             return resultAtLevel
         }

@@ -162,7 +162,7 @@ public class Parser {
         var allResults = ResultSet(startingRange: bounds!)
         
         while startIndex < endIndex {
-            let endPattern = endScope?.attribute as! Pattern?
+            let endPattern = endScope?.attribute as! ProtoPattern?
             let results = self.matchPatterns(endPattern?.subpatterns ?? language.patterns, withString: string, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex)
             
             if endScope != nil {
@@ -269,7 +269,7 @@ public class Parser {
     ///
     /// - returns:  The result set containing the lexical scope names with range
     ///             information. May exceed stopIndex.
-    private func matchPatterns(patterns: [Pattern], withString string: String, withEndPatternFromPattern endPattern: Pattern?, startingAtIndex startIndex: Int, stopIndex stop: Int) -> ResultSet {
+    private func matchPatterns(patterns: [ProtoPattern], withString string: String, withEndPatternFromPattern endPattern: ProtoPattern?, startingAtIndex startIndex: Int, stopIndex stop: Int) -> ResultSet {
         assert(endPattern == nil || endPattern!.end != nil)
         
         let s: NSString = string
@@ -326,7 +326,7 @@ public class Parser {
     /// - returns:  The results. nil if nothing could be matched and an empty
     ///             set if something could be matched but it doesn't have any
     ///             information associated with the match.
-    private func findBestPatternInPatterns(patterns: [Pattern], inString string: String, inRange bounds: NSRange) -> ResultSet? {
+    private func findBestPatternInPatterns(patterns: [ProtoPattern], inString string: String, inRange bounds: NSRange) -> ResultSet? {
         var bestResultForMiddle: ResultSet?
         for pattern in patterns {
             let currRes = self.matchPattern(pattern, inString: string, inRange: bounds)
@@ -353,7 +353,7 @@ public class Parser {
     ///     matched successfully
     ///
     /// - returns: The result of the match. Nil if unsuccessful
-    private func matchPattern(pattern: Pattern, inString string: String, inRange bounds: NSRange) -> ResultSet? {
+    private func matchPattern(pattern: ProtoPattern, inString string: String, inRange bounds: NSRange) -> ResultSet? {
         if let match = pattern.match {
             if let resultSet = matchExpression(match, withString: string, inRange: bounds, captures: pattern.captures, baseSelector: pattern.name) {
                 if resultSet.range.length != 0 {
@@ -404,6 +404,10 @@ public class Parser {
             return nil
         }
         
+        if (string as NSString).substringWithRange(bounds).containsString("@interface flickrCDTagsTableViewController ()") {
+//            print("string found")
+        }
+        
         var resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {
             resultSet.addResult(Result(identifier: baseSelector!, range: result.range))
@@ -412,7 +416,7 @@ public class Parser {
         if let captures = captures {
             for index in captures.captureIndexes {
                 if result.numberOfRanges <= Int(index) {
-                    print("Attention unexpected expression: \(regularExpression.pattern)")
+                    print("Attention unexpected capture (\(index) to \(result.numberOfRanges)): \(regularExpression.pattern)")
                     continue
                 }
                 let range = result.rangeAtIndex(Int(index))
