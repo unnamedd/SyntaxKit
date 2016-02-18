@@ -40,7 +40,7 @@ public struct Theme {
     
     // MARK: - Initializers
     
-    public init?(dictionary: [NSObject: AnyObject]) {
+    init?(dictionary: [NSObject: AnyObject]) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
             rawSettings = dictionary["settings"] as? [[String: AnyObject]]

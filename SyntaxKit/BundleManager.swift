@@ -24,7 +24,7 @@ public class BundleManager {
         defaultManager = BundleManager(callback: callback)
     }
     
-    init(callback: BundleLocationCallback) {
+    public init(callback: BundleLocationCallback) {
         self.bundleCallback = callback
     }
     

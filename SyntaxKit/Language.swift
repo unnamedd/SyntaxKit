@@ -10,12 +10,16 @@ import Foundation
 
 public class Language {
     
-    public var UUID: String = ""
-    public var name: String = ""
-    public var scopeName: String = ""
-    var referenceManager = ReferenceManager()
+    public var UUID: String         {return _UUID}
+    public var name: String         {return _name}
+    public var scopeName: String    {return _scopeName}
+    
+    private var _UUID = ""
+    private var _name = ""
+    private var _scopeName = ""
     
     var pattern: Pattern = Pattern()
+    var referenceManager = ReferenceManager()
     var repository = Repository()
     
     static let globalScope = "GLOBAL"
@@ -29,9 +33,9 @@ public class Language {
             array = dictionary["patterns"] as? [[NSObject: AnyObject]]
             else { return nil }
         
-        self.UUID = UUID
-        self.name = name
-        self.scopeName = scopeName
+        _UUID = UUID
+        _name = name
+        _scopeName = scopeName
         self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
         self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, inLanguage: self, withReferenceManager: referenceManager)
         referenceManager.resolveRepositoryReferences(repository)
@@ -40,9 +44,9 @@ public class Language {
     
     func validateWithHelperLanguages(helperLanguages: [Language]) {
         let resolvedProtoLanguage = Language.resolveReferencesBetweenThisAndProtoLanguages(self, andOtherLanguages: helperLanguages)
-        self.UUID = resolvedProtoLanguage.UUID
-        self.name = resolvedProtoLanguage.name
-        self.scopeName = resolvedProtoLanguage.scopeName
+        _UUID = resolvedProtoLanguage.UUID
+        _name = resolvedProtoLanguage.name
+        _scopeName = resolvedProtoLanguage.scopeName
         self.pattern = resolvedProtoLanguage.pattern
     }
     
