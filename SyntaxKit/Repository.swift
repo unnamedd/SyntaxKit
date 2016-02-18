@@ -12,7 +12,7 @@ class Repository {
     
     // MARK: - Properties
     
-    private var entries: [String: ProtoPattern] = [:]
+    private var entries: [String: Pattern] = [:]
     private weak var parentRepository: Repository?
     
     
@@ -28,7 +28,7 @@ class Repository {
             if let containedRepo = value["repository"] as? [String: [NSObject: AnyObject]] {
                  subRepo = Repository(repo: containedRepo, inParent: self, inLanguage: language, withReferenceManager: refman)
             }
-            if let pattern = ProtoPattern(dictionary: value, parent: nil, withRepository: subRepo, withReferenceManager: refman) {
+            if let pattern = Pattern(dictionary: value, parent: nil, withRepository: subRepo, withReferenceManager: refman) {
                 self.entries[key] = pattern
             }
         }
@@ -37,7 +37,7 @@ class Repository {
     
     // MARK: - Accessing Patterns
     
-    subscript(index: String) -> ProtoPattern? {
+    subscript(index: String) -> Pattern? {
         if let resultAtLevel = entries[index] {
             return resultAtLevel
         }

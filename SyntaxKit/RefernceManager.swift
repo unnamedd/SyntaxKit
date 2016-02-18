@@ -22,14 +22,14 @@ class ReferenceManager {
     
     init() {}
     
-    func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: ProtoPattern?) -> [ProtoPattern] {
-        var results: [ProtoPattern] = []
+    func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: Pattern?) -> [Pattern] {
+        var results: [Pattern] = []
         for rawPattern in patterns {
             if let include = rawPattern["include"] as? String {
                 let reference = Include(reference: include, inRepository: repository, parent: caller)
                 self.includes.append(reference)
                 results.append(reference)
-            } else if let pattern = ProtoPattern(dictionary: rawPattern, parent: caller, withRepository: repository, withReferenceManager: self) {
+            } else if let pattern = Pattern(dictionary: rawPattern, parent: caller, withRepository: repository, withReferenceManager: self) {
                 results.append(pattern)
             }
         }
@@ -54,14 +54,9 @@ class ReferenceManager {
             otherLanguages[language.scopeName] = language
         }
         for language in languages {
-            while true {
-                let includes = language.referenceManager.includes
-                if includes.filter({ $0.type != .resolved }) == [] {
-                    break
-                }
-                for include in includes where include.type == .toBase || include.type == .toForeign || include.type == .toForeignRepository {
-                    include.resolveInterLanguageReferences(language, inLanguages: otherLanguages, baseName: basename)
-                }
+            let includes = language.referenceManager.includes
+            for include in includes where include.type == .toBase || include.type == .toForeign || include.type == .toForeignRepository {
+                include.resolveInterLanguageReferences(language, inLanguages: otherLanguages, baseName: basename)
             }
         }
     }
@@ -69,23 +64,23 @@ class ReferenceManager {
     class func copyLanguage(language: Language) -> Language {
         let newLanguage = language
         newLanguage.referenceManager.includes = []
-        newLanguage.patterns = ReferenceManager.copyPatternTree(language.patterns, inLanguage: newLanguage)
+        newLanguage.pattern.subpatterns = ReferenceManager.copyPatternTree(language.pattern.subpatterns, inLanguage: newLanguage)
         return newLanguage
     }
     
-    private class func copyPatternTree(patterns: [ProtoPattern], parent: ProtoPattern? = nil, foundPatterns: [ProtoPattern: ProtoPattern] = [:], inLanguage language: Language) -> [ProtoPattern] {
+    private class func copyPatternTree(patterns: [Pattern], parent: Pattern? = nil, foundPatterns: [Pattern: Pattern] = [:], inLanguage language: Language) -> [Pattern] {
         var newFoundPatterns = foundPatterns
-        var result: [ProtoPattern] = []
+        var result: [Pattern] = []
         for pattern in patterns {
             if let visitedPattern = foundPatterns[pattern] {
                 result.append(visitedPattern)
             } else {
-                let newPattern: ProtoPattern
+                let newPattern: Pattern
                 if pattern as? Include != nil && (pattern as! Include).type != .resolved {
                     newPattern = Include(include: pattern as! Include, parent: parent)
                     language.referenceManager.includes.append(newPattern as! Include)
                 } else {
-                    newPattern = ProtoPattern(pattern: pattern, parent: parent)
+                    newPattern = Pattern(pattern: pattern, parent: parent)
                 }
                 newFoundPatterns[pattern] = newPattern
                 newPattern.subpatterns = copyPatternTree(pattern.subpatterns, parent: newPattern, foundPatterns: newFoundPatterns, inLanguage: language)

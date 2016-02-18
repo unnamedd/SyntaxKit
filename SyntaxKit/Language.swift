@@ -15,7 +15,7 @@ public class Language {
     public var scopeName: String = ""
     var referenceManager = ReferenceManager()
     
-    var patterns: [ProtoPattern] = []
+    var pattern: Pattern = Pattern()
     var repository = Repository()
     
     static let globalScope = "GLOBAL"
@@ -32,7 +32,7 @@ public class Language {
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
-        self.patterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
+        self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
         self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, inLanguage: self, withReferenceManager: referenceManager)
         referenceManager.resolveRepositoryReferences(repository)
         referenceManager.resolveSelfReferences(self)
@@ -43,7 +43,7 @@ public class Language {
         self.UUID = resolvedProtoLanguage.UUID
         self.name = resolvedProtoLanguage.name
         self.scopeName = resolvedProtoLanguage.scopeName
-        self.patterns = resolvedProtoLanguage.patterns
+        self.pattern = resolvedProtoLanguage.pattern
     }
     
     private class func resolveReferencesBetweenThisAndProtoLanguages(thisLanguage: Language, andOtherLanguages otherLanguages: [Language]) -> Language {
