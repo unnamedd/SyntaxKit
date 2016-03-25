@@ -133,8 +133,9 @@ public class Parser {
     ///                         On nil the entire string will be parsed.
     /// - parameter callback:   The callback to call on every match of a
     ///                         pattern identifier of the language
-    public func parse(string: String, var inRange bounds: NSRange? = nil, match callback: Callback) {
+    public func parse(string: String, inRange range: NSRange? = nil, match callback: Callback) {
         var endScope: Scope? = nil
+        var bounds = range
         if bounds == nil {
             bounds = NSRange(location: 0, length: (string as NSString).length)
             scopesString = ScopedString(string: string)
@@ -303,7 +304,8 @@ public class Parser {
                 }
             }
             
-            lineStart = lineEnd++
+            lineStart = lineEnd
+            lineEnd += 1
         }
         
         result.extendWithRange(NSRange(location: startIndex, length: stop - startIndex))

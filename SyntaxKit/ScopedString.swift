@@ -119,7 +119,7 @@ class ScopedString: NSObject, NSCopying {
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
-        for var level = levels.count - 1; level >= 0; level-- {
+        for level in (levels.count - 1).stride(through: 0, by: -1) {
             if findScopeIntersectionWithRange(scope.range, atLevel: levels[level]) == nil {
                 levels[level].insert(scope, atIndex: self.insertionPointForRange(scope.range, atLevel: levels[level]))
                 added = true
@@ -133,7 +133,7 @@ class ScopedString: NSObject, NSCopying {
     
     func topLevelScopeAtIndex(index: Int) -> Scope {
         let indexRange = NSRange(location: index, length: 1)
-        for var i = levels.count - 1; i >= 0; i-- {
+        for i in (levels.count - 1).stride(through: 0, by: -1) {
             let level = levels[i]
             if let theScope = findScopeIntersectionWithRange(indexRange, atLevel: level) {
                 return theScope
@@ -147,7 +147,7 @@ class ScopedString: NSObject, NSCopying {
         
         var foundScope = false
         let indexRange = NSRange(location: index, length: 1)
-        for var i = levels.count - 1; i >= 0; i-- {
+        for i in (levels.count - 1).stride(through: 0, by: -1) {
             let level = levels[i]
             let theScope = findScopeIntersectionWithRange(indexRange, atLevel: level)
             if theScope != nil {
@@ -162,7 +162,7 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func levelForScope(scope: Scope) -> Int {
-        for var i = 0; i < levels.count; i++ {
+        for i in 0 ..< levels.count {
             let level = levels[i]
             for currentScope in level {
                 if scope == currentScope {
@@ -179,8 +179,8 @@ class ScopedString: NSObject, NSCopying {
     func removeScopesInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
         
-        for var level = levels.count-1; level >= 0; level-- {
-            for var scope = levels[level].count-1; scope >= 0; scope-- {
+        for level in (levels.count - 1).stride(through: 0, by: -1) {
+            for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 let theScope = levels[level][scope]
                 if NSIntersectionRange(theScope.range, range).length == theScope.range.length {
                     levels[level].removeAtIndex(scope)
@@ -213,8 +213,8 @@ class ScopedString: NSObject, NSCopying {
         let mutableString = (self.underlyingString as NSString).mutableCopy() as! NSMutableString
         mutableString.deleteCharactersInRange(range)
         self.underlyingString = mutableString.copy() as! String
-        for var level = levels.count-1; level >= 0; level-- {
-            for var scope = levels[level].count-1; scope >= 0 ; scope-- {
+        for level in (levels.count - 1).stride(through: 0, by: -1) {
+            for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 var theRange = levels[level][scope].range
                 theRange.subtractRange(range)
                 if theRange.isEmpty() {
@@ -247,7 +247,7 @@ class ScopedString: NSObject, NSCopying {
             if range.location < scope.range.location {
                 return i
             }
-            i++
+            i += 1
         }
         return i
     }
