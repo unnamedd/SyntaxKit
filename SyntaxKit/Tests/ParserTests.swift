@@ -23,17 +23,19 @@ class ParserTests: XCTestCase {
         var punctuationBegin: NSRange?
         var punctuationEnd: NSRange?
         
-        parser.parse("title: \"Hello World\"\n") { scope, range in
-            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
-                stringQuoted = range
-            }
-            
-            if punctuationBegin == nil && scope.hasPrefix("punctuation.definition.string.begin") {
-                punctuationBegin = range
-            }
-            
-            if punctuationEnd == nil && scope.hasPrefix("punctuation.definition.string.end") {
-                punctuationEnd = range
+        parser.parse("title: \"Hello World\"\n") { (results: [(scope: String, range: NSRange)]) in
+            for result in results {
+                if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
+                    stringQuoted = result.range
+                }
+                
+                if punctuationBegin == nil && result.scope.hasPrefix("punctuation.definition.string.begin") {
+                    punctuationBegin = result.range
+                }
+                
+                if punctuationEnd == nil && result.scope.hasPrefix("punctuation.definition.string.end") {
+                    punctuationEnd = result.range
+                }
             }
         }
         
@@ -45,9 +47,11 @@ class ParserTests: XCTestCase {
     func testParsingBeginEndCrap() {
         var stringQuoted: NSRange?
         
-        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { scope, range in
-            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
-                stringQuoted = range
+        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (results: [(scope: String, range: NSRange)]) in
+            for result in results {
+                if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
+                    stringQuoted = result.range
+                }
             }
         }
         
@@ -55,13 +59,13 @@ class ParserTests: XCTestCase {
     }
     
     func testParsingGarbage() {
-        parser.parse("") { _, _ in }
-        parser.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _, _ in }
+        parser.parse("") { _ in }
+        parser.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _ in }
     }
     
     func testRuby() {
         let parser = Parser(language: language("Ruby"))
         let input = fixture("test.rb", "txt")
-        parser.parse(input, match: { _, _ in return })
+        parser.parse(input, match: { _ in return })
     }
 }

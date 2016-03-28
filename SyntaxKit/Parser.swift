@@ -11,8 +11,9 @@
 //  for the range it should be reparsed on the given change. This range can then 
 //  be passed to parsed.
 //
-//  Created by Sam Soffes on 9/19/14. Edited by Alexander Hedges
-//  Copyright © 2014-2015 Sam Soffes. Copyright (C) 2016 Alexander Hedges.
+//  Created by Sam Soffes on 9/19/14.
+//  Copyright © 2014-2015 Sam Soffes. 
+//  Copyright (c) 2016 Alexander Hedges.
 //  All rights reserved.
 //
 
@@ -22,7 +23,7 @@ public class Parser {
     
     // MARK: - Types
     
-    public typealias Callback = (scope: String, range: NSRange) -> Void
+    public typealias Callback = (results: [(scope: String, range: NSRange)]) -> Void
     
     
     // MARK: - Properties
@@ -48,6 +49,8 @@ public class Parser {
     private var diff: (String?, NSRange)?
     
     
+    private var aborted = false
+    
     // MARK: - Initializers
     
     public init(language: Language) {
@@ -56,6 +59,10 @@ public class Parser {
     
     
     // MARK: - Public
+    
+    public func abortCurrentParsing() {
+        aborted = true
+    }
     
     //  Algorithmic notes:
     //  If change occurred in a block reparse the lines in which the change
@@ -164,7 +171,10 @@ public class Parser {
         
         while startIndex < endIndex {
             let endPattern = endScope?.attribute as! Pattern?
-            let results = self.matchPatterns(endPattern?.subpatterns ?? language.pattern.subpatterns, withString: string, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex)
+            guard let results = self.matchPatterns(endPattern?.subpatterns ?? language.pattern.subpatterns, withString: string, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex) else {
+                aborted = false
+                return
+            }
             
             if endScope != nil {
                 allResults.addResult(Result(identifier: endScope!.patternIdentifier, range: results.range))
@@ -270,7 +280,8 @@ public class Parser {
     ///
     /// - returns:  The result set containing the lexical scope names with range
     ///             information. May exceed stopIndex.
-    private func matchPatterns(patterns: [Pattern], withString string: String, withEndPatternFromPattern endPattern: Pattern?, startingAtIndex startIndex: Int, stopIndex stop: Int) -> ResultSet {
+    ///             Only returns nil if the operation was aborted.
+    private func matchPatterns(patterns: [Pattern], withString string: String, withEndPatternFromPattern endPattern: Pattern?, startingAtIndex startIndex: Int, stopIndex stop: Int) -> ResultSet? {
         assert(endPattern == nil || endPattern!.end != nil)
         
         let s: NSString = string
@@ -284,6 +295,9 @@ public class Parser {
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
             
             while range.length > 0 {
+                if aborted {
+                    return nil
+                }
                 let bestResultForMiddle = findBestPatternInPatterns(patterns, inString: string, inRange: range)
                 
                 if endPattern != nil {
@@ -368,7 +382,9 @@ public class Parser {
             }
             
             let newLocation = NSMaxRange(beginResults.range)
-            let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation, stopIndex: (string as NSString).length)
+            guard let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation, stopIndex: (string as NSString).length) else {
+                return nil
+            }
             var result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
                 result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
@@ -445,13 +461,16 @@ public class Parser {
             return
         }
         
-        callback(scope: Language.globalScope, range: results.range)
+        var cumulativeResults: [(scope: String, range: NSRange)] = []
+        
+        cumulativeResults.append((Language.globalScope, results.range))
         for result in results.results where result.range.length > 0 {
             if result.attribute != nil {
                 self.scopesString?.addScopeAtBottom(result as Scope)
             } else if result.patternIdentifier != "" {
-                callback(scope: result.patternIdentifier, range: result.range)
+                cumulativeResults.append((result.patternIdentifier, result.range))
             }
         }
+        callback(results: cumulativeResults)
     }
 }

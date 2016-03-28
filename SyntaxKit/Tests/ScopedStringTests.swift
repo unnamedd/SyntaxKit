@@ -3,7 +3,7 @@
 //  SyntaxKit
 //
 //  Created by Alexander Hedges on 30/01/16.
-//  Copyright © 2016 Sam Soffes. All rights reserved.
+//  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
 import XCTest
