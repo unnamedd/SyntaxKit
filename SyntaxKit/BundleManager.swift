@@ -6,8 +6,6 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-import UIKit
-
 public class BundleManager {
     
     // MARK: - Types

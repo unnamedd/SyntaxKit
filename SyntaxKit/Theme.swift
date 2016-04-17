@@ -12,6 +12,8 @@ import Foundation
 
 #if os(iOS) || os(watchOS)
     import UIKit
+#else
+    import AppKit
 #endif
 
 public typealias Attributes = [String: AnyObject]
@@ -24,19 +26,19 @@ public struct Theme {
     public let name: String
     public let attributes: [String: Attributes]
     
-    public var backgroundColor: UIColor {
-        if let color = attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? UIColor {
+    public var backgroundColor: Color {
+        if let color = attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? Color {
             return color
         } else {
-            return UIColor.whiteColor()
+            return Color.whiteColor()
         }
     }
     
-    public var foregroundColor: UIColor {
-        if let color = attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? UIColor {
+    public var foregroundColor: Color {
+        if let color = attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color {
             return color
         } else {
-            return UIColor.blackColor()
+            return Color.blackColor()
         }
     }
     

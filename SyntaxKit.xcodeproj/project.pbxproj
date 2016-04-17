@@ -58,6 +58,9 @@
 		8C10B6441CC38E5200740E00 /* ParsingOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C10B6431CC38E5200740E00 /* ParsingOperation.swift */; };
 		8C10B6451CC38E5200740E00 /* ParsingOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C10B6431CC38E5200740E00 /* ParsingOperation.swift */; };
 		8C10B6461CC38E5200740E00 /* ParsingOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C10B6431CC38E5200740E00 /* ParsingOperation.swift */; };
+		8C10B6471CC3937F00740E00 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C08C3C61C36FD6D00D8548F /* Color.swift */; };
+		8C10B6481CC3938100740E00 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C08C3C61C36FD6D00D8548F /* Color.swift */; };
+		8C10B6491CC393E700740E00 /* ScopedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9003321C5C0B0D00CBA5B0 /* ScopedString.swift */; };
 		8C71A05D1C59587700041EC6 /* IncrementalParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C71A05C1C59587700041EC6 /* IncrementalParsingTests.swift */; };
 		8C71A05E1C59587700041EC6 /* IncrementalParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C71A05C1C59587700041EC6 /* IncrementalParsingTests.swift */; };
 		8C9003331C5C0B0D00CBA5B0 /* ScopedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9003321C5C0B0D00CBA5B0 /* ScopedString.swift */; };
@@ -571,6 +574,7 @@
 				8CEEC0DE1C411C8600BF3E85 /* RefernceManager.swift in Sources */,
 				8CEEC0E21C411F9700BF3E85 /* Repository.swift in Sources */,
 				2119899F1B2EC38B00F0D786 /* ResultSet.swift in Sources */,
+				8C10B6471CC3937F00740E00 /* Color.swift in Sources */,
 				2119899D1B2EC38B00F0D786 /* Pattern.swift in Sources */,
 				211989A11B2EC38B00F0D786 /* Theme.swift in Sources */,
 				2119899E1B2EC38B00F0D786 /* Result.swift in Sources */,
@@ -609,6 +613,8 @@
 				8C10B6461CC38E5200740E00 /* ParsingOperation.swift in Sources */,
 				8CEEC0E41C411F9700BF3E85 /* Repository.swift in Sources */,
 				2198CEDA1B36D5DE00BD463F /* ResultSet.swift in Sources */,
+				8C10B6481CC3938100740E00 /* Color.swift in Sources */,
+				8C10B6491CC393E700740E00 /* ScopedString.swift in Sources */,
 				2198CED81B36D5DE00BD463F /* Pattern.swift in Sources */,
 				2198CEDB1B36D5DE00BD463F /* Theme.swift in Sources */,
 				2198CED91B36D5DE00BD463F /* Result.swift in Sources */,
