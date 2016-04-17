@@ -57,6 +57,16 @@ class ScopedStringTests: XCTestCase {
         XCTAssert(newScopedString.underlyingString == "Tesssssst")
         XCTAssert(newScopedString.numberOfScopes() == 2)
         
+        let newScope3 = Scope(identifier: "zeroLengthScope1", range: NSRange(location: 0, length: 0), attribute: nil)
+        newScopedString.addScopeAtTop(newScope3)
+        let newScope4 = Scope(identifier: "zeroLengthScope2", range: NSRange(location: 3, length: 0), attribute: nil)
+        newScopedString.addScopeAtTop(newScope4)
+        XCTAssert(newScopedString.numberOfScopes() == 4)
+        XCTAssert(newScopedString.topLevelScopeAtIndex(0).patternIdentifier == "zeroLengthScope1")
+        
+        newScopedString.removeScopesInRange(NSRange(location: 0, length: 1))
+        XCTAssert(newScopedString.numberOfScopes() == 3)
+        
         XCTAssert(newScopedString.topLevelScopeAtIndex(2).range == NSRange(location: 1, length: 8))
     }
     

@@ -10,7 +10,7 @@ public class AttributedParser: Parser {
     
     // MARK: - Types
     
-    public typealias AttributedCallback = [(scope: String, range: NSRange, attributes: Attributes?)] -> Void
+    public typealias AttributedCallback = (scope: String, range: NSRange, attributes: Attributes?) -> Void
     
     
     // MARK: - Properties
@@ -29,19 +29,17 @@ public class AttributedParser: Parser {
     // MARK: - Parsing
     
     public func parse(string: String, inRange bounds: NSRange? = nil, match callback: AttributedCallback) {
-        parse(string, inRange: bounds) { (results: [(scope: String, range: NSRange)]) in
-            callback(results.map {($0, $1, self.attributesForScope($0))})
+        parse(string, inRange: bounds) { scope, range in
+            callback(scope: scope, range: range, attributes: self.attributesForScope(scope))
         }
     }
     
     public func attributedStringForString(string: String, baseAttributes: Attributes? = nil) -> NSAttributedString {
         let output = NSMutableAttributedString(string: string, attributes: baseAttributes)
         output.beginEditing()
-        parse(string) { (results: [(scope: String, range: NSRange, attributes: Attributes?)]) in
-            for result in results {
-                if let attributes = result.attributes {
-                    output.addAttributes(attributes, range: result.range)
-                }
+        parse(string) { _, range, attributes in
+            if let attributes = attributes {
+                output.addAttributes(attributes, range: range)
             }
         }
         output.endEditing()

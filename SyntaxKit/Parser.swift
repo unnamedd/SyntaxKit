@@ -23,7 +23,7 @@ public class Parser {
     
     // MARK: - Types
     
-    public typealias Callback = (results: [(scope: String, range: NSRange)]) -> Void
+    public typealias Callback = (scope: String, range: NSRange) -> Void
     
     
     // MARK: - Properties
@@ -60,7 +60,7 @@ public class Parser {
     
     // MARK: - Public
     
-    public func abortCurrentParsing() {
+    func abortCurrentParsing() {
         aborted = true
     }
     
@@ -199,6 +199,11 @@ public class Parser {
             }
         }
         scopesString!.removeScopesInRange(allResults.range)
+        if aborted {
+            aborted = false
+            diff = nil
+            return
+        }
         self.applyResults(allResults, callback: callback)
         diff = nil
     }
@@ -461,16 +466,13 @@ public class Parser {
             return
         }
         
-        var cumulativeResults: [(scope: String, range: NSRange)] = []
-        
-        cumulativeResults.append((Language.globalScope, results.range))
+        callback(scope: Language.globalScope, range: results.range)
         for result in results.results where result.range.length > 0 {
             if result.attribute != nil {
                 self.scopesString?.addScopeAtBottom(result as Scope)
             } else if result.patternIdentifier != "" {
-                cumulativeResults.append((result.patternIdentifier, result.range))
+                callback(scope: result.patternIdentifier, range: result.range)
             }
         }
-        callback(results: cumulativeResults)
     }
 }

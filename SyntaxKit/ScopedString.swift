@@ -37,6 +37,14 @@ extension NSRange {
         return index >= location && index <= location + length
     }
     
+    func partiallyContainsRange(otherRange: NSRange) -> Bool {
+        return otherRange.location + otherRange.length >= location && otherRange.location <= location + length
+    }
+    
+    func entirelyContainsRange(otherRange: NSRange) -> Bool {
+        return location <= otherRange.location && location + length >= otherRange.location + otherRange.length
+    }
+    
     mutating func subtractRange(range: NSRange) {
         length -= NSIntersectionRange(range, NSRange(location: location, length: length)).length
         if (range.location < self.location) {
@@ -132,7 +140,7 @@ class ScopedString: NSObject, NSCopying {
     }
     
     func topLevelScopeAtIndex(index: Int) -> Scope {
-        let indexRange = NSRange(location: index, length: 1)
+        let indexRange = NSRange(location: index, length: 0)
         for i in (levels.count - 1).stride(through: 0, by: -1) {
             let level = levels[i]
             if let theScope = findScopeIntersectionWithRange(indexRange, atLevel: level) {
@@ -146,7 +154,7 @@ class ScopedString: NSObject, NSCopying {
         assert(index >= 0 && index <= baseScope.range.length)
         
         var foundScope = false
-        let indexRange = NSRange(location: index, length: 1)
+        let indexRange = NSRange(location: index, length: 0)
         for i in (levels.count - 1).stride(through: 0, by: -1) {
             let level = levels[i]
             let theScope = findScopeIntersectionWithRange(indexRange, atLevel: level)
@@ -182,7 +190,7 @@ class ScopedString: NSObject, NSCopying {
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 let theScope = levels[level][scope]
-                if NSIntersectionRange(theScope.range, range).length == theScope.range.length {
+                if range.entirelyContainsRange(theScope.range) {
                     levels[level].removeAtIndex(scope)
                 }
             }
@@ -234,7 +242,7 @@ class ScopedString: NSObject, NSCopying {
     
     private func findScopeIntersectionWithRange(range: NSRange, atLevel level: [Scope]) -> Scope? {
         for scope in level {
-            if NSIntersectionRange(scope.range, range).length != 0 {
+            if scope.range.partiallyContainsRange(range) {
                 return scope
             }
         }
