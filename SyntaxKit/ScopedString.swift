@@ -34,11 +34,11 @@ extension NSRange {
     }
     
     func containsIndex(index: Int) -> Bool {
-        return index >= location && index <= location + length
+        return length == 0 && index == location || index >= location && index < location + length
     }
     
     func partiallyContainsRange(otherRange: NSRange) -> Bool {
-        return otherRange.location + otherRange.length >= location && otherRange.location <= location + length
+        return otherRange.location + otherRange.length >= location && otherRange.location < location + length
     }
     
     func entirelyContainsRange(otherRange: NSRange) -> Bool {

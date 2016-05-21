@@ -23,8 +23,7 @@ class ParserTests: XCTestCase {
         var punctuationBegin: NSRange?
         var punctuationEnd: NSRange?
         
-        parser.parse("title: \"Hello World\"\n") { (results: [(scope: String, range: NSRange)]) in
-            for result in results {
+        parser.parse("title: \"Hello World\"\n") { (result: (scope: String, range: NSRange)) in
                 if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
                     stringQuoted = result.range
                 }
@@ -36,7 +35,6 @@ class ParserTests: XCTestCase {
                 if punctuationEnd == nil && result.scope.hasPrefix("punctuation.definition.string.end") {
                     punctuationEnd = result.range
                 }
-            }
         }
         
         XCTAssertEqual(NSMakeRange(7, 13), stringQuoted)
@@ -47,12 +45,10 @@ class ParserTests: XCTestCase {
     func testParsingBeginEndCrap() {
         var stringQuoted: NSRange?
         
-        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (results: [(scope: String, range: NSRange)]) in
-            for result in results {
+        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (result: (scope: String, range: NSRange)) in
                 if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
                     stringQuoted = result.range
                 }
-            }
         }
         
         XCTAssertEqual(NSMakeRange(39, 4), stringQuoted)
