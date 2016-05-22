@@ -107,7 +107,7 @@ class ScopedString: NSObject, NSCopying {
         return index >= 0 && index <= baseScope.range.length
     }
     
-    func addScopeAtTop(scope: Scope) {
+    func addScopeAtBottom(scope: Scope) {
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
@@ -123,7 +123,7 @@ class ScopedString: NSObject, NSCopying {
         }
     }
     
-    func addScopeAtBottom(scope: Scope) {
+    func addScopeAtTop(scope: Scope) {
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
@@ -235,6 +235,34 @@ class ScopedString: NSObject, NSCopying {
                 levels.removeAtIndex(level)
             }
         }
+    }
+    
+    func prettyPrint() {
+        var printableUnderlyingString = underlyingString.stringByReplacingOccurrencesOfString("\n", withString: "¬")
+        printableUnderlyingString = printableUnderlyingString.stringByReplacingOccurrencesOfString("\t", withString: "»")
+        print(printableUnderlyingString)
+        for level in (levels.count - 1).stride(through: 0, by: -1) {
+            var levelString = String(count: (underlyingString as NSString).length, repeatedValue: " " as Character)
+            for pattern in levels[level] {
+                let range = pattern.range
+                if range.length == 0 {
+                    assert(false)
+                } else if range.length == 1 {
+                    levelString = (levelString as NSString).stringByReplacingCharactersInRange(range, withString: "|")
+                } else {
+                    let dashes = String(count: range.length - 2, repeatedValue: "-" as Character)
+                    levelString = (levelString as NSString).stringByReplacingCharactersInRange(range, withString: "[\(dashes)]")
+                }
+            }
+            print(levelString)
+        }
+        var numberString = ""
+        for i in 0...(underlyingString as NSString).length/10 {
+            let numDigits = ("\(i*10)" as NSString).length
+            let dashes = String(count: 9 - numDigits, repeatedValue: "-" as Character)
+            numberString += "\(i*10)\(dashes)|"
+        }
+        print(numberString)
     }
     
     

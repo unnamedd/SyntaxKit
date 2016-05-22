@@ -267,7 +267,7 @@ public class Parser {
             if pattern.name != nil {
                 result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
             }
-            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: beginResults.range.location + beginResults.range.length, length: result.range.length - beginResults.range.length), attribute: pattern))
+            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: beginResults.range.location + beginResults.range.length, length: NSUnionRange(beginResults.range, endResults.range).length - beginResults.range.length), attribute: pattern))
             result.addResults(beginResults)
             result.addResults(endResults)
             return result
