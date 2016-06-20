@@ -197,7 +197,6 @@ public class Parser {
             }
             
             lineStart = lineEnd
-            lineEnd += 1
         }
         
         result.extendWithRange(NSRange(location: startIndex, length: stop - startIndex))
