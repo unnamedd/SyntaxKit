@@ -176,19 +176,23 @@ public class Parser {
                 if aborted {
                     return nil
                 }
-                let bestResultForMiddle = findBestPatternInPatterns(patterns, inString: string, inRange: range)
+                let bestPatternForMiddle = findBestPatternInPatterns(patterns, inString: string, inRange: range)
                 
                 if endPattern != nil {
                     let endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
-                    if endMatchResult != nil && (bestResultForMiddle == nil || endMatchResult!.range.location < bestResultForMiddle!.range.location) {
+                    if endMatchResult != nil && (bestPatternForMiddle == nil || endMatchResult!.range.location < bestPatternForMiddle!.1.location) {
                         result.addResults(endMatchResult!)
                         return result
                     }
                 }
                 
-                if bestResultForMiddle != nil && bestResultForMiddle!.range.length != 0 {
-                    result.addResults(bestResultForMiddle!)
-                    let newStart = NSMaxRange(bestResultForMiddle!.range)
+                if bestPatternForMiddle != nil {
+                    let resultForMiddle = matchPattern(bestPatternForMiddle!.0, inString: string, inRange: range)!
+                    if resultForMiddle.range.length == 0 {
+                        break
+                    }
+                    result.addResults(resultForMiddle)
+                    let newStart = NSMaxRange(resultForMiddle.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
                     lineEnd = max(lineEnd, newStart)
                 } else {
@@ -219,17 +223,36 @@ public class Parser {
     /// - returns:  The results. nil if nothing could be matched and an empty
     ///             set if something could be matched but it doesn't have any
     ///             information associated with the match.
-    private func findBestPatternInPatterns(patterns: [Pattern], inString string: String, inRange bounds: NSRange) -> ResultSet? {
-        var bestResultForMiddle: ResultSet?
+    private func findBestPatternInPatterns(patterns: [Pattern], inString string: String, inRange bounds: NSRange) -> (Pattern, NSRange)? {
+        var interestingBounds = bounds
+        var bestResult: (Pattern, NSRange)?
         for pattern in patterns {
-            let currRes = self.matchPattern(pattern, inString: string, inRange: bounds)
-            if currRes?.range.location == bounds.location {
-                return currRes
-            } else if bestResultForMiddle == nil || currRes != nil && currRes!.range.location < bestResultForMiddle!.range.location {
-                bestResultForMiddle = currRes
+            let currentMatch = self.firstMatchRangeOfPattern(pattern, inString: string, inRange: bounds)
+            if currentMatch?.1.location == bounds.location {
+                return currentMatch
+            } else if currentMatch != nil && (bestResult == nil || currentMatch != nil && currentMatch!.1.location < bestResult!.1.location) {
+                bestResult = currentMatch
+                interestingBounds.length = currentMatch!.1.location - interestingBounds.location
             }
         }
-        return bestResultForMiddle
+        return bestResult
+    }
+    
+    private func firstMatchRangeOfPattern(pattern: Pattern, inString string: String, inRange bounds: NSRange) -> (Pattern, NSRange)? {
+        if let match = pattern.match {
+            if let resultSet = matchExpression(match, withString: string, inRange: bounds, captures: pattern.captures, baseSelector: pattern.name) {
+                if resultSet.range.length != 0 {
+                    return (pattern, resultSet.range)
+                }
+            }
+        } else if let begin = pattern.begin {
+            if let beginResults = matchExpression(begin, withString: string, inRange: bounds, captures: pattern.beginCaptures) {
+                return (pattern, beginResults.range)
+            }
+        } else if pattern.subpatterns.count >= 1 {
+            return findBestPatternInPatterns(pattern.subpatterns, inString: string, inRange: bounds)
+        }
+        return nil
     }
     
     //  Implementation note:
@@ -269,12 +292,6 @@ public class Parser {
             result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: beginResults.range.location + beginResults.range.length, length: NSUnionRange(beginResults.range, endResults.range).length - beginResults.range.length), attribute: pattern))
             result.addResults(beginResults)
             result.addResults(endResults)
-            return result
-        } else if pattern.subpatterns.count >= 1 {
-            var result = findBestPatternInPatterns(pattern.subpatterns, inString: string, inRange: bounds)
-            if pattern.name != nil {
-                result?.addResult(Result(identifier: pattern.name!, range: result!.range))
-            }
             return result
         }
         return nil
