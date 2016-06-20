@@ -187,12 +187,12 @@ public class Parser {
                 }
                 
                 if bestMatchForMiddle != nil {
-                    let resultForMiddle = matchPattern(bestMatchForMiddle!.pattern, inString: string, inRange: range)!
-                    if resultForMiddle.range.length == 0 {
+                    let resultForMiddle = matchPattern(bestMatchForMiddle!.pattern, inString: string, inRange: range)
+                    if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
                         break
                     }
-                    result.addResults(resultForMiddle)
-                    let newStart = NSMaxRange(resultForMiddle.range)
+                    result.addResults(resultForMiddle!)
+                    let newStart = NSMaxRange(resultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
                     lineEnd = max(lineEnd, newStart)
                 } else {
@@ -285,6 +285,7 @@ public class Parser {
             guard let endResults = matchPatterns(pattern.subpatterns, withString: string, withEndPatternFromPattern: pattern, startingAtIndex: newLocation, stopIndex: (string as NSString).length) else {
                 return nil
             }
+            
             var result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
                 result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
