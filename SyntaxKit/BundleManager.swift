@@ -19,8 +19,6 @@ public class BundleManager {
     
     private var bundleCallback: BundleLocationCallback
     private var dependencies: [Language] = []
-//    private var cachedLanguages: [String: Language] = [:]
-//    private var cachedUnresolvedLanguages: [String: Language] = [:]
     private var cachedThemes: [String: Theme] = [:]
     
     
@@ -38,23 +36,14 @@ public class BundleManager {
     // MARK: - Public
     
     public func languageWithIdentifier(identifier: String) -> Language? {
-//        if let language = self.cachedLanguages[identifier] {
-//            return language
-//        }
-        
         self.dependencies = []
         var language = self.getUnvalidatedLanguageWithIdentifier(identifier)!
         language.validateWithHelperLanguages(self.dependencies)
         
-//        self.cachedLanguages[identifier] = language
         return language
     }
     
     public func themeWithIdentifier(identifier: String) -> Theme? {
-//        if let theme = cachedThemes[identifier] {
-//            return theme
-//        }
-        
         guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: false),
             plist = NSDictionary(contentsOfURL: dictURL),
             newTheme = Theme(dictionary: plist as [NSObject : AnyObject]) else {
@@ -69,14 +58,6 @@ public class BundleManager {
     // MARK: - Internal Interface
     
     func getUnvalidatedLanguageWithIdentifier(identifier: String) -> Language? {
-        print("Requested Unvalidated Language: \(identifier)")
-//        if let language = cachedUnresolvedLanguages[identifier] {
-//            if self.dependencies.indexOf({$0.UUID == language.UUID}) == nil {
-//                self.dependencies.append(language)
-//            }
-//            return language
-//        }
-        
         guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
             plist = NSDictionary(contentsOfURL: dictURL),
             newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
@@ -84,7 +65,6 @@ public class BundleManager {
         }
         
         self.dependencies.append(newLanguage)
-//        cachedUnresolvedLanguages[identifier] = newLanguage
         return newLanguage
     }
 }
