@@ -15,17 +15,24 @@ public class BundleManager {
     
     // MARK: - Properties
     
+    public var languageCaching = true
+    
     public static var defaultManager: BundleManager?
     
     private var bundleCallback: BundleLocationCallback
     private var dependencies: [Language] = []
+    private var cachedLanguages: [String: Language] = [:]
     private var cachedThemes: [String: Theme] = [:]
     
     
     // MARK: - Initializers
     
     public class func initializeDefaultManagerWithLocationCallback(callback: BundleLocationCallback) {
-        defaultManager = BundleManager(callback: callback)
+        if defaultManager == nil {
+            defaultManager = BundleManager(callback: callback)
+        } else {
+            defaultManager!.bundleCallback = callback
+        }
     }
     
     init(callback: BundleLocationCallback) {
@@ -36,14 +43,27 @@ public class BundleManager {
     // MARK: - Public
     
     public func languageWithIdentifier(identifier: String) -> Language? {
+        if let language = self.cachedLanguages[identifier] {
+            return language
+        }
+        
         self.dependencies = []
         var language = self.getUnvalidatedLanguageWithIdentifier(identifier)!
         language.validateWithHelperLanguages(self.dependencies)
         
+        if languageCaching {
+            self.cachedLanguages[identifier] = language
+        }
+        
+        self.dependencies = []
         return language
     }
     
     public func themeWithIdentifier(identifier: String) -> Theme? {
+        if let theme = cachedThemes[identifier] {
+            return theme
+        }
+        
         guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: false),
             plist = NSDictionary(contentsOfURL: dictURL),
             newTheme = Theme(dictionary: plist as [NSObject : AnyObject]) else {
@@ -54,17 +74,27 @@ public class BundleManager {
         return newTheme
     }
     
+    public func emptyLanguageCache() {
+        self.cachedLanguages = [:]
+    }
+    
     
     // MARK: - Internal Interface
     
     func getUnvalidatedLanguageWithIdentifier(identifier: String) -> Language? {
-        guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
-            plist = NSDictionary(contentsOfURL: dictURL),
-            newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
-                return nil
-        }
+        let indexOfStoredLanguage = self.dependencies.indexOf{ (lang: Language) in lang.scopeName == identifier }
         
-        self.dependencies.append(newLanguage)
-        return newLanguage
+        if indexOfStoredLanguage != nil {
+            return self.dependencies[indexOfStoredLanguage!]
+        } else {
+            guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
+                plist = NSDictionary(contentsOfURL: dictURL),
+                newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
+                    return nil
+            }
+            
+            self.dependencies.append(newLanguage)
+            return newLanguage
+        }
     }
 }

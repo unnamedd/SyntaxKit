@@ -49,10 +49,6 @@ public struct Language {
     ///     references to resolve agains. This should at least contain the 
     ///     language itself.
     mutating func validateWithHelperLanguages(helperLanguages: [Language]) {
-        let newLanguage = self
-        let copyOfHelperLanguages = helperLanguages.map { ReferenceManager.copyLanguage($0) }
-        
-        ReferenceManager.resolveExternalReferencesBetweenLanguages(copyOfHelperLanguages, basename: self.scopeName)
-        self.pattern.subpatterns = newLanguage.pattern.subpatterns
+        ReferenceManager.resolveExternalReferencesBetweenLanguages(helperLanguages, basename: self.scopeName)
     }
 }

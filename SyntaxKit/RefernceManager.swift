@@ -57,36 +57,4 @@ class ReferenceManager {
             }
         }
     }
-    
-    
-    // MARK: - Language Copying
-    
-    class func copyLanguage(language: Language) -> Language {
-        let newLanguage = language
-        newLanguage.referenceManager.includes = []
-        newLanguage.pattern.subpatterns = copyPatternsRecursively(language.pattern.subpatterns, inLanguage: newLanguage)
-        return newLanguage
-    }
-    
-    private class func copyPatternsRecursively(patterns: [Pattern], parent: Pattern? = nil, foundPatterns: [Pattern: Pattern] = [:], inLanguage language: Language) -> [Pattern] {
-        var newFoundPatterns = foundPatterns
-        var result: [Pattern] = []
-        for pattern in patterns {
-            if let visitedPattern = foundPatterns[pattern] {
-                result.append(visitedPattern)
-            } else {
-                let newPattern: Pattern
-                if pattern as? Include != nil && (pattern as! Include).type != .resolved {
-                    newPattern = Include(include: pattern as! Include, parent: parent)
-                    language.referenceManager.includes.append(newPattern as! Include)
-                } else {
-                    newPattern = Pattern(pattern: pattern, parent: parent)
-                }
-                newFoundPatterns[pattern] = newPattern
-                newPattern.subpatterns = copyPatternsRecursively(pattern.subpatterns, parent: newPattern, foundPatterns: newFoundPatterns, inLanguage: language)
-                result.append(newPattern)
-            }
-        }
-        return result
-    }
 }
