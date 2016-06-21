@@ -180,7 +180,7 @@ public class Parser {
                 
                 if endPattern != nil {
                     let endMatchResult = self.matchExpression(endPattern!.end!, withString: string, inRange: range, captures: endPattern!.endCaptures)
-                    if endMatchResult != nil && (bestMatchForMiddle == nil || endMatchResult!.range.location < bestMatchForMiddle!.start) {
+                    if endMatchResult != nil && (bestMatchForMiddle == nil || endMatchResult!.range.location <= bestMatchForMiddle!.start) {
                         result.addResults(endMatchResult!)
                         return result
                     }
