@@ -89,3 +89,17 @@ Easy as that. This method takes an optional `baseAttributes` parameter to custom
 If you want to build your own parser (for example, to generate HTML) you can subclass whichever one meets your needs. Go nuts.
 
 Enjoy.
+
+## A list of Caveats
+
+There are however a few things you got to watch out for:
+
+* \G will always be matched
+* Technical differences from onigurama to NSRegularExpression
+* Backreferences to begin are not supported
+* contentName property is not supported
+* Attributes other than foreground color are ignored
+* crashs after ~ 300 stackframes in a secondary thread (in debug configuration)
+* Cannot recursively include itself (use $self or $base instead)
+
+Feel free to improve upon this.
