@@ -27,6 +27,7 @@ class Pattern: NSObject {
     var beginCaptures: CaptureCollection?   { return _beginCaptures }
     var end: NSRegularExpression?           { return _end }
     var endCaptures: CaptureCollection?     { return _endCaptures }
+    var applyEndPatternLast: Bool           { return _applyEndPatternLast}
     var parent: Pattern?                    { return _parent }
     var subpatterns: [Pattern] = []
     
@@ -37,6 +38,7 @@ class Pattern: NSObject {
     private var _beginCaptures: CaptureCollection?
     private var _end: NSRegularExpression?
     private var _endCaptures: CaptureCollection?
+    private var _applyEndPatternLast = false
     private weak var _parent: Pattern?
     
     private let debug = true
@@ -70,6 +72,8 @@ class Pattern: NSObject {
             }
         }
         
+        _applyEndPatternLast = dictionary["applyEndPatternLast"] as? Bool ?? false
+                
         if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
             _beginCaptures = CaptureCollection(dictionary: dictionary)
         }

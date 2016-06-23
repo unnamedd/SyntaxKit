@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct ResultSet {
+class ResultSet {
     
     // MARK: - Properties
     
@@ -28,16 +28,16 @@ struct ResultSet {
     
     // MARK: - Adding
     
-    mutating func extendWithRange(range: NSRange) {
+    func extendWithRange(range: NSRange) {
         _range = NSUnionRange(self.range, range)
     }
     
-    mutating func addResult(result: Result) {
+    func addResult(result: Result) {
         _results.append(result)
         extendWithRange(result.range)
     }
     
-    mutating func addResults(resultSet: ResultSet) {
+    func addResults(resultSet: ResultSet) {
         extendWithRange(resultSet.range)
         for result in resultSet.results {
             _results.append(result)

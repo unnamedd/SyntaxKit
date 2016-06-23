@@ -66,12 +66,14 @@ public class AttributedParsingOperation: NSOperation {
     
     public override func main() {
         var resultsArray: [(range: NSRange, attributes: Attributes?)] = []
-        parser.parse(stringToParse, inRange: range, withDiff: diff, usingPreviousScopesString: &scopedStringResult) { _, range, attributes in
+        parser.string = stringToParse
+        parser.parse(inRange: range, withDiff: diff, usingPreviousScopesString: &scopedStringResult) { _, range, attributes in
             if let attributes = attributes {
                 resultsArray.append((range, attributes))
             }
         }
         operationCallback(resultsArray)
+        parser.string = ""
     }
     
     public override func cancel() {

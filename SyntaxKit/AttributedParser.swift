@@ -34,8 +34,8 @@ public class AttributedParser: Parser {
         }
     }
     
-    func parse(string: String, inRange range: NSRange?, withDiff diff: (String?, NSRange)?, inout usingPreviousScopesString scopes: ScopedString, match callback: AttributedCallback) {
-        parse(string, inRange: range, withDiff: diff, usingPreviousScopesString: &scopes) { scope, range in
+    func parse(inRange range: NSRange?, withDiff diff: (String?, NSRange)?, inout usingPreviousScopesString scopes: ScopedString, match callback: AttributedCallback) {
+        parse(inRange: range, withDiff: diff, usingPreviousScopesString: &scopes) { scope, range in
             callback(scope: scope, range: range, attributes: self.attributesForScope(scope))
         }
     }
