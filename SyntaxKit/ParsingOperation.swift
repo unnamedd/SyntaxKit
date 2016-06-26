@@ -56,8 +56,6 @@ public class AttributedParsingOperation: NSOperation {
         if diffRepresentsChanges(diff, fromOldString: previousOperation.scopedStringResult.underlyingString, toNewString: string) {
             self.diff = diff
             self.range = outdatedRangeForChangeInString(string, changeIsInsertion: insertion, changedRange: range, previousScopedString: scopedStringResult)
-        } else {
-            assert(false, "Warning: The provided change information is inconsistent. The AttributedParsingOperation will parse the entire range")
         }
     }
     
@@ -150,7 +148,6 @@ public class AttributedParsingOperation: NSOperation {
                 return false
             }
             if newStr.substringWithRange(NSRange(location: diff.1.location, length: (diff.0! as NSString).length)) != diff.0! {
-                assert(false, "Warning: Passed in a wierd string")
                 return false
             }
         }
@@ -164,7 +161,6 @@ public class AttributedParsingOperation: NSOperation {
         let oldLength = insertion ? newString.length - range.length : newString.length + range.length
         
         if oldString.length != oldLength {
-            assert(false, "Warning: incompatible change")
             return false
         }
         return true
