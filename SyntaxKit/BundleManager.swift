@@ -74,7 +74,7 @@ public class BundleManager {
         return newTheme
     }
     
-    public func emptyLanguageCache() {
+    public func clearLanguageCache() {
         self.cachedLanguages = [:]
     }
     
