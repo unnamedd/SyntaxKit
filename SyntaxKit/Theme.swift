@@ -3,12 +3,8 @@
 //  SyntaxKit
 //
 //  Created by Sam Soffes on 10/11/14.
-//  Copyright © 2014-2015 Sam Soffes. 
-//  Copyright (c) Alexander Hedges.
-//  All rights reserved.
+//  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
-
-import Foundation
 
 #if os(iOS) || os(watchOS)
     import UIKit

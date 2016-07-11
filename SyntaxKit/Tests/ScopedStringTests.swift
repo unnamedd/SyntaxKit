@@ -7,8 +7,7 @@
 //
 
 import XCTest
-@testable
-import SyntaxKit
+@testable import SyntaxKit
 
 class ScopedStringTests: XCTestCase {
     

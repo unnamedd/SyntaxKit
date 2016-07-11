@@ -6,8 +6,6 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-import Foundation
-
 struct CaptureCollection {
     
     // MARK: - Properties

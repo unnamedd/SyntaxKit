@@ -14,8 +14,6 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-import Foundation
-
 class ReferenceManager {
     
     // MARK: - Properties

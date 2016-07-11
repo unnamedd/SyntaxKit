@@ -3,12 +3,8 @@
 //  SyntaxKit
 //
 //  Created by Sam Soffes on 9/18/14.
-//  Copyright © 2014-2015 Sam Soffes.
-//  Copyright (c) 2016 Alexander Hedges.
-//  All rights reserved.
+//  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
-
-import Foundation
 
 public struct Language {
     
