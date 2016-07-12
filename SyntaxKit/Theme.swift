@@ -26,19 +26,11 @@ public struct Theme {
     public let attributes: [String: Attributes]
     
     public var backgroundColor: Color {
-        if let color = attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? Color {
-            return color
-        } else {
-            return Color.whiteColor()
-        }
+        return attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? Color ?? Color.whiteColor()
     }
     
     public var foregroundColor: Color {
-        if let color = attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color {
-            return color
-        } else {
-            return Color.blackColor()
-        }
+        return attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color ?? Color.blackColor()
     }
     
     

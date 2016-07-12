@@ -46,7 +46,7 @@ public struct Language {
     /// Only after a call to this method the Language is fit for general use.
     ///
     /// - parameter helperLanguages: The languages that the language has 
-    ///     references to resolve agains. This should at least contain the 
+    ///     references to resolve against. This should at least contain the
     ///     language itself.
     mutating func validateWithHelperLanguages(helperLanguages: [Language]) {
         ReferenceManager.resolveExternalReferencesBetweenLanguages(helperLanguages, basename: self.scopeName)
