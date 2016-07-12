@@ -77,6 +77,7 @@ public class AttributedParsingOperation: NSOperation {
         super.cancel()
     }
     
+    
     // MARK: - Change Processing
     
     //  Algorithmic notes:

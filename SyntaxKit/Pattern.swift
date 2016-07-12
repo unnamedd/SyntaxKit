@@ -2,10 +2,10 @@
 //  Pattern.swift
 //  SyntaxKit
 //
-//  Represents a pattern from a TextMate Language Bundle
+//  Represents a pattern from a TextMate grammar
 //
 //  The Include class represents a Pattern that is a reference to another part
-//  of the Bundle. It is only fully functional as a pattern after it has been
+//  of the Bundle. It is only usable as a pattern after it has been
 //  resolved via the provided method.
 //
 //  Created by Sam Soffes on 9/18/14.

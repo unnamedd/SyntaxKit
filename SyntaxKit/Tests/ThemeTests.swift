@@ -16,6 +16,7 @@ class ThemeTests: XCTestCase {
     let tomorrow = theme("Tomorrow")
     let solarized = theme("Solarized")
     
+    
     // MARK: - Tests
     
     func testLoading() {

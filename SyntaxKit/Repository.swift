@@ -2,6 +2,9 @@
 //  Repository.swift
 //  SyntaxKit
 //
+//  Represents a repository dictionary from a TextMate grammar. This class 
+//  supports nested repositories as found in some grammars.
+//
 //  Created by Alexander Hedges on 09/01/16.
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //

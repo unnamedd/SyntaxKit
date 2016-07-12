@@ -2,6 +2,9 @@
 //  Language.swift
 //  SyntaxKit
 //
+//  Represents a textmate syntax file (.tmLanguage). Before use the 
+//  validateWithHelperLanguages method has to be called on it.
+//
 //  Created by Sam Soffes on 9/18/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
@@ -10,7 +13,7 @@ public struct Language {
     
     // MARK: - Properties
     
-    public let UUID: String
+    public let UUID: String // TODO: replace with uuid type in swift 3
     public let name: String
     public let scopeName: String
     
@@ -19,6 +22,7 @@ public struct Language {
     let repository: Repository
     
     static let globalScope = "GLOBAL"
+    
     
     // MARK: - Initializers
     

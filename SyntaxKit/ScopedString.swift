@@ -3,9 +3,10 @@
 //  SyntaxKit
 //
 //  A datastructure that facilitates working with strings that have nested 
-//  scopes associated with them. A scope being a named range that can have an 
+//  scopes associated with them. A scope being a named range that can have an
 //  attribute assciated with it for the callers convenience.
-//  The ranges can be nested. The datastrucuture could be visualized like this:
+//  The ranges can be nested. The datastructure could be visualized like this:
+//  In fact, something like this is returned by the prettyPrint function.
 //  
 //  Top:                              ----
 //                              -------------
@@ -15,11 +16,11 @@
 //  
 //  Note:
 //  The bottom-most layer is implicit and is not stored.
-//  If no layer can hold the inserted scope without intersections a new layer is
-//  added.
+//  A new layer is added if no layer can hold the inserted scope without
+//  creating intersections.
 //
-//  The datastructure might be optimized with binary search for insertions at 
-//  the individual levels.
+//  In the future the datastructure could be optimized by using binary search
+//  for insertions at the individual levels.
 //
 //  Created by Alexander Hedges on 29/01/16.
 //  Copyright © 2016 Alexander Hedges. All rights reserved.

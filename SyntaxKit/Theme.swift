@@ -2,6 +2,9 @@
 //  Theme.swift
 //  SyntaxKit
 //
+//  Represents a TextMate theme file (.tmTheme). Currently only supports the 
+//  foreground text color attribute on a local scope.
+//
 //  Created by Sam Soffes on 10/11/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
@@ -18,7 +21,7 @@ public struct Theme {
     
     // MARK: - Properties
     
-    public let UUID: String
+    public let UUID: String // TODO: replace with uuid type in swift 3
     public let name: String
     public let attributes: [String: Attributes]
     

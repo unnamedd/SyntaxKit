@@ -3,13 +3,10 @@
 //  SyntaxKit
 //
 //  This class is in charge of the painful task of recognizing the syntax
-//  patterns. It tries to match the output of TextMate as closely as possible.
-//  Turns out TextMate doesn't highlight things it should highlight according to
-//  the grammar so this is not entirely straight forward.
+//  patterns. It tries to match parsing behavior of TextMate as closely as 
+//  possible.
 //
-//  It supports incremental parsing. The recommmend usage is to ask the class
-//  for the range it should be reparsed on the given change. This range can then 
-//  be passed to parsed.
+//  The parsed string is stored as a property.
 //
 //  Created by Sam Soffes on 9/19/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
@@ -29,6 +26,7 @@ public class Parser {
     var aborted = false
     
     var string: String
+    
     
     // MARK: - Initializers
     
@@ -359,8 +357,7 @@ public class Parser {
     ///
     /// - parameter results:        The results of the parsing pass
     /// - parameter scopesString:   The place to store the scopes
-    /// - parameter callback:       The method to call on every successful 
-    ///                             match
+    /// - parameter callback:       The method to call on every successful match
     private func applyResults(results: ResultSet, inout storingInScopesString scopesString: ScopedString, callback: Callback) {
         callback(scope: Language.globalScope, range: results.range)
         for result in results.results where result.range.length > 0 {

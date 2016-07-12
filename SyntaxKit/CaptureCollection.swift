@@ -2,6 +2,8 @@
 //  CaptureCollection.swift
 //  SyntaxKit
 //
+//  Represents the captures attribute in a TextMate grammar.
+//
 //  Created by Sam Soffes on 9/19/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
