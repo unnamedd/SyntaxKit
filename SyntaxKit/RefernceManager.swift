@@ -50,8 +50,8 @@ class ReferenceManager {
         }
         for language in languages {
             let includes = language.referenceManager.includes
-            for include in includes where include.type == .toBase || include.type == .toForeign || include.type == .toForeignRepository {
-                include.resolveInterLanguageReferences(language, inLanguages: otherLanguages, baseName: basename)
+            for include in includes {
+                include.resolveExternalReference(language, inLanguages: otherLanguages, baseName: basename)
             }
         }
     }

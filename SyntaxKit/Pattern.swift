@@ -5,8 +5,8 @@
 //  Represents a pattern from a TextMate grammar
 //
 //  The Include class represents a Pattern that is a reference to another part
-//  of the Bundle. It is only usable as a pattern after it has been
-//  resolved via the provided method.
+//  in the same or another grammar. It is only usable as a pattern after it has
+//  been resolved via the provided method (and has type .resolved).
 //
 //  Created by Sam Soffes on 9/18/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
@@ -119,6 +119,7 @@ class Pattern: NSObject {
         self.subpatterns = []
     }
     
+    /// Only to be called from Include. Does not create a usable pattern.
     override init() {
         super.init()
     }
@@ -142,7 +143,7 @@ class Include: Pattern {
     private var _type: referenceType
     private let repositoryRef: String?
     private let languageRef: String?
-    private let associatedRepository: Repository?
+    private weak var associatedRepository: Repository?
     
     
     // MARK: - Initializers
@@ -203,7 +204,7 @@ class Include: Pattern {
         _type = .resolved
     }
     
-    func resolveInterLanguageReferences(ownLanguage: Language, inLanguages languages: [String: Language], baseName: String?) {
+    func resolveExternalReference(thisLanguage: Language, inLanguages languages: [String: Language], baseName: String?) {
         let pattern: Pattern?
         if type == .toBase {
             pattern = languages[baseName!]!.pattern
