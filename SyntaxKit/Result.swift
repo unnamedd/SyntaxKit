@@ -2,6 +2,8 @@
 //  Result.swift
 //  SyntaxKit
 //
+//  Represents a match by the parser.
+//
 //  Created by Sam Soffes on 10/11/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //

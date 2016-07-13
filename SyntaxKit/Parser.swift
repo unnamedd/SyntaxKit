@@ -77,7 +77,7 @@ public class Parser {
     func parse(inRange range: NSRange?, withDiff diff: (String?, NSRange)?, inout usingPreviousScopesString scopes: ScopedString, match callback: Callback) {
         var endScope: Scope? = nil
         var bounds = range ?? NSRange(location: 0, length: (string as NSString).length)
-        var scopesString = scopes.copy() as! ScopedString
+        var scopesString = scopes
         if range != nil && diff != nil {
             endScope = scopesString.topLevelScopeAtIndex(bounds.location)
             if diff!.0 == nil {

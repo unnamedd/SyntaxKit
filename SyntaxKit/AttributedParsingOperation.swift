@@ -112,7 +112,7 @@ public class AttributedParsingOperation: NSOperation {
             return nil
         }
         
-        let potentialNewString = previousScopes.copy() as! ScopedString
+        var potentialNewString = previousScopes
         
         let linesRange: NSRange
         if insertion {

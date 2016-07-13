@@ -64,7 +64,7 @@ extension NSRange {
 
 typealias Scope = Result
 
-class ScopedString: NSObject, NSCopying {
+struct ScopedString {
     
     // MARK: - Properties
     
@@ -86,12 +86,6 @@ class ScopedString: NSObject, NSCopying {
     
     // MARK: - Interface
     
-    func copyWithZone(zone: NSZone) -> AnyObject {
-        let newScopedString = ScopedString(string: self.underlyingString)
-        newScopedString.levels = levels
-        return newScopedString
-    }
-    
     func numberOfScopes() -> Int {
         var sum = 1
         for level in levels {
@@ -108,7 +102,7 @@ class ScopedString: NSObject, NSCopying {
         return index >= 0 && index <= baseScope.range.length
     }
     
-    func addScopeAtBottom(scope: Scope) {
+    mutating func addScopeAtBottom(scope: Scope) {
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
@@ -124,7 +118,7 @@ class ScopedString: NSObject, NSCopying {
         }
     }
     
-    func addScopeAtTop(scope: Scope) {
+    mutating func addScopeAtTop(scope: Scope) {
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
@@ -185,7 +179,7 @@ class ScopedString: NSObject, NSCopying {
         return -1
     }
     
-    func removeScopesInRange(range: NSRange) {
+    mutating func removeScopesInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
         
         for level in (levels.count - 1).stride(through: 0, by: -1) {
@@ -201,7 +195,7 @@ class ScopedString: NSObject, NSCopying {
         }
     }
     
-    func insertString(string: String, atIndex index: Int) {
+    mutating func insertString(string: String, atIndex index: Int) {
         assert(index >= 0 && index <= baseScope.range.length)
         
         let s = underlyingString as NSString
@@ -216,7 +210,7 @@ class ScopedString: NSObject, NSCopying {
         }
     }
     
-    func deleteCharactersInRange(range: NSRange) {
+    mutating func deleteCharactersInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
         
         let mutableString = (self.underlyingString as NSString).mutableCopy() as! NSMutableString

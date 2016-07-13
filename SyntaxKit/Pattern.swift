@@ -166,12 +166,12 @@ class Include: Pattern {
             self._type = .toForeignRepository
             self.repositoryRef = reference.substringFromIndex(reference.rangeOfString("#")!.endIndex)
             self.languageRef = reference.substringToIndex(reference.rangeOfString("#")!.startIndex)
-            BundleManager.defaultManager?.getUnvalidatedLanguageWithIdentifier(languageRef!)
+            BundleManager.defaultManager?.getRawLanguageWithIdentifier(languageRef!)
         } else {
             self._type = .toForeign
             self.repositoryRef = nil
             self.languageRef = reference
-            BundleManager.defaultManager?.getUnvalidatedLanguageWithIdentifier(languageRef!)
+            BundleManager.defaultManager?.getRawLanguageWithIdentifier(languageRef!)
         }
         super.init()
         _parent = parent
