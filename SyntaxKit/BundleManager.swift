@@ -57,7 +57,7 @@ public class BundleManager {
         }
     }
     
-    init(callback: BundleLocationCallback) {
+    public init(callback: BundleLocationCallback) {
         self.bundleCallback = callback
     }
     

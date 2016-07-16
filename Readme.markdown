@@ -4,12 +4,12 @@
 
 SyntaxKit makes TextMate-style syntax highlighting easy. It works on iOS, watchOS, and OS X.
 
-A fork from Sam Soffes' SyntaxKit which was originally abstracted from [Whiskey](http://usewhiskey.com).
+SyntaxKit was originally abstracted from [Whiskey](http://usewhiskey.com).
 
 
 ## Building
 
-SyntaxKit is written in Swift 2 so Xcode 7 is required. There aren't any dependencies besides system frameworks.
+SyntaxKit is written in Swift 3 so Xcode 8 is required. There aren't any dependencies besides system frameworks.
 
 
 ## Installation
@@ -35,20 +35,20 @@ SyntaxKit uses `tmLanguage` and `tmTheme` files to highlight source code. None a
 
 ### Basic Parsing
 
-Once you have a language, you can get started:
+Once you have a BundleManager, you can get started:
 
 ```swift
 import SyntaxKit
 
-BundleManager.initializeDefaultManagerWithLocationCallback { identifier, isLanguage in
+let manager = BundleManager() { identifier, isLanguage in
     NSURL(string: "Location of Bundles/" + identifier + ".plist")
 }
-let yaml = BundleManager.defaultManager!.languageWithIdentifier("source.yaml")!
+let yaml = manager.languageWithIdentifier("source.yaml")!
 
 let parser = Parser(language: yaml)
 ```
 
-`Parser` is a very simple class that just calls a block when it finds something the language file knows about. Let's print all of the elements in this string:
+`Parser` is a class that calls a block when it finds something the language file knows about. Let's print all of the elements in this string:
 
 ```swift
 let input = "title: \"Hello World\"\n"
@@ -65,7 +65,7 @@ parser.parse(input) { scope, range in
 SyntaxKit also comes with `AttributedParser`. This is a simple subclass of `Parser` that knows how to work with themes.
 
 ```swift
-let tomorrow = BundleManager.defaultManager!.themeWithIdentifier("tomorrow")!
+let tomorrow = manager.themeWithIdentifier("tomorrow")!
 let attributedParser = AttributedParser(language: yaml, theme: tomorrow)
 
 attributedParser.parse(input) { scope, range, attributes in
@@ -90,7 +90,7 @@ If you want to build your own parser (for example, to generate HTML) you can sub
 
 Enjoy.
 
-## A list of Caveats
+## Caveats
 
 There are however a few things you got to watch out for:
 

@@ -119,7 +119,7 @@ class Pattern: NSObject {
         self.subpatterns = []
     }
     
-    /// - note: For most cases does not create a usable pattern.
+    /// For most cases does not create a usable pattern.
     override init() {
         super.init()
     }

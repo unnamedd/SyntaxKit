@@ -36,7 +36,7 @@ public struct Language {
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
-        self.referenceManager = ReferenceManager(bundleManager)
+        self.referenceManager = ReferenceManager(bundleManager: bundleManager)
         
         self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
         self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, withReferenceManager: referenceManager)
