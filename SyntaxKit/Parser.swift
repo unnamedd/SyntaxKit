@@ -166,25 +166,19 @@ public class Parser {
         var lineEnd = startIndex
         let result = ResultSet(startingRange: NSRange(location: startIndex, length: 0))
         
-        var bestMatchForMiddle: (pattern: Pattern, start: Int)?
-        var endMatchResult: ResultSet?
-        var resultForMiddle: ResultSet?
-        var range: NSRange
-        var newStart: Int
-        
         while lineEnd < stop {
             (string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSMakeRange(lineEnd, 0))
-            range = NSRange(location: lineStart, length: lineEnd - lineStart)
+            var range = NSRange(location: lineStart, length: lineEnd - lineStart)
             
             while range.length > 0 {
                 if aborted {
                     return nil
                 }
                 
-                bestMatchForMiddle = findBestPatternInPatterns(patterns, inRange: range)
+                let bestMatchForMiddle = findBestPatternInPatterns(patterns, inRange: range)
                 
                 if endPattern != nil {
-                    endMatchResult = self.matchExpression(endPattern!.end!, inRange: range, captures: endPattern!.endCaptures)
+                    let endMatchResult = self.matchExpression(endPattern!.end!, inRange: range, captures: endPattern!.endCaptures)
                     if endMatchResult != nil && (bestMatchForMiddle == nil || bestMatchForMiddle != nil &&
                         (!endPattern!.applyEndPatternLast && endMatchResult!.range.location <= bestMatchForMiddle!.start || endMatchResult!.range.location < bestMatchForMiddle!.start)) {
                         result.addResults(endMatchResult!)
@@ -193,12 +187,12 @@ public class Parser {
                 }
                 
                 if bestMatchForMiddle != nil {
-                    resultForMiddle = matchPattern(bestMatchForMiddle!.pattern, inRange: range)
+                    let resultForMiddle = matchPattern(bestMatchForMiddle!.pattern, inRange: range)
                     if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
                         break
                     }
                     result.addResults(resultForMiddle!)
-                    newStart = NSMaxRange(resultForMiddle!.range)
+                    let newStart = NSMaxRange(resultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
                     lineEnd = max(lineEnd, newStart)
                 } else {
