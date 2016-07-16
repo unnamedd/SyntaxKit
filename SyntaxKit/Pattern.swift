@@ -119,7 +119,7 @@ class Pattern: NSObject {
         self.subpatterns = []
     }
     
-    /// Only to be called from Include. Does not create a usable pattern.
+    /// - note: For most cases does not create a usable pattern.
     override init() {
         super.init()
     }
@@ -148,7 +148,7 @@ class Include: Pattern {
     
     // MARK: - Initializers
     
-    init(reference: String, inRepository repository: Repository? = nil, parent: Pattern?) {
+    init(reference: String, inRepository repository: Repository? = nil, parent: Pattern?, bundleManager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
             self._type = .toRepository
@@ -166,12 +166,12 @@ class Include: Pattern {
             self._type = .toForeignRepository
             self.repositoryRef = reference.substringFromIndex(reference.rangeOfString("#")!.endIndex)
             self.languageRef = reference.substringToIndex(reference.rangeOfString("#")!.startIndex)
-            BundleManager.defaultManager?.getRawLanguageWithIdentifier(languageRef!)
+            bundleManager.getRawLanguageWithIdentifier(languageRef!)
         } else {
             self._type = .toForeign
             self.repositoryRef = nil
             self.languageRef = reference
-            BundleManager.defaultManager?.getRawLanguageWithIdentifier(languageRef!)
+            bundleManager.getRawLanguageWithIdentifier(languageRef!)
         }
         super.init()
         _parent = parent

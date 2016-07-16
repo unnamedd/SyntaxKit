@@ -114,7 +114,7 @@ public class BundleManager {
         } else {
             guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
                 plist = NSDictionary(contentsOfURL: dictURL),
-                newLanguage = Language(dictionary: plist as [NSObject : AnyObject]) else {
+                newLanguage = Language(dictionary: plist as [NSObject : AnyObject], bundleManager: self) else {
                     return nil
             }
             

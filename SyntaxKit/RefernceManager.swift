@@ -19,10 +19,18 @@ class ReferenceManager {
     // MARK: - Properties
     
     private var includes: [Include] = []
+    private weak var bundleManager: BundleManager?
+    
+    
+    // MARK: - Init
+    
+    init(bundleManager: BundleManager) {
+        self.bundleManager = bundleManager
+    }
     
     
     // MARK: - Pattern Creation and Resolution
-        
+    
     func patternsForArray(patterns: [[NSObject: AnyObject]], inRepository repository: Repository?, caller: Pattern?) -> [Pattern] {
         var results: [Pattern] = []
         for rawPattern in patterns {

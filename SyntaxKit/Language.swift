@@ -18,7 +18,7 @@ public struct Language {
     public let scopeName: String
     
     let pattern: Pattern = Pattern()
-    let referenceManager = ReferenceManager()
+    let referenceManager: ReferenceManager
     let repository: Repository
     
     static let globalScope = "GLOBAL"
@@ -26,7 +26,7 @@ public struct Language {
     
     // MARK: - Initializers
     
-    init?(dictionary: [NSObject: AnyObject]) {
+    init?(dictionary: [NSObject: AnyObject], bundleManager: BundleManager) {
         guard let UUID = dictionary["uuid"] as? String,
             name = dictionary["name"] as? String,
             scopeName = dictionary["scopeName"] as? String,
@@ -36,6 +36,7 @@ public struct Language {
         self.UUID = UUID
         self.name = name
         self.scopeName = scopeName
+        self.referenceManager = ReferenceManager(bundleManager)
         
         self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
         self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, withReferenceManager: referenceManager)
