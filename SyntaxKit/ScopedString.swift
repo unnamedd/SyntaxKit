@@ -15,7 +15,8 @@
 //  String: "(This is) (string (with (nest)ed) scopes)!"
 //  
 //  Note:
-//  The bottom-most layer is implicit and is not stored.
+//  In the picture above the parens are not actually in the string, they serve 
+//  visualization purposes. The bottom-most layer is implicit and is not stored.
 //  A new layer is added if no layer can hold the inserted scope without
 //  creating intersections.
 //
@@ -46,14 +47,17 @@ extension NSRange {
         return location <= otherRange.location && location + length >= otherRange.location + otherRange.length
     }
     
-    mutating func subtractRange(range: NSRange) {
+    /// Removes the indexes contained in range from self and shifts itself as
+    /// needed to not leave a gap in the domain.
+    mutating func removeIndexesFromRange(range: NSRange) {
         length -= NSIntersectionRange(range, NSRange(location: location, length: length)).length
         if (range.location < self.location) {
             self.location -= NSIntersectionRange(range, NSRange(location: 0, length: self.location)).length
         }
     }
     
-    mutating func insertRange(range: NSRange) {
+    /// Inserts the indexes contained in range into self. Grows as needed.
+    mutating func insertIndexesFromRange(range: NSRange) {
         if self.containsIndex(range.location) && range.location < NSMaxRange(self) {
             length += range.length
         } else if location > range.location {
@@ -62,6 +66,9 @@ extension NSRange {
     }
 }
 
+/// In this project the difference between a Result and a Scope is that the
+/// scope has the attribute set while the Result does not. This is an implicit
+/// agreement, please respect.
 typealias Scope = Result
 
 struct ScopedString {
@@ -134,7 +141,7 @@ struct ScopedString {
         }
     }
     
-    func topLevelScopeAtIndex(index: Int) -> Scope {
+    func topmostScopeAtIndex(index: Int) -> Scope {
         let indexRange = NSRange(location: index, length: 0)
         for i in (levels.count - 1).stride(through: 0, by: -1) {
             let level = levels[i]
@@ -179,6 +186,7 @@ struct ScopedString {
         return -1
     }
     
+    /// Removes all scopes that are entirely contained in the spcified range.
     mutating func removeScopesInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
         
@@ -195,6 +203,9 @@ struct ScopedString {
         }
     }
     
+    /// Inserts the given string into the underlying string, stretching and
+    /// shifting ranges as needed. If the range starts before and ends after the
+    /// insertion point, it is stretched.
     mutating func insertString(string: String, atIndex index: Int) {
         assert(index >= 0 && index <= baseScope.range.length)
         
@@ -205,11 +216,13 @@ struct ScopedString {
         self.underlyingString = mutableString.copy() as! String
         for level in 0..<levels.count {
             for scope in 0..<levels[level].count {
-                levels[level][scope].range.insertRange(NSRange(location: index, length: length))
+                levels[level][scope].range.insertIndexesFromRange(NSRange(location: index, length: length))
             }
         }
     }
     
+    /// Deletes the characters from the underlying string, shrinking and
+    /// deleting scopes as needed.
     mutating func deleteCharactersInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
         
@@ -219,7 +232,7 @@ struct ScopedString {
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 var theRange = levels[level][scope].range
-                theRange.subtractRange(range)
+                theRange.removeIndexesFromRange(range)
                 if theRange.isEmpty() {
                     levels[level].removeAtIndex(scope)
                 } else {
@@ -232,10 +245,15 @@ struct ScopedString {
         }
     }
     
-    func prettyPrint() {
+    /// - note: This representation is guaranteed not to change between releases
+    ///         (except for releases with breaking changes) so it can be used
+    ///         for unit testing.
+    /// - returns: A user-friendly description of the instance.
+    func prettyRepresentation() -> String {
+        var result = ""
         var printableUnderlyingString = underlyingString.stringByReplacingOccurrencesOfString("\n", withString: "¬")
         printableUnderlyingString = printableUnderlyingString.stringByReplacingOccurrencesOfString("\t", withString: "»")
-        print(printableUnderlyingString)
+        result += printableUnderlyingString + "\n"
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             var levelString = String(count: (underlyingString as NSString).length, repeatedValue: " " as Character)
             for pattern in levels[level] {
@@ -249,7 +267,7 @@ struct ScopedString {
                     levelString = (levelString as NSString).stringByReplacingCharactersInRange(range, withString: "[\(dashes)]")
                 }
             }
-            print(levelString)
+            result += levelString + "\n"
         }
         var numberString = ""
         for i in 0...(underlyingString as NSString).length/10 {
@@ -257,7 +275,8 @@ struct ScopedString {
             let dashes = String(count: 9 - numDigits, repeatedValue: "-" as Character)
             numberString += "\(i*10)\(dashes)|"
         }
-        print(numberString)
+        result += numberString + "\n"
+        return result
     }
     
     

@@ -126,7 +126,7 @@ public class AttributedParsingOperation: NSOperation {
             return nil
         }
         
-        let scopeAtIndex = potentialNewString.topLevelScopeAtIndex(NSMaxRange(linesRange) - 1)
+        let scopeAtIndex = potentialNewString.topmostScopeAtIndex(NSMaxRange(linesRange) - 1)
         if scopeAtIndex == potentialNewString.baseScope {
             return linesRange
         } else {

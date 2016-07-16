@@ -79,7 +79,7 @@ public class Parser {
         var bounds = range ?? NSRange(location: 0, length: (string as NSString).length)
         var scopesString = scopes
         if range != nil && diff != nil {
-            endScope = scopesString.topLevelScopeAtIndex(bounds.location)
+            endScope = scopesString.topmostScopeAtIndex(bounds.location)
             if diff!.0 == nil {
                 scopesString.deleteCharactersInRange(diff!.1)
             } else {
@@ -118,7 +118,7 @@ public class Parser {
             }
             
             if startIndex > endIndex && scopesString.isInString(startIndex + 1) {
-                let scopeAtIndex = scopesString.topLevelScopeAtIndex(startIndex + 1)
+                let scopeAtIndex = scopesString.topmostScopeAtIndex(startIndex + 1)
                 if endScope == nil && scopesString.levelForScope(scopeAtIndex) > 0 ||
                     endScope != nil && scopesString.levelForScope(scopeAtIndex) > scopesString.levelForScope(endScope!) {
                     endIndex = NSMaxRange(scopeAtIndex.range)
@@ -347,10 +347,6 @@ public class Parser {
         
         return resultSet
     }
-    
-    //  Implementation note:
-    //  In this project the difference between a Result and a Scope is that
-    //  the scope has the attribute set while the Result does not.
     
     /// Uses the callback to communicate the result of the parsing pass back
     /// to the caller of parse.
