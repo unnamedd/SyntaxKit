@@ -5,6 +5,16 @@
 //  Subclass of NSOperation that can be used for mutithreaded incremental
 //  parsing with all the benefits of NSOperationQueue.
 //
+//  It's underlying parser is an attributed parser. In theory this could be
+//  refactored into a superclass that uses parser and a subclass that uses
+//  attributed parser, but honestly I don't see a use-case of ParsingOperation
+//  so there is only this class.
+//
+//  Note that the callback returns an array of results instead of each result
+//  separately. This is more efficient since it allows coalescing the edits
+//  between a beginEditing and an endEditing call. Parser uses the other way for
+//  backward compatibility reasons.
+//
 //  Created by Alexander Hedges on 17/04/16.
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
@@ -15,6 +25,7 @@ struct Diff {
     
     var change: String
     var range: NSRange
+    
     
     // MARK: - Operations
     
@@ -59,7 +70,6 @@ public class AttributedParsingOperation: NSOperation {
     // MARK: - Properties
     
     private let parser: AttributedParser
-    private var stringToParse: String
     private var operationCallback: OperationCallback
     private var scopedStringResult: ScopedString
     
@@ -70,17 +80,16 @@ public class AttributedParsingOperation: NSOperation {
     // MARK: - Initializers
     
     public init(string: String, language: Language, theme: Theme, callback: OperationCallback) {
-        stringToParse = string
         parser = AttributedParser(language: language, theme: theme)
+        parser.string = string
         operationCallback = callback
         scopedStringResult = ScopedString(string: string)
         super.init()
     }
     
     public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, callback: OperationCallback) {
-        stringToParse = string
         parser = previousOperation.parser
-        parser.aborted = false
+        parser.string = string
         operationCallback = callback
         scopedStringResult = previousOperation.scopedStringResult
         
@@ -96,7 +105,7 @@ public class AttributedParsingOperation: NSOperation {
         
         if diff.representsChangesfromOldString(previousOperation.scopedStringResult.underlyingString, toNewString: string) {
             self.diff = diff
-            self.range = outdatedRangeForChangeInString(string, changeIsInsertion: insertion, changedRange: range, previousScopedString: scopedStringResult)
+            self.range = outdatedRangeForChangeInString(string, changeIsInsertion: insertion, changedRange: range)
         }
     }
     
@@ -105,7 +114,6 @@ public class AttributedParsingOperation: NSOperation {
     
     public override func main() {
         var resultsArray: [(range: NSRange, attributes: Attributes?)] = []
-        parser.string = stringToParse
         
         var incrementalParsingInfo: (NSRange, Diff, ScopedString)?
         if range != nil && diff != nil {
@@ -147,13 +155,11 @@ public class AttributedParsingOperation: NSOperation {
     /// In fact passing anything other than this range to parse might lead to
     /// uninteded results but is not prohibited.
     /// This method is only guaranteed to possibly not return nil if parse was
-    /// called on the old string before this call. The only kinds of changed
-    /// supported are single insertions and deletions of strings.
+    /// called on the old string before this call.
     ///
     /// - parameter newString:  The examined new string. Should be the product
     ///                         of previously parsed + change.
-    /// - parameter insertion:  If the change applied to the old value is an
-    ///                         insertion as opposed to a deletion.
+    /// - parameter insertion:  Change is an insertion as opposed to a deletion.
     /// - parameter range:      The range in which the change occurred. In case
     ///                         of an insertion the range in the new string that
     ///                         was inserted. For a deletion it is the range in
@@ -161,12 +167,12 @@ public class AttributedParsingOperation: NSOperation {
     ///
     /// - returns:  A range in newString that can be safely re-parsed. Or nil if
     ///             everything has to be reparsed.
-    func outdatedRangeForChangeInString(newString: NSString, changeIsInsertion insertion: Bool, changedRange range: NSRange, previousScopedString previousScopes: ScopedString) -> NSRange? {
-        if !Diff.stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range, oldString: previousScopes.underlyingString) {
+    func outdatedRangeForChangeInString(newString: NSString, changeIsInsertion insertion: Bool, changedRange range: NSRange) -> NSRange? {
+        if !Diff.stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range, oldString: scopedStringResult.underlyingString) {
             return nil
         }
         
-        var potentialNewString = previousScopes
+        var potentialNewString = scopedStringResult
         
         let linesRange: NSRange
         if insertion {

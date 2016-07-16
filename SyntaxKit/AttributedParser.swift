@@ -2,6 +2,10 @@
 //  AttributedParser.swift
 //  SyntaxKit
 //
+//  A subclass of Parser that knows about themes. Using the theme it maps
+//  between recognized TextMate scope descriptions and NSAttributedString
+//  attributes.
+//
 //  Created by Sam Soffes on 9/24/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //

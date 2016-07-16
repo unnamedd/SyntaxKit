@@ -8,6 +8,13 @@
 //  in the same or another grammar. It is only usable as a pattern after it has
 //  been resolved via the provided method (and has type .resolved).
 //
+//  A pattern may be one of three types:
+//  *   A single pattern in match which should be matched
+//  *   A begin and an end pattern containing an optional body of patterns
+//      (subpatterns) which should be matched between the begin and the end
+//  *   Only a body of patterns without the begin and end. Any pattern may be
+//      matched successfully
+//
 //  Created by Sam Soffes on 9/18/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //

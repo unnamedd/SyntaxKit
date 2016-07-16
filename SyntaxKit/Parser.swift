@@ -6,7 +6,8 @@
 //  patterns. It tries to match parsing behavior of TextMate as closely as
 //  possible.
 //
-//  The parsed string is stored as a property.
+//  The parsed string is stored as a property. This is so the regex library
+//  recognizes subsequent matches as such.
 //
 //  Created by Sam Soffes on 9/19/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
@@ -23,16 +24,14 @@ public class Parser {
     
     public let language: Language
     
+    var string = ""
     var aborted = false
-    
-    var string: String
     
     
     // MARK: - Initializers
     
     public init(language: Language) {
         self.language = language
-        self.string = ""
     }
     
     
@@ -50,28 +49,17 @@ public class Parser {
     
     // MARK: - Private
     
-    // Implementation notes:
-    // The first part tries to find the context in which parsing should take
-    // place (which block we are in), if any.
-    // The second part parses the string the until the full range is consumed
-    // and it may exceed that range if further parts of the string are outdated
-    
-    /// Parses the given string in the given range and calls the callback on
-    /// every match of a scope
+    /// Parses the string. Supports incremental parsing.
     ///
-    /// If a range is treated more of a recommendation than a requirement.
-    /// For best results supply a range that was returned from
-    /// outdatedRangeForChangeInString called before calling this method.
+    /// The given range mey be exceeded if necessary to match a pattern entirely.
     ///
-    /// - parameter string:     The string that is parsed
-    /// - parameter range:      The range in which the string should be parsed.
-    ///                         On nil the entire string will be parsed.
-    /// - parameter diff:       Addition: "Added string", (insertionIndex, 0)
-    ///                         Deletion: "", (deletionStart, deletionLength)
-    /// - parameter scopes:     Denotes
-    /// - parameter callback:   The callback to call on every match of a
-    ///                         pattern identifier of the language
-    /// - returns: A scopedString that contains the range results of the parsing
+    /// - parameter incremental: A tuple containing all the information
+    ///             necessary for incremental parsing. A range in which to parse,
+    ///             a Diff representing the change and the result of the
+    ///             previous call to parse.
+    /// - parameter callback: The callback to call on every match of a pattern
+    ///             identifier of the language.
+    /// - returns: A ScopedString that contains the range results of the parsing
     ///            Or nil if the parsing was aborted.
     func parse(incremental: (range: NSRange, diff: Diff, previousScopes: ScopedString)? = nil, match callback: Callback) -> ScopedString? {
         let bounds: NSRange
@@ -206,21 +194,16 @@ public class Parser {
     }
     
     /// Helper method that iterates over the given patterns and tries to match
-    /// them in order.
-    ///
-    /// It returns the best match, if many are possible. Which is the result
-    /// that starts the soonest and is encountered first.
+    /// them. Returns the matched pattern with the highest priority
+    /// (first criterion: matched sooner, second: higher up the list).
     ///
     /// - parameter patterns:   The patterns that should be matched
-    /// - parameter string:     The string that should be matched against
     /// - parameter range:      The range in which the matching should happen.
-    ///                         Though it is not guaranteed that the length of
-    ///                         the result does not exceed the length of the
-    ///                         range.
     ///
     /// - returns:  The results. nil if nothing could be matched and an empty
     ///             set if something could be matched but it doesn't have any
-    ///             information associated with the match.
+    ///             information associated with the match. The results range may
+    ///             exceed the passed in range.
     private func findMatchFromPatterns(patterns: [Pattern], inRange bounds: NSRange) -> (pattern: Pattern, match: ResultSet)? {
         var interestingBounds = bounds
         var bestResult: (pattern: Pattern, match: ResultSet)?
@@ -236,6 +219,9 @@ public class Parser {
         return bestResult
     }
     
+    /// Matches a single pattern in the string in the given range
+    ///
+    /// - returns: The result of the match. Nil if unsuccessful
     private func firstMatchOfPattern(pattern: Pattern, inRange bounds: NSRange) -> (pattern: Pattern, match: ResultSet)? {
         if let match = pattern.match {
             if let resultSet = matchExpression(match, inRange: bounds, captures: pattern.captures, baseSelector: pattern.name) {
@@ -257,28 +243,26 @@ public class Parser {
     // The order in which the beginning middle and end are added to the final
     // result matters.
     
-    /// Matches a single pattern in the string in the given range
+    /// Matches the middle and end of the given pattern
     ///
-    /// A pattern may be one three options:
-    /// * A single pattern called match which should be matched
-    /// * A begin and an end pattern containing an optional body of patterns
-    ///     which should be matched between the begin and the end
-    /// * Only a body of patterns without the begin and end. Any pattern may be
-    ///     matched successfully
-    ///
-    /// - returns: The result of the match. Nil if unsuccessful
-    private func matchAfterBeginOfPattern(pattern: Pattern, beginResults: ResultSet, inRange bounds: NSRange) -> ResultSet? {
-            let newLocation = NSMaxRange(beginResults.range)
+    /// - parameter pattern:    The pattern whose subpatterns and end pattern
+    ///                         has to be matched
+    /// - parameter begin:      The match result of the beginning
+    /// - parameter range:      The range in which to perform the match
+    /// - returns:  The result of matching the given pattern or nil on abortion.
+    ///             It's range may exceed the passed in range.
+    private func matchAfterBeginOfPattern(pattern: Pattern, beginResults begin: ResultSet, inRange bounds: NSRange) -> ResultSet? {
+            let newLocation = NSMaxRange(begin.range)
             guard let endResults = matchSubpatternsOfPattern(pattern, inRange: NSRange(location: newLocation, length: (string as NSString).length - newLocation)) else {
                 return nil
             }
             
             let result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
-                result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(beginResults.range, endResults.range)))
+                result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(begin.range, endResults.range)))
             }
-            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: beginResults.range.location + beginResults.range.length, length: NSUnionRange(beginResults.range, endResults.range).length - beginResults.range.length), attribute: pattern))
-            result.addResults(beginResults)
+            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: begin.range.location + begin.range.length, length: NSUnionRange(begin.range, endResults.range).length - begin.range.length), attribute: pattern))
+            result.addResults(begin)
             result.addResults(endResults)
             return result
     }
@@ -287,7 +271,6 @@ public class Parser {
     /// information for the captures
     ///
     /// - parameter expression:     The regular expression to match
-    /// - parameter string:         The string to match against
     /// - parameter range:          The range to which to restrict the match
     /// - parameter captures:       A collection of captures that can be used to
     ///                             add extra information to parts of the match.
