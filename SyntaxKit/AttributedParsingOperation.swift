@@ -2,9 +2,52 @@
 //  AttributedParsingOperation.swift
 //  SyntaxKit
 //
+//  Subclass of NSOperation that can be used for mutithreaded incremental
+//  parsing with all the benefits of NSOperationQueue.
+//
 //  Created by Alexander Hedges on 17/04/16.
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
+
+struct Diff {
+    
+    // MARK: - Properties
+    
+    var change: String
+    var range: NSRange
+    
+    // MARK: - Operations
+    
+    /// - returns:  true if predicted change from diff matches the characters
+    ///             from the new string in that range
+    func representsChangesfromOldString(oldString: NSString, toNewString newStr: NSString) -> Bool {
+        if self.range.length == 0 {
+            if !Diff.stringChangeIsCompatible(newStr as String, isInsertion: true, changedRange: NSRange(location: self.range.location, length: (self.change as NSString).length), oldString: oldString) {
+                return false
+            }
+            if newStr.substringWithRange(NSRange(location: self.range.location, length: (self.change as NSString).length)) != self.change {
+                return false
+            }
+        } else {
+            if !Diff.stringChangeIsCompatible(newStr as String, isInsertion: false, changedRange: self.range, oldString: oldString) {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    /// - returns:  true if the number of characters changed is consistent with
+    ///             the new string
+    private static func stringChangeIsCompatible(newString: NSString, isInsertion insertion: Bool, changedRange range: NSRange, oldString: NSString) -> Bool {
+        let oldLength = insertion ? newString.length - range.length : newString.length + range.length
+        
+        if oldString.length != oldLength {
+            return false
+        }
+        return true
+    }
+}
 
 public class AttributedParsingOperation: NSOperation {
     
@@ -21,7 +64,7 @@ public class AttributedParsingOperation: NSOperation {
     private var scopedStringResult: ScopedString
     
     private var range: NSRange?
-    private var diff: (String?, NSRange)?
+    private var diff: Diff?
     
     
     // MARK: - Initializers
@@ -44,14 +87,14 @@ public class AttributedParsingOperation: NSOperation {
         super.init()
         
         let s = string as NSString
-        let diff: (String?, NSRange)
+        let diff: Diff
         if insertion {
-            diff = (s.substringWithRange(range), NSRange(location: range.location, length: 0))
+            diff = Diff(change: s.substringWithRange(range), range: NSRange(location: range.location, length: 0))
         } else {
-            diff = (nil, range)
+            diff = Diff(change: "", range: range)
         }
         
-        if diffRepresentsChanges(diff, fromOldString: previousOperation.scopedStringResult.underlyingString, toNewString: string) {
+        if diff.representsChangesfromOldString(previousOperation.scopedStringResult.underlyingString, toNewString: string) {
             self.diff = diff
             self.range = outdatedRangeForChangeInString(string, changeIsInsertion: insertion, changedRange: range, previousScopedString: scopedStringResult)
         }
@@ -63,11 +106,22 @@ public class AttributedParsingOperation: NSOperation {
     public override func main() {
         var resultsArray: [(range: NSRange, attributes: Attributes?)] = []
         parser.string = stringToParse
-        parser.parse(inRange: range, withDiff: diff, usingPreviousScopesString: &scopedStringResult) { _, range, attributes in
+        
+        var incrementalParsingInfo: (NSRange, Diff, ScopedString)?
+        if range != nil && diff != nil {
+            incrementalParsingInfo = (range: range!, diff: diff!, previousScopes: scopedStringResult)
+        }
+        
+        let callback = { (_: String, range: NSRange, attributes: Attributes?) in
             if let attributes = attributes {
                 resultsArray.append((range, attributes))
             }
         }
+        
+        if let result = parser.parse(incrementalParsingInfo, match: callback) {
+            scopedStringResult = result
+        }
+        
         operationCallback(resultsArray)
         parser.string = ""
     }
@@ -80,7 +134,7 @@ public class AttributedParsingOperation: NSOperation {
     
     // MARK: - Change Processing
     
-    //  Algorithmic notes:
+    //  Implementation notes:
     //  If change occurred in a block reparse the lines in which the change
     //  happened and the range of the block from this point on. If the change
     //  occurred in the global scope just reparse the lines that changed.
@@ -108,7 +162,7 @@ public class AttributedParsingOperation: NSOperation {
     /// - returns:  A range in newString that can be safely re-parsed. Or nil if
     ///             everything has to be reparsed.
     func outdatedRangeForChangeInString(newString: NSString, changeIsInsertion insertion: Bool, changedRange range: NSRange, previousScopedString previousScopes: ScopedString) -> NSRange? {
-        if !stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range, oldString: previousScopes.underlyingString) {
+        if !Diff.stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range, oldString: previousScopes.underlyingString) {
             return nil
         }
         
@@ -133,35 +187,5 @@ public class AttributedParsingOperation: NSOperation {
             let endOfCurrentScope = NSMaxRange(scopeAtIndex.range)
             return NSUnionRange(linesRange, NSRange(location: range.location, length: endOfCurrentScope - range.location))
         }
-    }
-    
-    /// - returns:  true if diff not nil and predicted change from diff matches
-    ///             the characters from the new string in that range
-    func diffRepresentsChanges(diff: (String?, NSRange), fromOldString oldString: NSString, toNewString newStr: NSString) -> Bool {
-        if diff.0 == nil {
-            if !stringChangeIsCompatible(newStr as String, isInsertion: false, changedRange: diff.1, oldString: oldString) {
-                return false
-            }
-        } else {
-            if !stringChangeIsCompatible(newStr as String, isInsertion: true, changedRange: NSRange(location: diff.1.location, length: (diff.0! as NSString).length), oldString: oldString) {
-                return false
-            }
-            if newStr.substringWithRange(NSRange(location: diff.1.location, length: (diff.0! as NSString).length)) != diff.0! {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    /// - returns:  true if scopeString not nil and the number of characters
-    ///             changed is consistent with the new string
-    func stringChangeIsCompatible(newString: NSString, isInsertion insertion: Bool, changedRange range: NSRange, oldString: NSString) -> Bool {
-        let oldLength = insertion ? newString.length - range.length : newString.length + range.length
-        
-        if oldString.length != oldLength {
-            return false
-        }
-        return true
     }
 }

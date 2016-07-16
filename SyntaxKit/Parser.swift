@@ -3,7 +3,7 @@
 //  SyntaxKit
 //
 //  This class is in charge of the painful task of recognizing the syntax
-//  patterns. It tries to match parsing behavior of TextMate as closely as 
+//  patterns. It tries to match parsing behavior of TextMate as closely as
 //  possible.
 //
 //  The parsed string is stored as a property.
@@ -43,8 +43,7 @@ public class Parser {
             return
         }
         self.string = string
-        var scope = ScopedString(string: string)
-        parse(inRange: nil, withDiff: nil, usingPreviousScopesString: &scope, match: callback)
+        parse(match: callback)
         self.string = ""
     }
     
@@ -68,29 +67,28 @@ public class Parser {
     /// - parameter range:      The range in which the string should be parsed.
     ///                         On nil the entire string will be parsed.
     /// - parameter diff:       Addition: "Added string", (insertionIndex, 0)
-    ///                         Deletion: nil, (deletionStart, deletionLength)
+    ///                         Deletion: "", (deletionStart, deletionLength)
     /// - parameter scopes:     Denotes
     /// - parameter callback:   The callback to call on every match of a
     ///                         pattern identifier of the language
     /// - returns: A scopedString that contains the range results of the parsing
-    ///             Or nil if the parsing was aborted.
-    func parse(inRange range: NSRange?, withDiff diff: (String?, NSRange)?, inout usingPreviousScopesString scopes: ScopedString, match callback: Callback) {
-        var endScope: Scope? = nil
-        var bounds = range ?? NSRange(location: 0, length: (string as NSString).length)
-        var scopesString = scopes
-        if range != nil && diff != nil {
+    ///            Or nil if the parsing was aborted.
+    func parse(incremental: (range: NSRange, diff: Diff, previousScopes: ScopedString)? = nil, match callback: Callback) -> ScopedString? {
+        let bounds: NSRange
+        var scopesString: ScopedString
+        var endScope: Scope?
+        if incremental != nil && incremental!.previousScopes.underlyingString != (string as NSString).stringByReplacingCharactersInRange(incremental!.diff.range, withString: incremental!.diff.change) {
+            bounds = incremental!.range
+            scopesString = incremental!.previousScopes
             endScope = scopesString.topmostScopeAtIndex(bounds.location)
-            if diff!.0 == nil {
-                scopesString.deleteCharactersInRange(diff!.1)
+            if incremental!.diff.range.length == 0 {
+                scopesString.insertString(incremental!.diff.change, atIndex: incremental!.diff.range.location)
             } else {
-                scopesString.insertString(diff!.0!, atIndex: diff!.1.location)
+                scopesString.deleteCharactersInRange(incremental!.diff.range)
             }
-            if scopesString.underlyingString != string { // recover from inconsistecy (for instance "." shortcut)
-                print("Used the emergency trick")
-                bounds = NSRange(location: 0, length: (string as NSString).length)
-                endScope = nil
-                scopesString = ScopedString(string: string)
-            }
+        } else {
+            bounds = NSRange(location: 0, length: (string as NSString).length)
+            scopesString = ScopedString(string: string)
         }
         
         var startIndex = bounds.location
@@ -100,7 +98,7 @@ public class Parser {
         while startIndex < endIndex {
             let endPattern = endScope?.attribute as! Pattern?
             guard let results = self.matchPatterns(endPattern?.subpatterns ?? language.pattern.subpatterns, withEndPatternFromPattern: endPattern, startingAtIndex: startIndex, stopIndex: endIndex) else {
-                return
+                return nil
             }
             
             if endScope != nil {
@@ -125,11 +123,13 @@ public class Parser {
                 }
             }
         }
-        scopesString.removeScopesInRange(allResults.range)
-        scopes = scopesString
-        if !aborted {
-            self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
+        
+        if aborted {
+            return nil
         }
+        scopesString.removeScopesInRange(allResults.range)
+        self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
+        return scopesString
     }
     
     //  Algorithmic notes:
@@ -175,7 +175,7 @@ public class Parser {
                     return nil
                 }
                 
-                let bestMatchForMiddle = findBestPatternInPatterns(patterns, inRange: range)
+                let bestMatchForMiddle = findMatchFromPatterns(patterns, inRange: range)
                 
                 if endPattern != nil {
                     let endMatchResult = self.matchExpression(endPattern!.end!, inRange: range, captures: endPattern!.endCaptures)
@@ -223,7 +223,7 @@ public class Parser {
     /// - returns:  The results. nil if nothing could be matched and an empty
     ///             set if something could be matched but it doesn't have any
     ///             information associated with the match.
-    private func findBestPatternInPatterns(patterns: [Pattern], inRange bounds: NSRange) -> (pattern: Pattern, start: Int)? {
+    private func findMatchFromPatterns(patterns: [Pattern], inRange bounds: NSRange) -> (pattern: Pattern, start: Int)? {
         var interestingBounds = bounds
         var bestResult: (pattern: Pattern, start: Int)?
         for pattern in patterns {
@@ -250,7 +250,7 @@ public class Parser {
                 return (pattern, beginResults.range.location)
             }
         } else if pattern.subpatterns.count >= 1 {
-            return findBestPatternInPatterns(pattern.subpatterns, inRange: bounds)
+            return findMatchFromPatterns(pattern.subpatterns, inRange: bounds)
         }
         return nil
     }
