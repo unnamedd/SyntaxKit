@@ -109,7 +109,8 @@ struct ScopedString {
         return index >= 0 && index <= baseScope.range.length
     }
     
-    mutating func addScopeAtBottom(scope: Scope) {
+    mutating func addScopeAtTop(scope: Scope) {
+        assert(scope.range.length != 0)
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false
@@ -125,7 +126,8 @@ struct ScopedString {
         }
     }
     
-    mutating func addScopeAtTop(scope: Scope) {
+    mutating func addScopeAtBottom(scope: Scope) {
+        assert(scope.range.length != 0)
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
         
         var added = false

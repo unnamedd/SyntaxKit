@@ -11,16 +11,12 @@ import SyntaxKit
 
 class IncrementalParsingTests: XCTestCase {
     
-    let parser = Parser(language: language("Swift"))
+//    let parser = Parser(language: language("Swift"))
     
     override func setUp() {
         super.setUp()
     }
-    
-    override func tearDown() {
-        super.tearDown()
-    }
-    
+        
     func testEdits() {
 //        let input = fixture("swifttest.swift", "txt")
 //        

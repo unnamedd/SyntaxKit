@@ -12,10 +12,19 @@ import SyntaxKit
 
 class SwiftBaselineHighlightingTests: XCTestCase {
     
-    let parser = AttributedParser(language: language("Swift"), theme: theme("Solarized"))
+    // MARK: - Properties
+    
+    let manager = getBundleManager()
+    var parser: AttributedParser!
+    
+    
+    // MARK: - Tests
     
     override func setUp() {
         super.setUp()
+        let swift = manager.languageWithIdentifier("source.Swift")!
+        let solarized = manager.themeWithIdentifier("Solarized")!
+        parser = AttributedParser(language: swift, theme: solarized)
     }
     
     override func tearDown() {

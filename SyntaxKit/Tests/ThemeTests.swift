@@ -13,11 +13,18 @@ class ThemeTests: XCTestCase {
     
     // MARK: - Properties
     
-    let tomorrow = theme("Tomorrow")
-    let solarized = theme("Solarized")
+    let manager = getBundleManager()
+    var tomorrow: Theme!
+    var solarized: Theme!
     
     
     // MARK: - Tests
+    
+    override func setUp() {
+        super.setUp()
+        tomorrow = manager.themeWithIdentifier("Tomorrow")
+        solarized = manager.themeWithIdentifier("Solarized")
+    }
     
     func testLoading() {
         XCTAssertEqual("82CCD69C-F1B1-4529-B39E-780F91F07604", tomorrow.UUID)

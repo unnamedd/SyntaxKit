@@ -28,6 +28,8 @@ class ScopedStringTests: XCTestCase {
         
         let newScope1 = Scope(identifier: "bogus", range: NSRange(location: 1, length: 3), attribute: nil)
         newScopedString.addScopeAtTop(newScope1)
+//        print(newScopedString.prettyRepresentation())
+        
         XCTAssert(newScopedString.numberOfScopes() == 2)
         XCTAssert(newScopedString.numberOfLevels() == 2)
         
@@ -37,15 +39,17 @@ class ScopedStringTests: XCTestCase {
         
         let newScope2 = Scope(identifier: "bogus2", range: NSRange(location: 2, length: 1), attribute: nil)
         newScopedString.addScopeAtTop(newScope2)
+//        print(newScopedString.prettyRepresentation())
+
         XCTAssert(newScopedString.numberOfScopes() == 3)
         XCTAssert(newScopedString.numberOfLevels() == 3)
         
         XCTAssert(newScopedString.topmostScopeAtIndex(1) == newScope1)
         XCTAssert(newScopedString.topmostScopeAtIndex(2) == newScope2)
-        
         XCTAssertFalse(newScopedString.numberOfScopes() == 1)
         
         newScopedString.deleteCharactersInRange(NSRange(location: 2, length: 1))
+//        print(newScopedString.prettyRepresentation())
         XCTAssert(newScopedString.underlyingString == "Tet")
         XCTAssert(newScopedString.numberOfScopes() == 2)
         XCTAssert(newScopedString.numberOfLevels() == 2)
@@ -53,18 +57,12 @@ class ScopedStringTests: XCTestCase {
         XCTAssert(newScopedString.topmostScopeAtIndex(1).range == NSRange(location: 1, length: 2))
         
         newScopedString.insertString("ssssss", atIndex: 2)
+//        print(newScopedString.prettyRepresentation())
         XCTAssert(newScopedString.underlyingString == "Tesssssst")
         XCTAssert(newScopedString.numberOfScopes() == 2)
-        
-        let newScope3 = Scope(identifier: "zeroLengthScope1", range: NSRange(location: 0, length: 0), attribute: nil)
-        newScopedString.addScopeAtTop(newScope3)
-        let newScope4 = Scope(identifier: "zeroLengthScope2", range: NSRange(location: 3, length: 0), attribute: nil)
-        newScopedString.addScopeAtTop(newScope4)
-        XCTAssert(newScopedString.numberOfScopes() == 4)
-        XCTAssert(newScopedString.topmostScopeAtIndex(0).patternIdentifier == "zeroLengthScope1")
-        
+                
         newScopedString.removeScopesInRange(NSRange(location: 0, length: 1))
-        XCTAssert(newScopedString.numberOfScopes() == 3)
+        XCTAssert(newScopedString.numberOfScopes() == 2)
         
         XCTAssert(newScopedString.topmostScopeAtIndex(2).range == NSRange(location: 1, length: 8))
     }

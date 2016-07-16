@@ -552,7 +552,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?!\G)</string>
+					<string>\n</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -567,7 +567,7 @@
 								</dict>
 							</dict>
 							<key>end</key>
-							<string>\n</string>
+							<string>(?=\n)</string>
 							<key>name</key>
 							<string>comment.line.double-slash.swift</string>
 						</dict>
@@ -586,7 +586,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?!\G)</string>
+					<string>\n</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -601,7 +601,7 @@
 								</dict>
 							</dict>
 							<key>end</key>
-							<string>\n</string>
+							<string>(?=\n)</string>
 							<key>name</key>
 							<string>comment.line.triple-slash.swift</string>
 						</dict>

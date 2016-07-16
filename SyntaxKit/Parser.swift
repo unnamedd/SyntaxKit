@@ -6,9 +6,6 @@
 //  patterns. It tries to match parsing behavior of TextMate as closely as
 //  possible.
 //
-//  The parsed string is stored as a property. This is so the regex library
-//  recognizes subsequent matches as such.
-//
 //  Created by Sam Soffes on 9/19/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
@@ -174,9 +171,11 @@ public class Parser {
                     } else {
                         resultForMiddle = matchAfterBeginOfPattern(bestMatchForMiddle!.pattern, beginResults: bestMatchForMiddle!.match, inRange: range)
                     }
+                    
                     if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
                         break
                     }
+                    
                     result.addResults(resultForMiddle!)
                     let newStart = NSMaxRange(resultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
@@ -320,7 +319,7 @@ public class Parser {
         callback(scope: Language.globalScope, range: results.range)
         for result in results.results where result.range.length > 0 {
             if result.attribute != nil {
-                scopesString.addScopeAtBottom(result as Scope)
+                scopesString.addScopeAtTop(result as Scope)
             } else if result.patternIdentifier != "" {
                 callback(scope: result.patternIdentifier, range: result.range)
             }

@@ -13,10 +13,16 @@ class LanguageTests: XCTestCase {
     
     // MARK: - Properties
     
-    let yaml = language("YAML")
+    let manager = getBundleManager()
+    var yaml: Language!
     
     
     // MARK: - Tests
+    
+    override func setUp() {
+        super.setUp()
+        yaml = manager.languageWithIdentifier("source.YAML")
+    }
     
     func testLoading() {
         XCTAssertEqual("B0C44228-4F1F-11DA-AFF2-000A95AF0064", yaml.UUID)

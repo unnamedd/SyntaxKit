@@ -13,10 +13,17 @@ class ParserTests: XCTestCase {
     
     // MARK: - Properties
     
-    let parser = Parser(language: language("YAML"))
-    
+    var parser: Parser!
+    let manager = getBundleManager()
     
     // MARK: - Tests
+    
+    override func setUp() {
+        super.setUp()
+        let yaml = manager.languageWithIdentifier("source.YAML")!
+        parser = Parser(language: yaml)
+    }
+    
     
     func testParsingBeginEnd() {
         var stringQuoted: NSRange?
@@ -42,7 +49,7 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(NSMakeRange(19, 1), punctuationEnd)
     }
     
-    func testParsingBeginEndCrap() {
+    func testParsingBeginEndGarbage() {
         var stringQuoted: NSRange?
         
         parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (result: (scope: String, range: NSRange)) in
@@ -60,7 +67,8 @@ class ParserTests: XCTestCase {
     }
     
     func testRuby() {
-        let parser = Parser(language: language("Ruby"))
+        let ruby = manager.languageWithIdentifier("source.Ruby")!
+        parser = Parser(language: ruby)
         let input = fixture("test.rb", "txt")
         parser.parse(input, match: { _ in return })
     }

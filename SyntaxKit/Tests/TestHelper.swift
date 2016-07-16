@@ -15,19 +15,12 @@ func fixture(name: String, _ type: String) -> String! {
     return try! String(contentsOfFile: path)
 }
 
-//func language(name: String) -> Language! {
-//    let path = NSBundle(forClass: LanguageTests.self).pathForResource(name, ofType: "tmLanguage")!
-//    let plist = NSDictionary(contentsOfFile: path)! as [NSObject: AnyObject]
-//    var language = Language(dictionary: plist)!
-//    language.validateWithHelperLanguages([])
-//    return language
-//}
-
-//func theme(name: String) -> Theme! {
-//    let path = NSBundle(forClass: LanguageTests.self).pathForResource(name, ofType: "tmTheme")!
-//    let plist = NSDictionary(contentsOfFile: path)! as [NSObject: AnyObject]
-//    return Theme(dictionary: plist)!
-//}
+func getBundleManager() -> BundleManager {
+    return BundleManager() { identifier, isLanguage in
+        let name = isLanguage ? identifier.componentsSeparatedByString(".")[1] + ".tmLanguage" : identifier + ".tmTheme"
+        return NSBundle(forClass: LanguageTests.self).bundleURL.URLByAppendingPathComponent(name)
+    }
+}
 
 func simpleTheme() -> Theme! {
     return Theme(dictionary: [

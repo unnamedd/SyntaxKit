@@ -13,10 +13,17 @@ class AttributedParserTests: XCTestCase {
     
     // MARK: - Properties
     
-    let parser = AttributedParser(language: language("YAML"), theme: simpleTheme())
+    let manager = getBundleManager()
+    var parser: AttributedParser!
     
     
     // MARK: - Tests
+    
+    override func setUp() {
+        super.setUp()
+        let yaml = manager.languageWithIdentifier("source.YAML")!
+        parser = AttributedParser(language: yaml, theme: simpleTheme())
+    }
     
     func testParsing() {
         let string = parser.attributedStringForString("title: Hello World\ncount: 42\n")
