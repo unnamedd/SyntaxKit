@@ -35,6 +35,9 @@ class ReferenceManager {
         var results: [Pattern] = []
         for rawPattern in patterns {
             if let include = rawPattern["include"] as? String {
+                if include == "#inline" {
+                    print("Here")
+                }
                 let reference = Include(reference: include, inRepository: repository, parent: caller, bundleManager: bundleManager!)
                 self.includes.append(reference)
                 results.append(reference)

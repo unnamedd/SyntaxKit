@@ -150,7 +150,7 @@ class Include: Pattern {
     private var _type: referenceType
     private let repositoryRef: String?
     private let languageRef: String?
-    private weak var associatedRepository: Repository?
+    private var associatedRepository: Repository?
     
     
     // MARK: - Initializers

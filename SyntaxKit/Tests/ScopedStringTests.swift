@@ -21,50 +21,50 @@ class ScopedStringTests: XCTestCase {
     
     func testScopesString() {
         var newScopedString = ScopedString(string: "Test")
-        XCTAssert(newScopedString.numberOfScopes() == 1)
-        XCTAssert(newScopedString.numberOfLevels() == 1)
+        XCTAssertEqual(newScopedString.numberOfScopes(), 1)
+        XCTAssertEqual(newScopedString.numberOfLevels(), 1)
         
-        XCTAssert(newScopedString.topmostScopeAtIndex(2) == newScopedString.baseScope)
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(2), newScopedString.baseScope)
         
         let newScope1 = Scope(identifier: "bogus", range: NSRange(location: 1, length: 3), attribute: nil)
         newScopedString.addScopeAtTop(newScope1)
 //        print(newScopedString.prettyRepresentation())
         
-        XCTAssert(newScopedString.numberOfScopes() == 2)
-        XCTAssert(newScopedString.numberOfLevels() == 2)
+        XCTAssertEqual(newScopedString.numberOfScopes(), 2)
+        XCTAssertEqual(newScopedString.numberOfLevels(), 2)
         
-        XCTAssert(newScopedString.topmostScopeAtIndex(0) == newScopedString.baseScope)
-        XCTAssert(newScopedString.topmostScopeAtIndex(1) == newScope1)
-        XCTAssert(newScopedString.lowerScopeForScope(newScope1, AtIndex: 1) == newScopedString.baseScope)
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(0), newScopedString.baseScope)
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(1), newScope1)
+        XCTAssertEqual(newScopedString.lowerScopeForScope(newScope1, AtIndex: 1), newScopedString.baseScope)
         
         let newScope2 = Scope(identifier: "bogus2", range: NSRange(location: 2, length: 1), attribute: nil)
         newScopedString.addScopeAtTop(newScope2)
 //        print(newScopedString.prettyRepresentation())
 
-        XCTAssert(newScopedString.numberOfScopes() == 3)
-        XCTAssert(newScopedString.numberOfLevels() == 3)
+        XCTAssertEqual(newScopedString.numberOfScopes(), 3)
+        XCTAssertEqual(newScopedString.numberOfLevels(), 3)
         
-        XCTAssert(newScopedString.topmostScopeAtIndex(1) == newScope1)
-        XCTAssert(newScopedString.topmostScopeAtIndex(2) == newScope2)
-        XCTAssertFalse(newScopedString.numberOfScopes() == 1)
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(1), newScope1)
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(2), newScope2)
+        XCTAssertNotEqual(newScopedString.numberOfScopes(), 1)
         
         newScopedString.deleteCharactersInRange(NSRange(location: 2, length: 1))
 //        print(newScopedString.prettyRepresentation())
-        XCTAssert(newScopedString.underlyingString == "Tet")
-        XCTAssert(newScopedString.numberOfScopes() == 2)
-        XCTAssert(newScopedString.numberOfLevels() == 2)
+        XCTAssertEqual(newScopedString.underlyingString, "Tet")
+        XCTAssertEqual(newScopedString.numberOfScopes(), 2)
+        XCTAssertEqual(newScopedString.numberOfLevels(), 2)
         
-        XCTAssert(newScopedString.topmostScopeAtIndex(1).range == NSRange(location: 1, length: 2))
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(1).range, NSRange(location: 1, length: 2))
         
         newScopedString.insertString("ssssss", atIndex: 2)
 //        print(newScopedString.prettyRepresentation())
-        XCTAssert(newScopedString.underlyingString == "Tesssssst")
-        XCTAssert(newScopedString.numberOfScopes() == 2)
+        XCTAssertEqual(newScopedString.underlyingString, "Tesssssst")
+        XCTAssertEqual(newScopedString.numberOfScopes(), 2)
                 
         newScopedString.removeScopesInRange(NSRange(location: 0, length: 1))
-        XCTAssert(newScopedString.numberOfScopes() == 2)
+        XCTAssertEqual(newScopedString.numberOfScopes(), 2)
         
-        XCTAssert(newScopedString.topmostScopeAtIndex(2).range == NSRange(location: 1, length: 8))
+        XCTAssertEqual(newScopedString.topmostScopeAtIndex(2).range, NSRange(location: 1, length: 8))
     }
     
     func testRangeExtension() {
