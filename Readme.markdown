@@ -83,6 +83,9 @@ let attributedString = attributedParser.attributedStringForString(input)
 
 Easy as that. This method takes an optional `baseAttributes` parameter to customize how the string is created. This is great if you want to specify a font, etc.
 
+### Parsing Operations
+
+There is also a `AttributedParsingOperation` subclass of NSOperation that facilitates mutithreaded parsing.
 
 ### Custom Parsers
 
