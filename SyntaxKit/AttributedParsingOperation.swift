@@ -134,10 +134,10 @@ public class AttributedParsingOperation: NSOperation {
     
     // MARK: - Change Processing
     
-    //  Implementation notes:
-    //  If change occurred in a block reparse the lines in which the change
-    //  happened and the range of the block from this point on. If the change
-    //  occurred in the global scope just reparse the lines that changed.
+    // Implementation notes:
+    // If change occurred in a block reparse the lines in which the change
+    // happened and the range of the block from this point on. If the change
+    // occurred in the global scope just reparse the lines that changed.
     
     /// Returns the range in the given string that should be re-parsed after the
     /// given change.

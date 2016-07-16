@@ -45,7 +45,7 @@ public class BundleManager {
     // MARK: - Initializers
     
     /// Used to initialize the default manager. Unless this is called the
-    //  defaultManager property will be set to nil.
+    /// defaultManager property will be set to nil.
     ///
     /// - parameter callback:   The callback used to find the location of the
     ///                         textmate files.
