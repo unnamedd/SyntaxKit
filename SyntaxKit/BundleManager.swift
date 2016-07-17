@@ -70,10 +70,10 @@ public class BundleManager {
         }
         
         self.dependencies = []
-        var language = self.getRawLanguageWithIdentifier(identifier)!
-        language.validateWithHelperLanguages(self.dependencies)
+        var language = self.getRawLanguageWithIdentifier(identifier)
+        language?.validateWithHelperLanguages(self.dependencies)
         
-        if languageCaching {
+        if languageCaching && language != nil {
             self.cachedLanguages[identifier] = language
         }
         

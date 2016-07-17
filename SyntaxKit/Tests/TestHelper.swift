@@ -17,8 +17,9 @@ func fixture(name: String, _ type: String) -> String! {
 
 func getBundleManager() -> BundleManager {
     return BundleManager() { identifier, isLanguage in
-        let name = isLanguage ? identifier.componentsSeparatedByString(".")[1] + ".tmLanguage" : identifier + ".tmTheme"
-        return NSBundle(forClass: LanguageTests.self).bundleURL.URLByAppendingPathComponent(name)
+        let name = isLanguage ? identifier.componentsSeparatedByString(".")[1] : identifier
+        let ext = isLanguage ? ".tmLanguage" : ".tmTheme"
+        return NSBundle(forClass: LanguageTests.self).URLForResource(name.capitalizedString, withExtension: ext) ?? NSURL()
     }
 }
 
