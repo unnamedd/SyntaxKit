@@ -87,10 +87,10 @@ public class AttributedParsingOperation: NSOperation {
         super.init()
     }
     
-    public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, callback: OperationCallback) {
+    public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, callback: OperationCallback? = nil) {
         parser = previousOperation.parser
         parser.string = string
-        operationCallback = callback
+        operationCallback = callback ?? previousOperation.operationCallback
         scopedStringResult = previousOperation.scopedStringResult
         
         super.init()

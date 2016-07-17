@@ -11,104 +11,106 @@ import SyntaxKit
 
 class IncrementalParsingTests: XCTestCase {
     
-//    let parser = Parser(language: language("Swift"))
+    // MARK: - Properties
+    
+    let manager = getBundleManager()
+    var parsingOperation: AttributedParsingOperation!
+    var theme: Theme!
+    var language: Language!
+    var totalRange: NSRange?
+    var input = ""
+    
+    
+    // MARK: - Tests
     
     override func setUp() {
         super.setUp()
+        language = manager.languageWithIdentifier("Source.swift")!
+        theme = manager.themeWithIdentifier("tomorrow")!
+
     }
-        
+    
     func testEdits() {
-//        let input = fixture("swifttest.swift", "txt")
-//        
-//        var rangeToParse = parser.outdatedRangeForChangeInString(input, changeIsInsertion: true, changedRange: NSRange(location: 0, length: 5))
-//        XCTAssertEqual(rangeToParse, nil)
-//        
-//        parser.parse(input, inRange: rangeToParse) { _ in return }
-//        
-//        var newInput = stringByReplacingRange(NSRange(location: 20, length: 0), inString: input, withString: " ")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 20, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 3, length: 136))
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 162, length: 0), inString: input, withString: "i")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 162, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 5))
-//        
-//        parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 162, length: 1), inString: newInput, withString: "")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: false, changedRange: NSRange(location: 162, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 4))
-//        
-//        parser.parse(input, inRange: rangeToParse) { _ in return }
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 160, length: 0), inString: input, withString: "756")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 160, length: 3))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 7))
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 159, length: 0), inString: input, withString: "756")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 159, length: 3))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 159, length: 7))
+        input = fixture("swifttest.swift", "txt")
+        parsingOperation = getParsingOperation()
+
+        parsingOperation.main()
+        XCTAssertEqual(totalRange!, NSRange(location: 0, length: (input as NSString).length))
+        
+        testInsertion("i", location: 162, expectedRange: NSRange(location: 159, length: 5))
+        
+        testDeletion(NSRange(location: 162, length: 1), expectedRange: NSRange(location: 159, length: 4))
+        
+        testInsertion("756", location: 160, expectedRange: NSRange(location: 159, length: 7))
     }
     
     func testEdgeCase() {
-//        let input = "// test.swift\n/**"
-//        
-//        parser.parse(input) { _ in return }
-//        
-//        var newInput = stringByReplacingRange(NSRange(location: 2, length: 1), inString: input, withString: "")
-//        var rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: false, changedRange: NSRange(location: 2, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 0, length: 13))
-//        
-//        parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 2, length: 0), inString: newInput, withString: " ")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 2, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 0, length: 14))
-//        
-//        parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//        
-//        newInput = stringByReplacingRange(NSRange(location: 17, length: 0), inString: newInput, withString: "\n")
-//        rangeToParse = parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 17, length: 1))
-//        XCTAssertEqual(rangeToParse, NSRange(location: 14, length: 4))
-//        
-//        parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//        
-//        parser.parse("") { _ in return }
+        input = "// test.swift\n/**"
+        parsingOperation = getParsingOperation()
+        
+        parsingOperation.main()
+        XCTAssertEqual(totalRange, NSRange(location: 0, length: 17))
+        
+        testDeletion(NSRange(location: 2, length: 1), expectedRange: NSRange(location: 0, length: 13))
+
+        testInsertion(" ", location: 2, expectedRange: NSRange(location: 0, length: 14))
+        
+        testInsertion("\n", location: 17, expectedRange: NSRange(location: 14, length: 4))
     }
     
     func testPerformanceInScope() {
-//        let input = fixture("swifttest.swift", "txt")
-//        self.parser.parse(input) { _ in return }
-//        
-//        self.measureBlock {
-//            let newInput = stringByReplacingRange(NSRange(location: 239, length: 0), inString: input, withString: "Tests")
-//            var rangeToParse = self.parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: true, changedRange: NSRange(location: 239, length: 5))
-//            XCTAssertEqual(rangeToParse, NSRange(location: 230, length: 24))
-//            
-//            self.parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//            
-//            rangeToParse = self.parser.outdatedRangeForChangeInString(input, changeIsInsertion: false, changedRange: NSRange(location: 239, length: 5))
-//            XCTAssertEqual(rangeToParse, NSRange(location: 230, length: 19))
-//            
-//            self.parser.parse(input, inRange: rangeToParse) { _ in return }
-//        }
+        input = fixture("swifttest.swift", "txt")
+        parsingOperation = getParsingOperation()
+        
+        parsingOperation.main()
+        
+        self.measureBlock {
+            self.testInsertion("Tests", location: 239, expectedRange: NSRange(location: 230, length: 24))
+            
+            self.testDeletion(NSRange(location: 239, length: 5), expectedRange: NSRange(location: 230, length: 19))
+        }
     }
     
     func testPerformanceEdgeCases() {
-//        let input = fixture("swifttest.swift", "txt")
-//        self.parser.parse(input) { _ in return }
-//        
-//        self.measureBlock {
-//            let newInput = stringByReplacingRange(NSRange(location: 139, length: 1), inString: input, withString: "")
-//            var rangeToParse = self.parser.outdatedRangeForChangeInString(newInput, changeIsInsertion: false, changedRange: NSRange(location: 139, length: 1))
-//            XCTAssertEqual(rangeToParse, NSRange(location: 139, length: 22))
-//            
-//            self.parser.parse(newInput, inRange: rangeToParse) { _ in return }
-//            
-//            rangeToParse = self.parser.outdatedRangeForChangeInString(input, changeIsInsertion: true, changedRange: NSRange(location: 139, length: 1))
-//            XCTAssertEqual(rangeToParse, NSRange(location: 139, length: 4))
-//            
-//            self.parser.parse(input, inRange: rangeToParse) { _ in return }
-//        }
+        input = fixture("swifttest.swift", "txt")
+        parsingOperation = getParsingOperation()
+        
+        parsingOperation.main()
+        
+        self.measureBlock {
+            self.testDeletion(NSRange(location: 139, length: 1), expectedRange: NSRange(location: 139, length: 22))
+
+            self.testInsertion("/", location: 139, expectedRange: NSRange(location: 139, length: 23))
+        }
+    }
+    
+    private func getParsingOperation() -> AttributedParsingOperation {
+        return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)]) in
+            for result in results {
+                if self.totalRange == nil {
+                    self.totalRange = result.range
+                } else {
+                    self.totalRange = NSUnionRange(self.totalRange!, result.range)
+                }
+            }
+        }
+    }
+    
+    private func testInsertion(string: String, location: Int, expectedRange expected: NSRange) {
+        input = stringByReplacingRange(NSRange(location: location, length: 0), inString: input, withString: string)
+        parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: true, changedRange: NSRange(location: location, length: (string as NSString).length))
+        
+        totalRange = nil
+        parsingOperation.main()
+        XCTAssertEqual(totalRange!, expected)
+    }
+    
+    private func testDeletion(range: NSRange, expectedRange expected: NSRange) {
+        input = stringByReplacingRange(range, inString: input, withString: "")
+        parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: false, changedRange: range)
+        
+        totalRange = nil
+        parsingOperation.main()
+        XCTAssertEqual(totalRange, expected)
     }
 }
