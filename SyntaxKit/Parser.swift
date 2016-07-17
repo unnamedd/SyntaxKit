@@ -35,9 +35,8 @@ public class Parser {
     // MARK: - Public
     
     public func parse(string: String, match callback: Callback) {
-        if aborted {
-            return
-        }
+        if aborted { return }
+        
         self.string = string
         parse(match: callback)
         self.string = ""
@@ -109,9 +108,8 @@ public class Parser {
             }
         }
         
-        if aborted {
-            return nil
-        }
+        if aborted { return nil }
+        
         scopesString.removeScopesInRange(allResults.range)
         self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
         return scopesString
@@ -149,9 +147,7 @@ public class Parser {
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
             
             while range.length > 0 {
-                if aborted {
-                    return nil
-                }
+                if aborted { return nil }
                 
                 let bestMatchForMiddle = findMatchFromPatterns(pattern.subpatterns, inRange: range)
                 
@@ -280,7 +276,7 @@ public class Parser {
     ///             could not match any part of the string. It may also be empty
     ///             and only contain range information to show what it matched.
     private func matchExpression(regularExpression: NSRegularExpression, inRange bounds: NSRange, captures: CaptureCollection?, baseSelector: String? = nil) -> ResultSet? {
-        guard let result = regularExpression.matchesInString(string, options: [.WithTransparentBounds], range: bounds).first else {
+        guard let result = regularExpression.firstMatchInString(string, options: [.WithTransparentBounds], range: bounds) else {
             return nil
         }
         

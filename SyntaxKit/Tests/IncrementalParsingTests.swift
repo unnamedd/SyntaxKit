@@ -84,6 +84,9 @@ class IncrementalParsingTests: XCTestCase {
         }
     }
     
+    
+    // MARK: - Helpers
+    
     private func getParsingOperation() -> AttributedParsingOperation {
         return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)]) in
             for result in results {

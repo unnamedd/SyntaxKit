@@ -27,10 +27,6 @@ class SwiftBaselineHighlightingTests: XCTestCase {
         parser = AttributedParser(language: swift, theme: solarized)
     }
     
-    override func tearDown() {
-        super.tearDown()
-    }
-    
     func testColors() {
         let input = fixture("swifttest.swift", "txt")
         let string = parser.attributedStringForString(input)
