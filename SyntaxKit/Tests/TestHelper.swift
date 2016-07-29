@@ -56,7 +56,7 @@ func stringByReplacingRange(range: NSRange, inString string: String, withString 
     return newInput.copy() as! String
 }
 
-#if os(iOS)
+#if !os(OSX)
 import UIKit
 extension Color {
     var redComponent: CGFloat {
@@ -64,19 +64,19 @@ extension Color {
         getRed(&value, green: nil, blue: nil, alpha: nil)
         return value
     }
-    
+
     var greenComponent: CGFloat {
         var value: CGFloat = 0.0
         getRed(nil, green: &value, blue: nil, alpha: nil)
         return value
     }
-    
+
     var blueComponent: CGFloat {
         var value: CGFloat = 0.0
         getRed(nil, green: nil, blue: &value, alpha: nil)
         return value
     }
-    
+
     var alphaComponent: CGFloat {
         var value: CGFloat = 0.0
         getRed(nil, green: nil, blue: nil, alpha: &value)

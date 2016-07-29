@@ -13,38 +13,38 @@
 public class Parser {
     
     // MARK: - Types
-    
+
     public typealias Callback = (scope: String, range: NSRange) -> Void
-    
-    
+
+
     // MARK: - Properties
-    
+
     public let language: Language
-    
+
     var string = ""
     var aborted = false
-    
-    
+
+
     // MARK: - Initializers
-    
+
     public init(language: Language) {
         self.language = language
     }
-    
-    
+
+
     // MARK: - Public
-    
+
     public func parse(string: String, match callback: Callback) {
         if aborted { return }
-        
+
         self.string = string
         parse(match: callback)
         self.string = ""
     }
-    
-    
+
+
     // MARK: - Private
-    
+
     /// Parses the string. Supports incremental parsing.
     ///
     /// The given range mey be exceeded if necessary to match a pattern entirely.
@@ -74,21 +74,21 @@ public class Parser {
             bounds = NSRange(location: 0, length: (string as NSString).length)
             scopesString = ScopedString(string: string)
         }
-        
+
         var startIndex = bounds.location
         var endIndex = NSMaxRange(bounds)
         let allResults = ResultSet(startingRange: bounds)
-        
+
         while startIndex < endIndex {
             let endPattern = endScope?.attribute as! Pattern?
             guard let results = self.matchSubpatternsOfPattern(endPattern ?? language.pattern, inRange: NSRange(location: startIndex, length: endIndex - startIndex)) else {
                 return nil
             }
-            
+
             if endScope != nil {
                 allResults.addResult(Result(identifier: endScope!.patternIdentifier, range: results.range))
             }
-            
+
             if results.range.length != 0 {
                 allResults.addResults(results)
                 startIndex = NSMaxRange(results.range)
@@ -98,7 +98,7 @@ public class Parser {
             } else {
                 startIndex = endIndex
             }
-            
+
             if startIndex > endIndex && scopesString.isInString(startIndex + 1) {
                 let scopeAtIndex = scopesString.topmostScopeAtIndex(startIndex + 1)
                 if endScope == nil && scopesString.levelForScope(scopeAtIndex) > 0 ||
@@ -107,14 +107,14 @@ public class Parser {
                 }
             }
         }
-        
+
         if aborted { return nil }
-        
+
         scopesString.removeScopesInRange(allResults.range)
         self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
         return scopesString
     }
-    
+
     // Algorithmic notes:
     // A pattern expression can not match a substring spanning multiple lines
     // so in the outer loop the string is decomposed into its lines.
@@ -123,11 +123,11 @@ public class Parser {
     // This procedure is repeated with the subsequent lines until it has either
     // matched the end pattern or the string is consumed entirely.
     // If it can find neither in a line it moves to the next one.
-    
+
     // Implementation note:
     // The matching of the middle part may return a match that goes beyond the
     // given range. This is intentional.
-    
+
     /// Matches subpatterns of the given pattern in the input.
     ///
     /// - parameter pattern:    The patterns whose subpatterns should be matched
@@ -141,16 +141,16 @@ public class Parser {
         var lineStart = bounds.location
         var lineEnd = bounds.location
         let result = ResultSet(startingRange: NSRange(location: bounds.location, length: 0))
-        
+
         while lineEnd < stop {
             (string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSMakeRange(lineEnd, 0))
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
-            
+
             while range.length > 0 {
                 if aborted { return nil }
-                
+
                 let bestMatchForMiddle = findMatchFromPatterns(pattern.subpatterns, inRange: range)
-                
+
                 if pattern.end != nil {
                     let endMatchResult = self.matchExpression(pattern.end!, inRange: range, captures: pattern.endCaptures)
                     if endMatchResult != nil && (bestMatchForMiddle == nil || bestMatchForMiddle != nil &&
@@ -159,7 +159,7 @@ public class Parser {
                         return result
                     }
                 }
-                
+
                 if bestMatchForMiddle != nil {
                     let resultForMiddle: ResultSet?
                     if bestMatchForMiddle!.pattern.match != nil {
@@ -167,11 +167,11 @@ public class Parser {
                     } else {
                         resultForMiddle = matchAfterBeginOfPattern(bestMatchForMiddle!.pattern, beginResults: bestMatchForMiddle!.match, inRange: range)
                     }
-                    
+
                     if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
                         break
                     }
-                    
+
                     result.addResults(resultForMiddle!)
                     let newStart = NSMaxRange(resultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
@@ -180,14 +180,14 @@ public class Parser {
                     break
                 }
             }
-            
+
             lineStart = lineEnd
         }
-        
+
         result.extendWithRange(bounds)
         return result
     }
-    
+
     /// Helper method that iterates over the given patterns and tries to match
     /// them. Returns the matched pattern with the highest priority
     /// (first criterion: matched sooner, second: higher up the list).
@@ -213,7 +213,7 @@ public class Parser {
         }
         return bestResult
     }
-    
+
     /// Matches a single pattern in the string in the given range
     ///
     /// - returns: The result of the match. Nil if unsuccessful
@@ -233,11 +233,11 @@ public class Parser {
         }
         return nil
     }
-    
+
     // Implementation note:
     // The order in which the beginning middle and end are added to the final
     // result matters.
-    
+
     /// Matches the middle and end of the given pattern
     ///
     /// - parameter pattern:    The pattern whose subpatterns and end pattern
@@ -251,7 +251,7 @@ public class Parser {
             guard let endResults = matchSubpatternsOfPattern(pattern, inRange: NSRange(location: newLocation, length: (string as NSString).length - newLocation)) else {
                 return nil
             }
-            
+
             let result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
                 result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(begin.range, endResults.range)))
@@ -261,7 +261,7 @@ public class Parser {
             result.addResults(endResults)
             return result
     }
-    
+
     /// Matches a given regular expression in a String and returns range
     /// information for the captures
     ///
@@ -279,12 +279,12 @@ public class Parser {
         guard let result = regularExpression.firstMatchInString(string, options: [.WithTransparentBounds], range: bounds) else {
             return nil
         }
-        
+
         let resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {
             resultSet.addResult(Result(identifier: baseSelector!, range: result.range))
         }
-        
+
         if let captures = captures {
             for index in captures.captureIndexes {
                 if result.numberOfRanges <= Int(index) {
@@ -295,16 +295,16 @@ public class Parser {
                 if range.location == NSNotFound {
                     continue
                 }
-                
+
                 if let scope = captures[index]?.name {
                     resultSet.addResult(Result(identifier: scope, range: range))
                 }
             }
         }
-        
+
         return resultSet
     }
-    
+
     /// Uses the callback to communicate the result of the parsing pass back
     /// to the caller of parse.
     ///

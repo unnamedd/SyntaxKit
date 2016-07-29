@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2122A6DD1B22B9320006409B"
+               BlueprintIdentifier = "211826D91D257A71003F2BF2"
                BuildableName = "SyntaxKit.framework"
-               BlueprintName = "SyntaxKit-OSX"
+               BlueprintName = "SyntaxKit-tvOS"
                ReferencedContainer = "container:SyntaxKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -26,16 +26,15 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      codeCoverageEnabled = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2122A6E81B22B9320006409B"
-               BuildableName = "SyntaxKitTests-OSX.xctest"
-               BlueprintName = "SyntaxKitTests-OSX"
+               BlueprintIdentifier = "211826E21D257A71003F2BF2"
+               BuildableName = "SyntaxKitTests.xctest"
+               BlueprintName = "SyntaxKitTests-tvOS"
                ReferencedContainer = "container:SyntaxKit.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -43,9 +42,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2122A6DD1B22B9320006409B"
+            BlueprintIdentifier = "211826D91D257A71003F2BF2"
             BuildableName = "SyntaxKit.framework"
-            BlueprintName = "SyntaxKit-OSX"
+            BlueprintName = "SyntaxKit-tvOS"
             ReferencedContainer = "container:SyntaxKit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -65,9 +64,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2122A6DD1B22B9320006409B"
+            BlueprintIdentifier = "211826D91D257A71003F2BF2"
             BuildableName = "SyntaxKit.framework"
-            BlueprintName = "SyntaxKit-OSX"
+            BlueprintName = "SyntaxKit-tvOS"
             ReferencedContainer = "container:SyntaxKit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -83,9 +82,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2122A6DD1B22B9320006409B"
+            BlueprintIdentifier = "211826D91D257A71003F2BF2"
             BuildableName = "SyntaxKit.framework"
-            BlueprintName = "SyntaxKit-OSX"
+            BlueprintName = "SyntaxKit-tvOS"
             ReferencedContainer = "container:SyntaxKit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
