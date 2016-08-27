@@ -11,7 +11,7 @@
 //
 
 public class Parser {
-    
+
     // MARK: - Types
 
     public typealias Callback = (scope: String, range: NSRange) -> Void
@@ -35,7 +35,9 @@ public class Parser {
     // MARK: - Public
 
     public func parse(string: String, match callback: Callback) {
-        if aborted { return }
+        if aborted {
+            return
+        }
 
         self.string = string
         parse(match: callback)
@@ -93,7 +95,7 @@ public class Parser {
                 allResults.addResults(results)
                 startIndex = NSMaxRange(results.range)
                 if endScope != nil {
-                    endScope = scopesString.lowerScopeForScope(endScope!, AtIndex: startIndex)
+                    endScope = scopesString.lowerScopeForScope(endScope!, atIndex: startIndex)
                 }
             } else {
                 startIndex = endIndex
@@ -108,7 +110,9 @@ public class Parser {
             }
         }
 
-        if aborted { return nil }
+        if aborted {
+            return nil
+        }
 
         scopesString.removeScopesInRange(allResults.range)
         self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
@@ -147,7 +151,9 @@ public class Parser {
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
 
             while range.length > 0 {
-                if aborted { return nil }
+                if aborted {
+                    return nil
+                }
 
                 let bestMatchForMiddle = findMatchFromPatterns(pattern.subpatterns, inRange: range)
 

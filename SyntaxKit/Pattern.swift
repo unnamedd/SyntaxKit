@@ -21,9 +21,9 @@
 
 @objc(SKPattern)
 class Pattern: NSObject {
-    
+
     // MARK: - Properties
-    
+
     var name: String?                       { return _name }
     var match: NSRegularExpression?         { return _match }
     var captures: CaptureCollection?        { return _captures }
@@ -34,7 +34,7 @@ class Pattern: NSObject {
     var applyEndPatternLast: Bool           { return _applyEndPatternLast}
     var parent: Pattern?                    { return _parent }
     var subpatterns: [Pattern] = []
-    
+
     private var _name: String?
     private var _match: NSRegularExpression?
     private var _captures: CaptureCollection?
@@ -44,44 +44,44 @@ class Pattern: NSObject {
     private var _endCaptures: CaptureCollection?
     private var _applyEndPatternLast = false
     private weak var _parent: Pattern?
-    
+
     private let debug = true
-    
-    
+
+
     // MARK: - Initializers
-    
+
     init?(dictionary: [NSObject: AnyObject], parent: Pattern?, withRepository repository: Repository?, withReferenceManager refman: ReferenceManager) {
         super.init()
         _parent = parent
         _name = dictionary["name"] as? String
-        
+
         if let matchExpr = dictionary["match"] as? String {
-            _match = try? NSRegularExpression(pattern: matchExpr, options:[.AnchorsMatchLines])
+            _match = try? NSRegularExpression(pattern: matchExpr, options: [.AnchorsMatchLines])
             if debug && self.match == nil {
                 print("Problem parsing match expression \(matchExpr)")
             }
         }
-        
+
         if let beginExpr = dictionary["begin"] as? String {
-            _begin = try? NSRegularExpression(pattern: beginExpr, options:[.AnchorsMatchLines])
+            _begin = try? NSRegularExpression(pattern: beginExpr, options: [.AnchorsMatchLines])
             if debug && self.begin == nil {
                 print("Problem parsing begin expression \(beginExpr)")
             }
         }
-        
+
         if let endExpr = dictionary["end"] as? String {
-            _end = try? NSRegularExpression(pattern: endExpr, options:[.AnchorsMatchLines])
+            _end = try? NSRegularExpression(pattern: endExpr, options: [.AnchorsMatchLines])
             if debug && self.end == nil {
                 print("Problem parsing end expression \(endExpr)")
             }
         }
-        
+
         _applyEndPatternLast = dictionary["applyEndPatternLast"] as? Bool ?? false
-                
+
         if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
             _beginCaptures = CaptureCollection(dictionary: dictionary)
         }
-        
+
         if let dictionary = dictionary["captures"] as? [NSObject: AnyObject] {
             if match != nil {
                 _captures = CaptureCollection(dictionary: dictionary)
@@ -90,17 +90,17 @@ class Pattern: NSObject {
                 _endCaptures = self.beginCaptures
             }
         }
-        
+
         if let dictionary = dictionary["endCaptures"] as? [NSObject: AnyObject] {
             _endCaptures = CaptureCollection(dictionary: dictionary)
         }
-        
+
         if dictionary["match"] as? String != nil && self.match == nil {
             return nil
         } else if dictionary["begin"] as? String != nil && (self.begin == nil || self.end == nil) {
             return nil
         }
-        
+
         if self.match == nil &&
             self.begin == nil &&
             self.end == nil &&
@@ -108,12 +108,12 @@ class Pattern: NSObject {
                 print("Attention: pattern not recognized: \(self.name)")
                 return nil
         }
-        
+
         if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
             self.subpatterns = refman.patternsForArray(array, inRepository: repository, caller: self)
         }
     }
-    
+
     init(pattern: Pattern, parent: Pattern?) {
         super.init()
         _name = pattern.name
@@ -126,57 +126,57 @@ class Pattern: NSObject {
         _parent = parent
         self.subpatterns = []
     }
-    
+
     /// For most cases does not create a usable pattern.
     override init() {
         super.init()
     }
 }
 
-enum referenceType {
-    case toRepository
-    case toSelf
-    case toBase
-    case toForeign
-    case toForeignRepository
-    case resolved
+enum ReferenceType {
+    case ToRepository
+    case ToSelf
+    case ToBase
+    case ToForeign
+    case ToForeignRepository
+    case Resolved
 }
 
 class Include: Pattern {
-    
+
     // MARK: - Properties
-    
-    var type: referenceType     {return _type}
-    
-    private var _type: referenceType
+
+    var type: ReferenceType     {return _type}
+
+    private var _type: ReferenceType
     private let repositoryRef: String?
     private let languageRef: String?
     private var associatedRepository: Repository?
-    
-    
+
+
     // MARK: - Initializers
-    
+
     init(reference: String, inRepository repository: Repository? = nil, parent: Pattern?, bundleManager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
-            self._type = .toRepository
+            self._type = .ToRepository
             self.repositoryRef = reference.substringFromIndex(reference.startIndex.successor())
             self.languageRef = nil
         } else if reference == "$self" {
-            self._type = .toSelf
+            self._type = .ToSelf
             self.repositoryRef = nil
             self.languageRef = nil
         } else  if reference == "$base" {
-            self._type = .toBase
+            self._type = .ToBase
             self.repositoryRef = nil
             self.languageRef = nil
         } else if reference.containsString("#") {
-            self._type = .toForeignRepository
+            self._type = .ToForeignRepository
             self.repositoryRef = reference.substringFromIndex(reference.rangeOfString("#")!.endIndex)
             self.languageRef = reference.substringToIndex(reference.rangeOfString("#")!.startIndex)
             bundleManager.getRawLanguageWithIdentifier(languageRef!)
         } else {
-            self._type = .toForeign
+            self._type = .ToForeign
             self.repositoryRef = nil
             self.languageRef = reference
             bundleManager.getRawLanguageWithIdentifier(languageRef!)
@@ -184,7 +184,7 @@ class Include: Pattern {
         super.init()
         _parent = parent
     }
-    
+
     init(include: Include, parent: Pattern?) {
         self._type = include.type
         self.repositoryRef = include.repositoryRef
@@ -192,47 +192,47 @@ class Include: Pattern {
         self.associatedRepository = include.associatedRepository
         super.init(pattern: include, parent: parent)
     }
-    
-    
+
+
     // MARK: - Reference Resolution
-    
+
     func resolveInternalReference(repository: Repository, inLanguage language: Language) {
         let pattern: Pattern?
-        if type == .toRepository {
+        if type == .ToRepository {
             pattern = (associatedRepository ?? repository)[repositoryRef!]
-        } else if type == .toSelf {
+        } else if type == .ToSelf {
             pattern = language.pattern
         } else {
             return
         }
-        
+
         if pattern != nil {
             self.replaceWithPattern(pattern!)
         }
-        _type = .resolved
+        _type = .Resolved
     }
-    
+
     func resolveExternalReference(thisLanguage: Language, inLanguages languages: [String: Language], baseName: String?) {
         let pattern: Pattern?
-        if type == .toBase {
+        if type == .ToBase {
             pattern = languages[baseName!]!.pattern
-        } else if type == .toForeignRepository {
+        } else if type == .ToForeignRepository {
             pattern = languages[languageRef!]?.repository[repositoryRef!]
-        } else if type == .toForeign {
+        } else if type == .ToForeign {
             pattern = languages[languageRef!]?.pattern
         } else {
             return
         }
-        
+
         if pattern != nil {
             self.replaceWithPattern(pattern!)
         }
-        _type = .resolved
+        _type = .Resolved
     }
-    
-        
+
+
     // MARK: - Private
-    
+
     private func replaceWithPattern(pattern: Pattern) {
         _name = pattern.name
         _match = pattern.match
@@ -244,4 +244,3 @@ class Include: Pattern {
         self.subpatterns = pattern.subpatterns
     }
 }
-

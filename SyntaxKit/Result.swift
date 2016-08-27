@@ -9,16 +9,16 @@
 //
 
 struct Result: Equatable {
-    
+
     // MARK: - Properties
-    
+
     let patternIdentifier: String
     var range: NSRange
     let attribute: AnyObject?
-    
-    
+
+
     // MARK: - Initializers
-    
+
     init(identifier: String, range: NSRange, attribute: AnyObject? = nil) {
         self.patternIdentifier = identifier
         self.range = range
@@ -26,7 +26,7 @@ struct Result: Equatable {
     }
 }
 
-func ==(lhs: Result, rhs: Result) -> Bool {
+func == (lhs: Result, rhs: Result) -> Bool {
     return lhs.patternIdentifier == rhs.patternIdentifier &&
         lhs.range.toRange() == rhs.range.toRange()
 }

@@ -16,7 +16,7 @@ func fixture(name: String, _ type: String) -> String! {
 }
 
 func getBundleManager() -> BundleManager {
-    return BundleManager() { identifier, isLanguage in
+    return BundleManager { identifier, isLanguage in
         let name = isLanguage ? identifier.componentsSeparatedByString(".")[1] : identifier
         let ext = isLanguage ? ".tmLanguage" : ".tmTheme"
         return NSBundle(forClass: LanguageTests.self).URLForResource(name.capitalizedString, withExtension: ext) ?? NSURL()
@@ -96,8 +96,8 @@ func assertEqualColors(color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.0
     XCTAssertEqualWithAccuracy(color1!.alphaComponent, color2!.alphaComponent, accuracy: accuracy)
 }
 
-extension NSRange: Equatable { }
+extension NSRange: Equatable {}
 
-public func ==(lhs: NSRange, rhs: NSRange) -> Bool {
+public func == (lhs: NSRange, rhs: NSRange) -> Bool {
     return lhs.location == rhs.location && lhs.length == rhs.length
 }

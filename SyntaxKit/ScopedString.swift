@@ -2,20 +2,20 @@
 //  ScopedString.swift
 //  SyntaxKit
 //
-//  A datastructure that facilitates working with strings that have nested 
+//  A datastructure that facilitates working with strings that have nested
 //  scopes associated with them. A scope being a named range that can have an
 //  attribute assciated with it for the callers convenience.
 //  The ranges can be nested. The datastructure could be visualized like this:
 //  In fact, something like this is returned by the prettyPrint function.
-//  
+//
 //  Top:                              ----
 //                              -------------
 //            -------   -----------------------------
 //  Bottom:  ------------------------------------------
 //  String: "(This is) (string (with (nest)ed) scopes)!"
-//  
+//
 //  Note:
-//  In the picture above the parens are not actually in the string, they serve 
+//  In the picture above the parens are not actually in the string, they serve
 //  visualization purposes. The bottom-most layer is implicit and is not stored.
 //  A new layer is added if no layer can hold the inserted scope without
 //  creating intersections.
@@ -30,32 +30,32 @@
 import Foundation
 
 extension NSRange {
-    
+
     func isEmpty() -> Bool {
         return length == 0
     }
-    
+
     func containsIndex(index: Int) -> Bool {
         return length == 0 && index == location || index >= location && index < location + length
     }
-    
+
     func partiallyContainsRange(otherRange: NSRange) -> Bool {
         return otherRange.location + otherRange.length >= location && otherRange.location < location + length
     }
-    
+
     func entirelyContainsRange(otherRange: NSRange) -> Bool {
         return location <= otherRange.location && location + length >= otherRange.location + otherRange.length
     }
-    
+
     /// Removes the indexes contained in range from self and shifts itself as
     /// needed to not leave a gap in the domain.
     mutating func removeIndexesFromRange(range: NSRange) {
         length -= NSIntersectionRange(range, NSRange(location: location, length: length)).length
-        if (range.location < self.location) {
+        if range.location < self.location {
             self.location -= NSIntersectionRange(range, NSRange(location: 0, length: self.location)).length
         }
     }
-    
+
     /// Inserts the indexes contained in range into self. Grows as needed.
     mutating func insertIndexesFromRange(range: NSRange) {
         if self.containsIndex(range.location) && range.location < NSMaxRange(self) {
@@ -72,27 +72,27 @@ extension NSRange {
 typealias Scope = Result
 
 struct ScopedString {
-    
+
     // MARK: - Properties
-    
+
     var underlyingString: String
-    
+
     private var levels: [[Scope]] = []
-    
+
     var baseScope: Scope {
         return Scope(identifier: "BaseNameString", range: NSRange(location: 0, length: (underlyingString as NSString).length), attribute: nil)
     }
-    
-    
+
+
     // MARK: - Initializers
-    
+
     init(string: String) {
         self.underlyingString = string
     }
-    
-    
+
+
     // MARK: - Interface
-    
+
     func numberOfScopes() -> Int {
         var sum = 1
         for level in levels {
@@ -100,19 +100,19 @@ struct ScopedString {
         }
         return sum
     }
-    
+
     func numberOfLevels() -> Int {
         return levels.count + 1
     }
-    
+
     func isInString(index: Int) -> Bool {
         return index >= 0 && index <= baseScope.range.length
     }
-    
+
     mutating func addScopeAtTop(scope: Scope) {
         assert(scope.range.length != 0)
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
-        
+
         var added = false
         for level in 0..<levels.count {
             if findScopeIntersectionWithRange(scope.range, atLevel: levels[level]) == nil {
@@ -125,11 +125,11 @@ struct ScopedString {
             levels.append([scope])
         }
     }
-    
+
     mutating func addScopeAtBottom(scope: Scope) {
         assert(scope.range.length != 0)
         assert(NSIntersectionRange(scope.range, baseScope.range).length == scope.range.length)
-        
+
         var added = false
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             if findScopeIntersectionWithRange(scope.range, atLevel: levels[level]) == nil {
@@ -142,7 +142,7 @@ struct ScopedString {
             levels.insert([scope], atIndex: 0)
         }
     }
-    
+
     func topmostScopeAtIndex(index: Int) -> Scope {
         let indexRange = NSRange(location: index, length: 0)
         for i in (levels.count - 1).stride(through: 0, by: -1) {
@@ -153,10 +153,10 @@ struct ScopedString {
         }
         return baseScope
     }
-    
-    func lowerScopeForScope(scope: Scope, AtIndex index: Int) -> Scope {
+
+    func lowerScopeForScope(scope: Scope, atIndex index: Int) -> Scope {
         assert(index >= 0 && index <= baseScope.range.length)
-        
+
         var foundScope = false
         let indexRange = NSRange(location: index, length: 0)
         for i in (levels.count - 1).stride(through: 0, by: -1) {
@@ -172,7 +172,7 @@ struct ScopedString {
         }
         return baseScope
     }
-    
+
     func levelForScope(scope: Scope) -> Int {
         for i in 0 ..< levels.count {
             let level = levels[i]
@@ -187,11 +187,11 @@ struct ScopedString {
         }
         return -1
     }
-    
+
     /// Removes all scopes that are entirely contained in the spcified range.
     mutating func removeScopesInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
-        
+
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 let theScope = levels[level][scope]
@@ -204,13 +204,13 @@ struct ScopedString {
             }
         }
     }
-    
+
     /// Inserts the given string into the underlying string, stretching and
     /// shifting ranges as needed. If the range starts before and ends after the
     /// insertion point, it is stretched.
     mutating func insertString(string: String, atIndex index: Int) {
         assert(index >= 0 && index <= baseScope.range.length)
-        
+
         let s = underlyingString as NSString
         let length = (string as NSString).length
         let mutableString = s.mutableCopy() as! NSMutableString
@@ -222,12 +222,12 @@ struct ScopedString {
             }
         }
     }
-    
+
     /// Deletes the characters from the underlying string, shrinking and
     /// deleting scopes as needed.
     mutating func deleteCharactersInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
-        
+
         let mutableString = (self.underlyingString as NSString).mutableCopy() as! NSMutableString
         mutableString.deleteCharactersInRange(range)
         self.underlyingString = mutableString.copy() as! String
@@ -246,7 +246,7 @@ struct ScopedString {
             }
         }
     }
-    
+
     /// - note: This representation is guaranteed not to change between releases
     ///         (except for releases with breaking changes) so it can be used
     ///         for unit testing.
@@ -280,10 +280,10 @@ struct ScopedString {
         result += numberString + "\n"
         return result
     }
-    
-    
+
+
     // MARK: - Private
-    
+
     private func findScopeIntersectionWithRange(range: NSRange, atLevel level: [Scope]) -> Scope? {
         for scope in level {
             if scope.range.partiallyContainsRange(range) {
@@ -292,7 +292,7 @@ struct ScopedString {
         }
         return nil
     }
-    
+
     private func insertionPointForRange(range: NSRange, atLevel level: [Scope]) -> Int {
         var i = 0
         for scope in level {

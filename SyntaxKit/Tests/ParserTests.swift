@@ -10,7 +10,7 @@ import XCTest
 import SyntaxKit
 
 class ParserTests: XCTestCase {
-    
+
     // MARK: - Properties
 
     var parser: Parser!
