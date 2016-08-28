@@ -44,6 +44,15 @@ class IncrementalParsingTests: XCTestCase {
         assertInsertion("756", location: 160, expectedRange: NSRange(location: 159, length: 7))
     }
 
+    func testDeletion() {
+        input = "Only this!"
+        parsingOperation = getParsingOperation()
+
+        parsingOperation.main()
+
+        assertDeletion(NSRange(location: 9, length: 1), expectedRange: NSRange(location: 0,length: 9))
+    }
+
     func testEdgeCase() {
         input = "// test.swift\n/**"
         parsingOperation = getParsingOperation()

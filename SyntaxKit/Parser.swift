@@ -63,7 +63,7 @@ public class Parser {
         let bounds: NSRange
         var scopesString: ScopedString
         var endScope: Scope?
-        if incremental != nil && incremental!.previousScopes.underlyingString != (string as NSString).stringByReplacingCharactersInRange(incremental!.diff.range, withString: incremental!.diff.change) {
+        if incremental != nil && (incremental!.previousScopes.underlyingString as NSString).stringByReplacingCharactersInRange(incremental!.diff.range, withString: incremental!.diff.change) == string {
             bounds = incremental!.range
             scopesString = incremental!.previousScopes
             endScope = scopesString.topmostScopeAtIndex(bounds.location)

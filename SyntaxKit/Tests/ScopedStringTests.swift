@@ -35,7 +35,7 @@ class ScopedStringTests: XCTestCase {
 
         XCTAssertEqual(newScopedString.topmostScopeAtIndex(0), newScopedString.baseScope)
         XCTAssertEqual(newScopedString.topmostScopeAtIndex(1), newScope1)
-        XCTAssertEqual(newScopedString.lowerScopeForScope(newScope1, AtIndex: 1), newScopedString.baseScope)
+        XCTAssertEqual(newScopedString.lowerScopeForScope(newScope1, atIndex: 1), newScopedString.baseScope)
 
         let newScope2 = Scope(identifier: "bogus2", range: NSRange(location: 2, length: 1), attribute: nil)
         newScopedString.addScopeAtTop(newScope2)
