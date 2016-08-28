@@ -41,9 +41,9 @@ extension Color {
 
         // Make the string 8 characters long for easier parsing
         if length == 3 {
-            let r = hex.substringWithRange(NSMakeRange(0, 1))
-            let g = hex.substringWithRange(NSMakeRange(1, 1))
-            let b = hex.substringWithRange(NSMakeRange(2, 1))
+            let r = hex.substringWithRange(NSRange(location: 0, length: 1))
+            let g = hex.substringWithRange(NSRange(location: 1, length: 1))
+            let b = hex.substringWithRange(NSRange(location: 2, length: 1))
             hex = r + r + g + g + b + b + "ff"
         } else if length == 6 {
             hex = String(hex) + "ff"
@@ -55,10 +55,10 @@ extension Color {
             return CGFloat(value / 255.0)
         }
 
-        let red = hexValue(hex.substringWithRange(NSMakeRange(0, 2)))
-        let green = hexValue(hex.substringWithRange(NSMakeRange(2, 2)))
-        let blue = hexValue(hex.substringWithRange(NSMakeRange(4, 2)))
-        let alpha = hexValue(hex.substringWithRange(NSMakeRange(6, 2)))
+        let red = hexValue(hex.substringWithRange(NSRange(location: 0, length: 2)))
+        let green = hexValue(hex.substringWithRange(NSRange(location: 2, length: 2)))
+        let blue = hexValue(hex.substringWithRange(NSRange(location: 4, length: 2)))
+        let alpha = hexValue(hex.substringWithRange(NSRange(location: 6, length: 2)))
 
         self.init(red: red, green: green, blue: blue, alpha: alpha)
     }

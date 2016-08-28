@@ -70,7 +70,7 @@ public class AttributedParser: Parser {
 
         var attributes = Attributes()
         for i in 0..<count {
-            let key = (components.subarrayWithRange(NSMakeRange(0, i + 1)) as NSArray).componentsJoinedByString(".")
+            let key = (components.subarrayWithRange(NSRange(location: 0, length: i + 1)) as NSArray).componentsJoinedByString(".")
             if let attrs = theme.attributes[key] {
                 for (k, v) in attrs {
                     attributes[k] = v

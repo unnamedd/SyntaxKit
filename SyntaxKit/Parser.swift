@@ -147,7 +147,7 @@ public class Parser {
         let result = ResultSet(startingRange: NSRange(location: bounds.location, length: 0))
 
         while lineEnd < stop {
-            (string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSMakeRange(lineEnd, 0))
+            (string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSRange(location: lineEnd, length: 0))
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
 
             while range.length > 0 {
@@ -199,7 +199,7 @@ public class Parser {
     /// (first criterion: matched sooner, second: higher up the list).
     ///
     /// - parameter patterns:   The patterns that should be matched
-    /// - parameter range:      The range in which the matching should happen.
+    /// - parameter bounds:     The range in which the matching should happen.
     ///
     /// - returns:  The results. nil if nothing could be matched and an empty
     ///             set if something could be matched but it doesn't have any

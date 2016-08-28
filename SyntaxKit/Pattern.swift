@@ -146,7 +146,7 @@ class Include: Pattern {
 
     // MARK: - Properties
 
-    var type: ReferenceType     {return _type}
+    var type: ReferenceType {return _type}
 
     private var _type: ReferenceType
     private let repositoryRef: String?

@@ -44,9 +44,9 @@ class ParserTests: XCTestCase {
                 }
         }
 
-        XCTAssertEqual(NSMakeRange(7, 13), stringQuoted)
-        XCTAssertEqual(NSMakeRange(7, 1), punctuationBegin)
-        XCTAssertEqual(NSMakeRange(19, 1), punctuationEnd)
+        XCTAssertEqual(NSRange(location: 7, length: 13), stringQuoted)
+        XCTAssertEqual(NSRange(location: 7, length: 1), punctuationBegin)
+        XCTAssertEqual(NSRange(location: 19, length: 1), punctuationEnd)
     }
 
     func testParsingBeginEndGarbage() {
@@ -58,7 +58,7 @@ class ParserTests: XCTestCase {
                 }
         }
 
-        XCTAssertEqual(NSMakeRange(39, 4), stringQuoted)
+        XCTAssertEqual(NSRange(location: 39, length: 4), stringQuoted)
     }
 
     func testParsingGarbage() {
