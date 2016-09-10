@@ -12,10 +12,10 @@ class ResultSet {
 
     // MARK: - Properties
 
-    var results: [Result]   { return _results }
+    var results: [Result] { return _results }
     /// Guaranteed to be larger or equal to the union of all the ranges
     /// associated with the contained results.
-    var range: NSRange      { return _range }
+    var range: NSRange { return _range }
 
     private var _results = [Result]()
     private var _range: NSRange

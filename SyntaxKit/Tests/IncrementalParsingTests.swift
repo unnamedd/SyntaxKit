@@ -50,7 +50,7 @@ class IncrementalParsingTests: XCTestCase {
 
         parsingOperation.main()
 
-        assertDeletion(NSRange(location: 9, length: 1), expectedRange: NSRange(location: 0,length: 9))
+        assertDeletion(NSRange(location: 9, length: 1), expectedRange: NSRange(location: 0, length: 9))
     }
 
     func testEdgeCase() {

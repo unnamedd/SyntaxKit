@@ -79,6 +79,9 @@ public class AttributedParsingOperation: NSOperation {
 
     // MARK: - Initializers
 
+    /// Initializer for the first instance in the NSOperationQueue
+    ///
+    /// Can also be used if no incremental parsing is desired
     public init(string: String, language: Language, theme: Theme, callback: OperationCallback) {
         parser = AttributedParser(language: language, theme: theme)
         parser.string = string
@@ -87,7 +90,12 @@ public class AttributedParsingOperation: NSOperation {
         super.init()
     }
 
-    public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, callback: OperationCallback? = nil) {
+    /// Initializer to use for operations that allow incremental parsing
+    ///
+    /// The given change has to match the change in the string between the two
+    /// operations. Otherwise the entire string is reparsed. If newCallback is
+    /// nil the callback from the previous operation will be taken.
+    public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, newCallback callback: OperationCallback? = nil) {
         parser = previousOperation.parser
         parser.string = string
         operationCallback = callback ?? previousOperation.operationCallback

@@ -24,15 +24,15 @@ class Pattern: NSObject {
 
     // MARK: - Properties
 
-    var name: String?                       { return _name }
-    var match: NSRegularExpression?         { return _match }
-    var captures: CaptureCollection?        { return _captures }
-    var begin: NSRegularExpression?         { return _begin }
-    var beginCaptures: CaptureCollection?   { return _beginCaptures }
-    var end: NSRegularExpression?           { return _end }
-    var endCaptures: CaptureCollection?     { return _endCaptures }
-    var applyEndPatternLast: Bool           { return _applyEndPatternLast}
-    var parent: Pattern?                    { return _parent }
+    var name: String? { return _name }
+    var match: NSRegularExpression? { return _match }
+    var captures: CaptureCollection? { return _captures }
+    var begin: NSRegularExpression? { return _begin }
+    var beginCaptures: CaptureCollection? { return _beginCaptures }
+    var end: NSRegularExpression? { return _end }
+    var endCaptures: CaptureCollection? { return _endCaptures }
+    var applyEndPatternLast: Bool { return _applyEndPatternLast}
+    var parent: Pattern? { return _parent }
     var subpatterns: [Pattern] = []
 
     private var _name: String?
@@ -104,7 +104,7 @@ class Pattern: NSObject {
         if self.match == nil &&
             self.begin == nil &&
             self.end == nil &&
-            (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || dictionary["patterns"] as! [[NSObject: AnyObject]] == []) {
+            (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || (dictionary["patterns"] as? [[NSObject: AnyObject]])! == []) {
                 print("Attention: pattern not recognized: \(self.name)")
                 return nil
         }

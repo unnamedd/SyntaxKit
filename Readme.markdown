@@ -85,7 +85,7 @@ Easy as that. This method takes an optional `baseAttributes` parameter to custom
 
 ### Parsing Operations
 
-There is also a `AttributedParsingOperation` subclass of NSOperation that facilitates mutithreaded parsing.
+There is also a `AttributedParsingOperation` subclass of NSOperation that facilitates multithreaded parsing.
 
 ### Custom Parsers
 

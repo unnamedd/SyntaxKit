@@ -82,8 +82,8 @@ public class Parser {
         let allResults = ResultSet(startingRange: bounds)
 
         while startIndex < endIndex {
-            let endPattern = endScope?.attribute as! Pattern?
-            guard let results = self.matchSubpatternsOfPattern(endPattern ?? language.pattern, inRange: NSRange(location: startIndex, length: endIndex - startIndex)) else {
+            let endPattern = endScope?.attribute as? Pattern ?? language.pattern
+            guard let results = self.matchSubpatternsOfPattern(endPattern, inRange: NSRange(location: startIndex, length: endIndex - startIndex)) else {
                 return nil
             }
 

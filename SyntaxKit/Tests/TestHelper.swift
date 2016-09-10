@@ -12,7 +12,7 @@ import XCTest
 
 func fixture(name: String, _ type: String) -> String! {
     let path = NSBundle(forClass: LanguageTests.self).pathForResource(name, ofType: type)!
-    return try! String(contentsOfFile: path)
+    return try? String(contentsOfFile: path)
 }
 
 func getBundleManager() -> BundleManager {
@@ -51,9 +51,9 @@ func simpleTheme() -> Theme! {
 }
 
 func stringByReplacingRange(range: NSRange, inString string: String, withString inserted: String) -> String {
-    let newInput = string.mutableCopy() as! NSMutableString
-    newInput.replaceCharactersInRange(range, withString: inserted)
-    return newInput.copy() as! String
+    let newInput = string.mutableCopy() as? NSMutableString
+    newInput?.replaceCharactersInRange(range, withString: inserted)
+    return newInput.copy() as? String ?? ""
 }
 
 #if !os(OSX)

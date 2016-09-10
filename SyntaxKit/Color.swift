@@ -23,8 +23,8 @@
 public typealias Color = ColorType
 
 extension Color {
-    public convenience init?(hex s: String) {
-        var hex: NSString = s
+    public convenience init?(hex representation: String) {
+        var hex: NSString = representation
 
         // Remove `#` and `0x`
         if hex.hasPrefix("#") {

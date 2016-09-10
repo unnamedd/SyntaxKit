@@ -213,9 +213,9 @@ struct ScopedString {
 
         let s = underlyingString as NSString
         let length = (string as NSString).length
-        let mutableString = s.mutableCopy() as! NSMutableString
-        mutableString.insertString(string, atIndex: index)
-        self.underlyingString = mutableString.copy() as! String
+        let mutableString = s.mutableCopy() as? NSMutableString
+        mutableString?.insertString(string, atIndex: index)
+        self.underlyingString = mutableString?.copy() as? String ?? ""
         for level in 0..<levels.count {
             for scope in 0..<levels[level].count {
                 levels[level][scope].range.insertIndexesFromRange(NSRange(location: index, length: length))
@@ -228,9 +228,9 @@ struct ScopedString {
     mutating func deleteCharactersInRange(range: NSRange) {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
 
-        let mutableString = (self.underlyingString as NSString).mutableCopy() as! NSMutableString
-        mutableString.deleteCharactersInRange(range)
-        self.underlyingString = mutableString.copy() as! String
+        let mutableString = (self.underlyingString as NSString).mutableCopy() as? NSMutableString
+        mutableString?.deleteCharactersInRange(range)
+        self.underlyingString = mutableString?.copy() as? String ?? ""
         for level in (levels.count - 1).stride(through: 0, by: -1) {
             for scope in (levels[level].count-1).stride(through: 0, by: -1) {
                 var theRange = levels[level][scope].range
