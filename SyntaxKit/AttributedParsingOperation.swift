@@ -107,6 +107,8 @@ open class AttributedParsingOperation: Operation {
 
         if diff.representsChanges(from: parser.toParse.string, to: string) {
             self.parsedRange = AttributedParsingOperation.outdatedRange(in: string as NSString, forChange: diff, updatingPreviousResult: &self.parser.toParse)
+        } else {
+            self.parser.toParse = ScopedString(string: string)
         }
     }
 
@@ -115,7 +117,6 @@ open class AttributedParsingOperation: Operation {
 
     open override func main() {
         var resultsArray: [(range: NSRange, attributes: Attributes?)] = []
-
         let callback = { (_: String, range: NSRange, attributes: Attributes?) in
             if let attributes = attributes {
                 resultsArray.append((range, attributes))

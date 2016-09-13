@@ -9,7 +9,7 @@ SyntaxKit was originally abstracted from [Whiskey](http://usewhiskey.com).
 
 ## Building
 
-SyntaxKit is written in Swift 2 so Xcode 7 is required. There aren't any dependencies besides system frameworks.
+SyntaxKit is written in Swift 3 so Xcode 8 is required. There aren't any dependencies besides system frameworks.
 
 
 ## Installation
@@ -43,7 +43,7 @@ import SyntaxKit
 let manager = BundleManager() { identifier, isLanguage in
     NSURL(string: "Location of Bundles/" + identifier + ".plist")
 }
-let yaml = manager.languageWithIdentifier("source.yaml")!
+let yaml = manager.language(withIdentifier: "source.yaml")!
 
 let parser = Parser(language: yaml)
 ```
@@ -65,7 +65,7 @@ parser.parse(input) { scope, range in
 SyntaxKit also comes with `AttributedParser`. This is a simple subclass of `Parser` that knows how to work with themes.
 
 ```swift
-let tomorrow = manager.themeWithIdentifier("tomorrow")!
+let tomorrow = manager.theme(withIdentifier: "tomorrow")!
 let attributedParser = AttributedParser(language: yaml, theme: tomorrow)
 
 attributedParser.parse(input) { scope, range, attributes in
@@ -78,7 +78,7 @@ Notice that `attributes` is the third parameter to the block now. This is a dict
 `AttributedParser` includes a convenience method for turning a `String` of source code into an `NSAttributedString`:
 
 ```swift
-let attributedString = attributedParser.attributedStringForString(input)
+let attributedString = attributedParser.attributedString(for: input)
 ```
 
 Easy as that. This method takes an optional `baseAttributes` parameter to customize how the string is created. This is great if you want to specify a font, etc.
