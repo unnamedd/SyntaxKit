@@ -3,7 +3,7 @@
 //  SyntaxKit
 //
 //  Represents a textmate syntax file (.tmLanguage). Before use the
-//  validateWithHelperLanguages method has to be called on it.
+//  validate method has to be called on it.
 //
 //  Created by Sam Soffes on 9/18/14.
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
@@ -13,7 +13,7 @@ public struct Language {
 
     // MARK: - Properties
 
-    public let UUID: String // TODO: replace with uuid type in swift 3
+    public let uuid: UUID
     public let name: String
     public let scopeName: String
 
@@ -26,21 +26,22 @@ public struct Language {
 
     // MARK: - Initializers
 
-    init?(dictionary: [NSObject: AnyObject], bundleManager: BundleManager) {
-        guard let UUID = dictionary["uuid"] as? String,
-            name = dictionary["name"] as? String,
-            scopeName = dictionary["scopeName"] as? String,
-            array = dictionary["patterns"] as? [[NSObject: AnyObject]]
+    init?(dictionary: [String: Any], manager: BundleManager) {
+        guard let uuidString = dictionary["uuid"] as? String,
+            let uuid = UUID(uuidString: uuidString),
+            let name = dictionary["name"] as? String,
+            let scopeName = dictionary["scopeName"] as? String,
+            let array = dictionary["patterns"] as? [[String: Any]]
             else { return nil }
 
-        self.UUID = UUID
+        self.uuid = uuid
         self.name = name
         self.scopeName = scopeName
-        self.referenceManager = ReferenceManager(bundleManager: bundleManager)
+        self.referenceManager = ReferenceManager(bundleManager: manager)
 
-        self.pattern.subpatterns = referenceManager.patternsForArray(array, inRepository: nil, caller: nil)
-        self.repository = Repository(repo: dictionary["repository"] as? [String: [NSObject: AnyObject]] ?? [:], inParent: nil, withReferenceManager: referenceManager)
-        referenceManager.resolveInternalReferences(repository, inLanguage: self)
+        self.pattern.subpatterns = referenceManager.patterns(for: array, in: nil, caller: nil)
+        self.repository = Repository(repo: dictionary["repository"] as? [String: [AnyHashable: Any]] ?? [:], inParent: nil, with: referenceManager)
+        referenceManager.resolveInternalReferences(with: repository, in: self)
     }
 
     /// Resolves all external reference the language has to the given languages.
@@ -49,7 +50,7 @@ public struct Language {
     /// - parameter helperLanguages: The languages that the language has
     ///     references to resolve against. This should at least contain the
     ///     language itself.
-    mutating func validateWithHelperLanguages(helperLanguages: [Language]) {
-        ReferenceManager.resolveExternalReferencesBetweenLanguages(helperLanguages, basename: self.scopeName)
+    mutating func validate(with helperLanguages: [Language]) {
+        ReferenceManager.resolveExternalReferences(between: helperLanguages, basename: self.scopeName)
     }
 }

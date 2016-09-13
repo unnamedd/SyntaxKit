@@ -17,7 +17,7 @@ struct Capture {
 
     // MARK: - Initializers
 
-    init?(dictionary: [NSObject: AnyObject]) {
+    init?(dictionary: [AnyHashable: Any]) {
         guard let name = dictionary["name"] as? String else { return nil }
         self.name = name
     }

@@ -25,8 +25,8 @@ class IncrementalParsingTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        language = manager.languageWithIdentifier("Source.swift")!
-        theme = manager.themeWithIdentifier("tomorrow")!
+        language = manager.language(withIdentifier: "Source.swift")!
+        theme = manager.theme(withIdentifier: "tomorrow")!
 
     }
 
@@ -73,7 +73,7 @@ class IncrementalParsingTests: XCTestCase {
 
         parsingOperation.main()
 
-        self.measureBlock {
+        self.measure {
             self.assertInsertion("Tests", location: 239, expectedRange: NSRange(location: 230, length: 24))
 
             self.assertDeletion(NSRange(location: 239, length: 5), expectedRange: NSRange(location: 230, length: 19))
@@ -86,7 +86,7 @@ class IncrementalParsingTests: XCTestCase {
 
         parsingOperation.main()
 
-        self.measureBlock {
+        self.measure {
             self.assertDeletion(NSRange(location: 139, length: 1), expectedRange: NSRange(location: 139, length: 22))
 
             self.assertInsertion("/", location: 139, expectedRange: NSRange(location: 139, length: 23))
@@ -96,7 +96,7 @@ class IncrementalParsingTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func getParsingOperation() -> AttributedParsingOperation {
+    fileprivate func getParsingOperation() -> AttributedParsingOperation {
         return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)]) in
             for result in results {
                 if self.totalRange == nil {
@@ -108,8 +108,8 @@ class IncrementalParsingTests: XCTestCase {
         }
     }
 
-    private func assertInsertion(string: String, location: Int, expectedRange expected: NSRange) {
-        input = stringByReplacingRange(NSRange(location: location, length: 0), inString: input, withString: string)
+    fileprivate func assertInsertion(_ string: String, location: Int, expectedRange expected: NSRange) {
+        input = replace(NSRange(location: location, length: 0), in: input, with: string)
         parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: true, changedRange: NSRange(location: location, length: (string as NSString).length))
 
         totalRange = nil
@@ -117,8 +117,8 @@ class IncrementalParsingTests: XCTestCase {
         XCTAssertEqual(totalRange!, expected)
     }
 
-    private func assertDeletion(range: NSRange, expectedRange expected: NSRange) {
-        input = stringByReplacingRange(range, inString: input, withString: "")
+    fileprivate func assertDeletion(_ range: NSRange, expectedRange expected: NSRange) {
+        input = replace(range, in: input, with: "")
         parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: false, changedRange: range)
 
         totalRange = nil

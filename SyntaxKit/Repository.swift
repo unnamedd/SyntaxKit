@@ -13,21 +13,21 @@ class Repository {
 
     // MARK: - Properties
 
-    private var entries: [String: Pattern] = [:]
-    private weak var parentRepository: Repository?
+    fileprivate var entries: [String: Pattern] = [:]
+    fileprivate weak var parentRepository: Repository?
 
 
     // MARK: - Initializers
 
-    init(repo: [String: [NSObject: AnyObject]], inParent parent: Repository?, withReferenceManager refman: ReferenceManager) {
+    init(repo: [String: [AnyHashable: Any]], inParent parent: Repository?, with manager: ReferenceManager) {
         self.parentRepository = parent
 
         for (key, value) in repo {
             var subRepo: Repository?
-            if let containedRepo = value["repository"] as? [String: [NSObject: AnyObject]] {
-                 subRepo = Repository(repo: containedRepo, inParent: self, withReferenceManager: refman)
+            if let containedRepo = value["repository"] as? [String: [AnyHashable: Any]] {
+                 subRepo = Repository(repo: containedRepo, inParent: self, with: manager)
             }
-            if let pattern = Pattern(dictionary: value, parent: nil, withRepository: subRepo, withReferenceManager: refman) {
+            if let pattern = Pattern(dictionary: value, parent: nil, with: subRepo, with: manager) {
                 self.entries[key] = pattern
             }
         }

@@ -12,7 +12,7 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-public class BundleManager {
+open class BundleManager {
 
     // MARK: - Types
 
@@ -23,7 +23,7 @@ public class BundleManager {
     /// - parameter isLanguage: Whether the requested file stores a language
     ///                         (.tmLanguage)
     /// - returns:  A URL pointing to the resource, if found
-    public typealias BundleLocationCallback = (identifier: String, isLanguage: Bool) -> (NSURL?)
+    public typealias BundleLocationCallback = (_ identifier: String, _ isLanguage: Bool) -> (URL?)
 
 
     // MARK: - Properties
@@ -32,14 +32,14 @@ public class BundleManager {
     ///
     /// - note: Setting it to false will not invalidate or purge the cache. This
     ///         has to be done separately using clearLanguageCache.
-    public var languageCaching = true
+    open var languageCaching = true
 
-    public static var defaultManager: BundleManager?
+    open static var defaultManager: BundleManager?
 
-    private var bundleCallback: BundleLocationCallback
-    private var dependencies: [Language] = []
-    private var cachedLanguages: [String: Language] = [:]
-    private var cachedThemes: [String: Theme] = [:]
+    fileprivate var bundleCallback: BundleLocationCallback
+    fileprivate var dependencies: [Language] = []
+    fileprivate var cachedLanguages: [String: Language] = [:]
+    fileprivate var cachedThemes: [String: Theme] = [:]
 
 
     // MARK: - Initializers
@@ -49,7 +49,7 @@ public class BundleManager {
     ///
     /// - parameter callback:   The callback used to find the location of the
     ///                         textmate files.
-    public class func initializeDefaultManagerWithLocationCallback(callback: BundleLocationCallback) {
+    open class func initializeDefaultManager(with callback: @escaping BundleLocationCallback) {
         if defaultManager == nil {
             defaultManager = BundleManager(callback: callback)
         } else {
@@ -57,21 +57,21 @@ public class BundleManager {
         }
     }
 
-    public init(callback: BundleLocationCallback) {
+    public init(callback: @escaping BundleLocationCallback) {
         self.bundleCallback = callback
     }
 
 
     // MARK: - Public
 
-    public func languageWithIdentifier(identifier: String) -> Language? {
+    open func language(withIdentifier identifier: String) -> Language? {
         if let language = self.cachedLanguages[identifier] {
             return language
         }
 
         self.dependencies = []
-        var language = self.getRawLanguageWithIdentifier(identifier)
-        language?.validateWithHelperLanguages(self.dependencies)
+        var language = self.loadRawLanguage(withIdentifier: identifier)
+        language?.validate(with: self.dependencies)
 
         if languageCaching && language != nil {
             self.cachedLanguages[identifier] = language
@@ -81,14 +81,14 @@ public class BundleManager {
         return language
     }
 
-    public func themeWithIdentifier(identifier: String) -> Theme? {
+    open func theme(withIdentifier identifier: String) -> Theme? {
         if let theme = cachedThemes[identifier] {
             return theme
         }
 
-        guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: false),
-            plist = NSDictionary(contentsOfURL: dictURL),
-            newTheme = Theme(dictionary: plist as [NSObject: AnyObject]) else {
+        guard let dictURL = self.bundleCallback(identifier, false),
+            let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
+            let newTheme = Theme(dictionary: plist) else {
                 return nil
         }
 
@@ -97,7 +97,7 @@ public class BundleManager {
     }
 
     /// Clears the language cache. Use if low on memory.
-    public func clearLanguageCache() {
+    open func clearLanguageCache() {
         self.cachedLanguages = [:]
     }
 
@@ -106,15 +106,15 @@ public class BundleManager {
 
     /// - parameter identifier: The identifier of the requested language.
     /// - returns:  The Language with unresolved extenal references, if found
-    func getRawLanguageWithIdentifier(identifier: String) -> Language? {
-        let indexOfStoredLanguage = self.dependencies.indexOf { (lang: Language) in lang.scopeName == identifier }
+    func loadRawLanguage(withIdentifier identifier: String) -> Language? {
+        let indexOfStoredLanguage = self.dependencies.index { (lang: Language) in lang.scopeName == identifier }
 
         if indexOfStoredLanguage != nil {
             return self.dependencies[indexOfStoredLanguage!]
         } else {
-            guard let dictURL = self.bundleCallback(identifier: identifier, isLanguage: true),
-                plist = NSDictionary(contentsOfURL: dictURL),
-                newLanguage = Language(dictionary: plist as [NSObject: AnyObject], bundleManager: self) else {
+            guard let dictURL = self.bundleCallback(identifier, true),
+                let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
+                let newLanguage = Language(dictionary: plist, manager: self) else {
                     return nil
             }
 

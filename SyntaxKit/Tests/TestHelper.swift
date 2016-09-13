@@ -10,22 +10,28 @@ import Foundation
 import XCTest
 @testable import SyntaxKit
 
-func fixture(name: String, _ type: String) -> String! {
-    let path = NSBundle(forClass: LanguageTests.self).pathForResource(name, ofType: type)!
-    return try? String(contentsOfFile: path)
+func fixture(_ name: String, _ type: String) -> String {
+    if let path = Bundle(for: LanguageTests.self).path(forResource: name, ofType: type) {
+        do {
+            return try String(contentsOfFile: path)
+        } catch {
+            return ""
+        }
+    }
+    return ""
 }
 
 func getBundleManager() -> BundleManager {
     return BundleManager { identifier, isLanguage in
-        let name = isLanguage ? identifier.componentsSeparatedByString(".")[1] : identifier
+        let name = isLanguage ? identifier._split(separator: ".")[1] : identifier
         let ext = isLanguage ? ".tmLanguage" : ".tmTheme"
-        return NSBundle(forClass: LanguageTests.self).URLForResource(name.capitalizedString, withExtension: ext) ?? NSURL()
+        return Bundle(for: LanguageTests.self).url(forResource: name.capitalized, withExtension: ext) ?? URL(fileURLWithPath: "")
     }
 }
 
-func simpleTheme() -> Theme! {
+func simpleTheme() -> Theme {
     return Theme(dictionary: [
-        "uuid": "7",
+        "uuid": "123e4567-e89b-12d3-a456-426655440000",
         "name": "Simple",
         "settings": [
             [
@@ -47,13 +53,13 @@ func simpleTheme() -> Theme! {
                 ]
             ]
         ]
-    ])
+    ])!
 }
 
-func stringByReplacingRange(range: NSRange, inString string: String, withString inserted: String) -> String {
+func replace(_ range: NSRange, in string: String, with inserted: String) -> String {
     let newInput = string.mutableCopy() as? NSMutableString
-    newInput?.replaceCharactersInRange(range, withString: inserted)
-    return newInput.copy() as? String ?? ""
+    newInput?.replaceCharacters(in: range, with: inserted)
+    return newInput!.copy() as? String ?? ""
 }
 
 #if !os(OSX)
@@ -85,7 +91,7 @@ extension Color {
 }
 #endif
 
-func assertEqualColors(color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.005) {
+func assertEqualColors(_ color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.005) {
     if color1 == nil || color2 == nil {
         XCTAssert(false, "colors have to be non-nil")
         return

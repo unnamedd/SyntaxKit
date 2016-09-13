@@ -19,8 +19,8 @@ class LanguageTests: XCTestCase {
     // MARK: - Tests
 
     func testYaml() {
-        let yaml = manager.languageWithIdentifier("source.YAML")!
-        XCTAssertEqual("B0C44228-4F1F-11DA-AFF2-000A95AF0064", yaml.UUID)
+        let yaml = manager.language(withIdentifier: "source.YAML")!
+        XCTAssertEqual(UUID(uuidString: "B0C44228-4F1F-11DA-AFF2-000A95AF0064"), yaml.uuid)
         XCTAssertEqual("YAML", yaml.name)
         XCTAssertEqual("source.yaml", yaml.scopeName)
 
@@ -39,8 +39,8 @@ class LanguageTests: XCTestCase {
     }
 
     func testSwift() {
-        let swift = manager.languageWithIdentifier("source.swift")!
-        XCTAssertEqual("D133338A-DEED-4ECC-9852-A392C44D10AC", swift.UUID)
+        let swift = manager.language(withIdentifier: "source.swift")!
+        XCTAssertEqual(UUID(uuidString: "D133338A-DEED-4ECC-9852-A392C44D10AC"), swift.uuid)
         XCTAssertEqual("Swift", swift.name)
         XCTAssertEqual("source.swift", swift.scopeName)
 

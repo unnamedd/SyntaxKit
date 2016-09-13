@@ -10,18 +10,23 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-public class Parser {
+open class Parser {
 
     // MARK: - Types
 
-    public typealias Callback = (scope: String, range: NSRange) -> Void
+    public typealias Callback = (_ scope: String, _ range: NSRange) -> Void
 
 
     // MARK: - Properties
 
-    public let language: Language
+    /// The Language that the parser recognizes
+    open let language: Language
 
-    var string = ""
+    /// String that is used in parse(in:). May already contain lexical
+    /// information from previous calls to parse for incremental parsing.
+    /// Stores the recognized lexical scopes after a successful call to parse.
+    var toParse = ScopedString(string: "")
+    /// Set to true to abort the parsing pass
     var aborted = false
 
 
@@ -34,89 +39,64 @@ public class Parser {
 
     // MARK: - Public
 
-    public func parse(string: String, match callback: Callback) {
+    open func parse(_ string: String, match callback: Callback) {
         if aborted {
             return
         }
-
-        self.string = string
+        self.toParse = ScopedString(string: string)
         parse(match: callback)
-        self.string = ""
     }
 
 
     // MARK: - Private
 
-    /// Parses the string. Supports incremental parsing.
+    /// Parses the string in toParse. Supports incremental parsing.
     ///
-    /// The given range mey be exceeded if necessary to match a pattern entirely.
-    ///
-    /// - parameter incremental: A tuple containing all the information
-    ///             necessary for incremental parsing. A range in which to parse,
-    ///             a Diff representing the change and the result of the
-    ///             previous call to parse.
-    /// - parameter callback: The callback to call on every match of a pattern
-    ///             identifier of the language.
-    /// - returns: A ScopedString that contains the range results of the parsing
-    ///            Or nil if the parsing was aborted.
-    func parse(incremental: (range: NSRange, diff: Diff, previousScopes: ScopedString)? = nil, match callback: Callback) -> ScopedString? {
-        let bounds: NSRange
-        var scopesString: ScopedString
-        var endScope: Scope?
-        if incremental != nil && (incremental!.previousScopes.underlyingString as NSString).stringByReplacingCharactersInRange(incremental!.diff.range, withString: incremental!.diff.change) == string {
-            bounds = incremental!.range
-            scopesString = incremental!.previousScopes
-            endScope = scopesString.topmostScopeAtIndex(bounds.location)
-            if incremental!.diff.range.length == 0 {
-                scopesString.insertString(incremental!.diff.change, atIndex: incremental!.diff.range.location)
-            } else {
-                scopesString.deleteCharactersInRange(incremental!.diff.range)
-            }
-        } else {
-            bounds = NSRange(location: 0, length: (string as NSString).length)
-            scopesString = ScopedString(string: string)
-        }
+    /// - parameter range:  The range that should be re-parsed or nil if the
+    ///                     entire string should be parsed. It may be exceeded
+    ///                     if necessary to match a pattern entirely. For
+    ///                     calculation of such a range take a look at
+    ///                     outdatedRange(in: forChange:).
+    /// - parameter match:  The callback to call on every match of a pattern
+    ///                     identifier of the language.
+    func parse(in range: NSRange? = nil, match: Callback) {
 
+        let bounds: NSRange = range ?? NSRange(location: 0, length: (toParse.string as NSString).length)
+        assert((toParse.string as NSString).length >= NSMaxRange(bounds))
+        var endScope = toParse.topmostScope(atIndex: bounds.location)
         var startIndex = bounds.location
         var endIndex = NSMaxRange(bounds)
         let allResults = ResultSet(startingRange: bounds)
 
         while startIndex < endIndex {
-            let endPattern = endScope?.attribute as? Pattern ?? language.pattern
-            guard let results = self.matchSubpatternsOfPattern(endPattern, inRange: NSRange(location: startIndex, length: endIndex - startIndex)) else {
-                return nil
+            let endPattern = endScope.attribute as? Pattern ?? language.pattern
+            guard let results = self.matchSubpatterns(of: endPattern, in: NSRange(location: startIndex, length: endIndex - startIndex)) else {
+                return
             }
 
-            if endScope != nil {
-                allResults.addResult(Result(identifier: endScope!.patternIdentifier, range: results.range))
-            }
+            allResults.add(Result(identifier: endScope.patternIdentifier, range: results.range))
 
             if results.range.length != 0 {
-                allResults.addResults(results)
+                allResults.add(results)
                 startIndex = NSMaxRange(results.range)
-                if endScope != nil {
-                    endScope = scopesString.lowerScopeForScope(endScope!, atIndex: startIndex)
-                }
+                endScope = toParse.lowerScope(for: endScope, atIndex: startIndex)
             } else {
                 startIndex = endIndex
             }
 
-            if startIndex > endIndex && scopesString.isInString(startIndex + 1) {
-                let scopeAtIndex = scopesString.topmostScopeAtIndex(startIndex + 1)
-                if endScope == nil && scopesString.levelForScope(scopeAtIndex) > 0 ||
-                    endScope != nil && scopesString.levelForScope(scopeAtIndex) > scopesString.levelForScope(endScope!) {
+            if startIndex > endIndex && toParse.isInString(index: startIndex + 1) {
+                let scopeAtIndex = toParse.topmostScope(atIndex: startIndex + 1)
+                if toParse.level(for: scopeAtIndex) > toParse.level(for: endScope) {
                     endIndex = NSMaxRange(scopeAtIndex.range)
                 }
             }
         }
 
         if aborted {
-            return nil
+            return
         }
-
-        scopesString.removeScopesInRange(allResults.range)
-        self.applyResults(allResults, storingInScopesString: &scopesString, callback: callback)
-        return scopesString
+        toParse.removeScopes(in: allResults.range)
+        self.apply(allResults, callback: match)
     }
 
     // Algorithmic notes:
@@ -135,19 +115,18 @@ public class Parser {
     /// Matches subpatterns of the given pattern in the input.
     ///
     /// - parameter pattern:    The patterns whose subpatterns should be matched
-    /// - parameter bounds:     The range in which the matching should occur.
+    /// - parameter range:      The range in which the matching should occur.
     ///
     /// - returns:  The result set containing the lexical scope names with range
     ///             information or nil if aborted. May exceed range.
-    private func matchSubpatternsOfPattern(pattern: Pattern, inRange bounds: NSRange) -> ResultSet? {
-        let stop = bounds.location + bounds.length
-        assert((string as NSString).length >= stop)
-        var lineStart = bounds.location
-        var lineEnd = bounds.location
-        let result = ResultSet(startingRange: NSRange(location: bounds.location, length: 0))
+    fileprivate func matchSubpatterns(of pattern: Pattern, in range: NSRange) -> ResultSet? {
+        let stop = range.location + range.length
+        var lineStart = range.location
+        var lineEnd = range.location
+        let result = ResultSet(startingRange: NSRange(location: range.location, length: 0))
 
         while lineEnd < stop {
-            (string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, forRange: NSRange(location: lineEnd, length: 0))
+            (toParse.string as NSString).getLineStart(nil, end: &lineEnd, contentsEnd: nil, for: NSRange(location: lineEnd, length: 0))
             var range = NSRange(location: lineStart, length: lineEnd - lineStart)
 
             while range.length > 0 {
@@ -155,13 +134,13 @@ public class Parser {
                     return nil
                 }
 
-                let bestMatchForMiddle = findMatchFromPatterns(pattern.subpatterns, inRange: range)
+                let bestMatchForMiddle = match(pattern.subpatterns, in: range)
 
                 if pattern.end != nil {
-                    let endMatchResult = self.matchExpression(pattern.end!, inRange: range, captures: pattern.endCaptures)
+                    let endMatchResult = self.match(pattern.end!, in: range, captures: pattern.endCaptures)
                     if endMatchResult != nil && (bestMatchForMiddle == nil || bestMatchForMiddle != nil &&
                         (!pattern.applyEndPatternLast && endMatchResult!.range.location <= bestMatchForMiddle!.match.range.location || endMatchResult!.range.location < bestMatchForMiddle!.match.range.location)) {
-                        result.addResults(endMatchResult!)
+                        result.add(endMatchResult!)
                         return result
                     }
                 }
@@ -171,14 +150,14 @@ public class Parser {
                     if bestMatchForMiddle!.pattern.match != nil {
                         resultForMiddle = bestMatchForMiddle!.match
                     } else {
-                        resultForMiddle = matchAfterBeginOfPattern(bestMatchForMiddle!.pattern, beginResults: bestMatchForMiddle!.match, inRange: range)
+                        resultForMiddle = matchAfterBegin(of: bestMatchForMiddle!.pattern, beginResults: bestMatchForMiddle!.match)
                     }
 
                     if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
                         break
                     }
 
-                    result.addResults(resultForMiddle!)
+                    result.add(resultForMiddle!)
                     let newStart = NSMaxRange(resultForMiddle!.range)
                     range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
                     lineEnd = max(lineEnd, newStart)
@@ -190,7 +169,7 @@ public class Parser {
             lineStart = lineEnd
         }
 
-        result.extendWithRange(bounds)
+        result.extend(with: range)
         return result
     }
 
@@ -198,19 +177,17 @@ public class Parser {
     /// them. Returns the matched pattern with the highest priority
     /// (first criterion: matched sooner, second: higher up the list).
     ///
-    /// - parameter patterns:   The patterns that should be matched
-    /// - parameter bounds:     The range in which the matching should happen.
+    /// - parameter patterns:   The patterns that can be matched
+    /// - parameter range:      The range in which the matching should happen.
     ///
-    /// - returns:  The results. nil if nothing could be matched and an empty
-    ///             set if something could be matched but it doesn't have any
-    ///             information associated with the match. The results range may
-    ///             exceed the passed in range.
-    private func findMatchFromPatterns(patterns: [Pattern], inRange bounds: NSRange) -> (pattern: Pattern, match: ResultSet)? {
-        var interestingBounds = bounds
+    /// - returns:  The matched pattern and the matching result. Nil on failure.
+    ///             The results range may exceed the passed in range.
+    fileprivate func match(_ patterns: [Pattern], in range: NSRange) -> (pattern: Pattern, match: ResultSet)? {
+        var interestingBounds = range
         var bestResult: (pattern: Pattern, match: ResultSet)?
         for pattern in patterns {
-            let currentMatch = self.firstMatchOfPattern(pattern, inRange: bounds)
-            if currentMatch?.match.range.location == bounds.location {
+            let currentMatch = self.firstMatch(of: pattern, in: range)
+            if currentMatch?.match.range.location == range.location {
                 return currentMatch
             } else if currentMatch != nil && (bestResult == nil || currentMatch != nil && currentMatch!.match.range.location < bestResult!.match.range.location) {
                 bestResult = currentMatch
@@ -222,20 +199,23 @@ public class Parser {
 
     /// Matches a single pattern in the string in the given range
     ///
-    /// - returns: The result of the match. Nil if unsuccessful
-    private func firstMatchOfPattern(pattern: Pattern, inRange bounds: NSRange) -> (pattern: Pattern, match: ResultSet)? {
-        if let match = pattern.match {
-            if let resultSet = matchExpression(match, inRange: bounds, captures: pattern.captures, baseSelector: pattern.name) {
+    /// - parameter pattern:    The Pattern to match in the string
+    /// - parameter range:      The range in which to match the pattern
+    ///
+    /// - returns: The matched pattern and the matching result. Nil on failure.
+    fileprivate func firstMatch(of pattern: Pattern, in range: NSRange) -> (pattern: Pattern, match: ResultSet)? {
+        if let expression = pattern.match {
+            if let resultSet = match(expression, in: range, captures: pattern.captures, baseSelector: pattern.name) {
                 if resultSet.range.length != 0 {
                     return (pattern, resultSet)
                 }
             }
         } else if let begin = pattern.begin {
-            if let beginResults = matchExpression(begin, inRange: bounds, captures: pattern.beginCaptures) {
+            if let beginResults = match(begin, in: range, captures: pattern.beginCaptures) {
                 return (pattern, beginResults)
             }
         } else if pattern.subpatterns.count >= 1 {
-            return findMatchFromPatterns(pattern.subpatterns, inRange: bounds)
+            return match(pattern.subpatterns, in: range)
         }
         return nil
     }
@@ -249,26 +229,24 @@ public class Parser {
     /// - parameter pattern:    The pattern whose subpatterns and end pattern
     ///                         has to be matched
     /// - parameter begin:      The match result of the beginning
-    /// - parameter range:      The range in which to perform the match
     /// - returns:  The result of matching the given pattern or nil on abortion.
-    ///             It's range may exceed the passed in range.
-    private func matchAfterBeginOfPattern(pattern: Pattern, beginResults begin: ResultSet, inRange bounds: NSRange) -> ResultSet? {
+    fileprivate func matchAfterBegin(of pattern: Pattern, beginResults begin: ResultSet) -> ResultSet? {
             let newLocation = NSMaxRange(begin.range)
-            guard let endResults = matchSubpatternsOfPattern(pattern, inRange: NSRange(location: newLocation, length: (string as NSString).length - newLocation)) else {
+            guard let endResults = matchSubpatterns(of: pattern, in: NSRange(location: newLocation, length: (toParse.string as NSString).length - newLocation)) else {
                 return nil
             }
 
             let result = ResultSet(startingRange: endResults.range)
             if pattern.name != nil {
-                result.addResult(Result(identifier: pattern.name!, range: NSUnionRange(begin.range, endResults.range)))
+                result.add(Result(identifier: pattern.name!, range: NSUnionRange(begin.range, endResults.range)))
             }
-            result.addResult(Scope(identifier: pattern.name ?? "", range: NSRange(location: begin.range.location + begin.range.length, length: NSUnionRange(begin.range, endResults.range).length - begin.range.length), attribute: pattern))
-            result.addResults(begin)
-            result.addResults(endResults)
+            result.add(Scope(identifier: pattern.name ?? "", range: NSRange(location: begin.range.location + begin.range.length, length: NSUnionRange(begin.range, endResults.range).length - begin.range.length), attribute: pattern))
+            result.add(begin)
+            result.add(endResults)
             return result
     }
 
-    /// Matches a given regular expression in a String and returns range
+    /// Matches a given regular expression in the String and returns range
     /// information for the captures
     ///
     /// - parameter expression:     The regular expression to match
@@ -281,29 +259,29 @@ public class Parser {
     /// - returns:  The set containing the results. May be nil if the expression
     ///             could not match any part of the string. It may also be empty
     ///             and only contain range information to show what it matched.
-    private func matchExpression(regularExpression: NSRegularExpression, inRange bounds: NSRange, captures: CaptureCollection?, baseSelector: String? = nil) -> ResultSet? {
-        guard let result = regularExpression.firstMatchInString(string, options: [.WithTransparentBounds], range: bounds) else {
+    fileprivate func match(_ expression: NSRegularExpression, in range: NSRange, captures: CaptureCollection?, baseSelector: String? = nil) -> ResultSet? {
+        guard let result = expression.firstMatch(in: toParse.string, options: [.withTransparentBounds], range: range) else {
             return nil
         }
 
         let resultSet = ResultSet(startingRange: result.range)
         if baseSelector != nil {
-            resultSet.addResult(Result(identifier: baseSelector!, range: result.range))
+            resultSet.add(Result(identifier: baseSelector!, range: result.range))
         }
 
         if let captures = captures {
             for index in captures.captureIndexes {
                 if result.numberOfRanges <= Int(index) {
-                    print("Attention unexpected capture (\(index) to \(result.numberOfRanges)): \(regularExpression.pattern)")
+                    print("Attention unexpected capture (\(index) to \(result.numberOfRanges)): \(expression.pattern)")
                     continue
                 }
-                let range = result.rangeAtIndex(Int(index))
+                let range = result.rangeAt(Int(index))
                 if range.location == NSNotFound {
                     continue
                 }
 
                 if let scope = captures[index]?.name {
-                    resultSet.addResult(Result(identifier: scope, range: range))
+                    resultSet.add(Result(identifier: scope, range: range))
                 }
             }
         }
@@ -311,19 +289,18 @@ public class Parser {
         return resultSet
     }
 
-    /// Uses the callback to communicate the result of the parsing pass back
-    /// to the caller of parse.
+    /// Uses the callback to communicate the results of the parsing pass back to
+    /// the caller of parse. The scopes are stored in toParse.
     ///
-    /// - parameter results:        The results of the parsing pass
-    /// - parameter scopesString:   The place to store the scopes
-    /// - parameter callback:       The method to call on every successful match
-    private func applyResults(results: ResultSet, inout storingInScopesString scopesString: ScopedString, callback: Callback) {
-        callback(scope: Language.globalScope, range: results.range)
+    /// - parameter results:    The results of the parsing pass
+    /// - parameter callback:   The method to call on every successful match
+    fileprivate func apply(_ results: ResultSet, callback: Callback) {
+        callback(Language.globalScope, results.range)
         for result in results.results where result.range.length > 0 {
             if result.attribute != nil {
-                scopesString.addScopeAtTop(result as Scope)
+                toParse.addAtTop(result as Scope)
             } else if result.patternIdentifier != "" {
-                callback(scope: result.patternIdentifier, range: result.range)
+                callback(result.patternIdentifier, result.range)
             }
         }
     }

@@ -21,47 +21,48 @@ public struct Theme {
 
     // MARK: - Properties
 
-    public let UUID: String // TODO: replace with uuid type in swift 3
+    public let uuid: UUID
     public let name: String
     public let attributes: [String: Attributes]
 
     public var backgroundColor: Color {
-        return attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? Color ?? Color.whiteColor()
+        return attributes[Language.globalScope]?[NSBackgroundColorAttributeName] as? Color ?? Color.white
     }
 
     public var foregroundColor: Color {
-        return attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color ?? Color.blackColor()
+        return attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color ?? Color.black
     }
 
 
     // MARK: - Initializers
 
-    init?(dictionary: [NSObject: AnyObject]) {
-        guard let UUID = dictionary["uuid"] as? String,
-            name = dictionary["name"] as? String,
-            rawSettings = dictionary["settings"] as? [[String: AnyObject]]
+    init?(dictionary: [String: Any]) {
+        guard let uuidString = dictionary["uuid"] as? String,
+            let uuid = UUID(uuidString: uuidString),
+            let name = dictionary["name"] as? String,
+            let rawSettings = dictionary["settings"] as? [[String: AnyObject]]
             else { return nil }
 
-        self.UUID = UUID
+        self.uuid = uuid
         self.name = name
 
         var attributes = [String: Attributes]()
         for raw in rawSettings {
             guard var setting = raw["settings"] as? [String: AnyObject] else { continue }
 
-            if let value = setting.removeValueForKey("foreground") as? String {
+            if let value = setting.removeValue(forKey: "foreground") as? String {
                 setting[NSForegroundColorAttributeName] = Color(hex: value)
             }
 
-            if let value = setting.removeValueForKey("background") as? String {
+            if let value = setting.removeValue(forKey: "background") as? String {
                 setting[NSBackgroundColorAttributeName] = Color(hex: value)
             }
 
             // TODO: caret, invisibles, lightHighlight, selection, font style
 
             if let patternIdentifiers = raw["scope"] as? String {
-                for patternIdentifier in patternIdentifiers.componentsSeparatedByString(",") {
-                    let key = patternIdentifier.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                for patternIdentifier in patternIdentifiers.components(separatedBy: ",") {
+                    let key = patternIdentifier.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
                     attributes[key] = setting
                 }
             } else if !setting.isEmpty {

@@ -20,7 +20,7 @@ class ParserTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let yaml = manager.languageWithIdentifier("source.YAML")!
+        let yaml = manager.language(withIdentifier: "source.YAML")!
         parser = Parser(language: yaml)
     }
 
@@ -67,7 +67,7 @@ class ParserTests: XCTestCase {
     }
 
     func testRuby() {
-        let ruby = manager.languageWithIdentifier("source.Ruby")!
+        let ruby = manager.language(withIdentifier: "source.Ruby")!
         parser = Parser(language: ruby)
         let input = fixture("test.rb", "txt")
         parser.parse(input, match: { _ in return })

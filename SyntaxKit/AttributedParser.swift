@@ -12,16 +12,16 @@
 
 import Foundation
 
-public class AttributedParser: Parser {
+open class AttributedParser: Parser {
 
     // MARK: - Types
 
-    public typealias AttributedCallback = (scope: String, range: NSRange, attributes: Attributes?) -> Void
+    public typealias AttributedCallback = (_ scope: String, _ range: NSRange, _ attributes: Attributes?) -> Void
 
 
     // MARK: - Properties
 
-    public let theme: Theme
+    open let theme: Theme
 
 
     // MARK: - Initializers
@@ -34,20 +34,20 @@ public class AttributedParser: Parser {
 
     // MARK: - Parsing
 
-    public func parse(string: String, match callback: AttributedCallback) {
+    open func parse(_ string: String, match callback: AttributedCallback) {
         parse(string) { scope, range in
-            callback(scope: scope, range: range, attributes: self.attributesForScope(scope))
+            callback(scope, range, self.attributes(forScope: scope))
         }
     }
 
-    func parse(incremental: (range: NSRange, diff: Diff, previousScopes: ScopedString)? = nil, match callback: AttributedCallback) -> ScopedString? {
-        return parse(incremental) { scope, range in
-            callback(scope: scope, range: range, attributes: self.attributesForScope(scope))
+    func parse(in range: NSRange?, match callback: AttributedCallback) {
+        parse(in: range) { scope, range in
+            callback(scope, range, self.attributes(forScope: scope))
         }
     }
 
-    public func attributedStringForString(string: String, baseAttributes: Attributes? = nil) -> NSAttributedString {
-        let output = NSMutableAttributedString(string: string, attributes: baseAttributes)
+    open func attributedString(for string: String, base: Attributes? = nil) -> NSAttributedString {
+        let output = NSMutableAttributedString(string: string, attributes: base)
         output.beginEditing()
         parse(string) { _, range, attributes in
             if let attributes = attributes {
@@ -61,16 +61,15 @@ public class AttributedParser: Parser {
 
     // MARK: - Private
 
-    private func attributesForScope(scope: String) -> Attributes? {
-        let components = scope.componentsSeparatedByString(".") as NSArray
-        let count = components.count
-        if count == 0 {
+    fileprivate func attributes(forScope scope: String) -> Attributes? {
+        let components = scope.components(separatedBy: ".")
+        if components.count == 0 {
             return nil
         }
 
         var attributes = Attributes()
-        for i in 0..<count {
-            let key = (components.subarrayWithRange(NSRange(location: 0, length: i + 1)) as NSArray).componentsJoinedByString(".")
+        for i in 0..<components.count {
+            let key = components[0...i].joined(separator: ".")
             if let attrs = theme.attributes[key] {
                 for (k, v) in attrs {
                     attributes[k] = v
@@ -81,7 +80,6 @@ public class AttributedParser: Parser {
         if attributes.isEmpty {
             return nil
         }
-
         return attributes
     }
 }

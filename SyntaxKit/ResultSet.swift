@@ -17,8 +17,8 @@ class ResultSet {
     /// associated with the contained results.
     var range: NSRange { return _range }
 
-    private var _results = [Result]()
-    private var _range: NSRange
+    fileprivate var _results = [Result]()
+    fileprivate var _range: NSRange
 
 
     // MARK: - Initializers
@@ -30,17 +30,17 @@ class ResultSet {
 
     // MARK: - Adding
 
-    func extendWithRange(range: NSRange) {
+    func extend(with range: NSRange) {
         _range = NSUnionRange(self.range, range)
     }
 
-    func addResult(result: Result) {
-        extendWithRange(result.range)
+    func add(_ result: Result) {
+        extend(with: result.range)
         _results.append(result)
     }
 
-    func addResults(resultSet: ResultSet) {
-        extendWithRange(resultSet.range)
+    func add(_ resultSet: ResultSet) {
+        extend(with: resultSet.range)
         for result in resultSet.results {
             _results.append(result)
         }

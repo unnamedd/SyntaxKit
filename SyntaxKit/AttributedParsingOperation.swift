@@ -12,69 +12,59 @@
 //
 //  Note that the callback returns an array of results instead of each result
 //  separately. This is more efficient since it allows coalescing the edits
-//  between a beginEditing and an endEditing call. Parser uses the other way for
-//  backward compatibility reasons.
+//  between a beginEditing and an endEditing call.
 //
 //  Created by Alexander Hedges on 17/04/16.
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
+/// Represents one change (insertion or deletion) between two strings
 struct Diff {
 
     // MARK: - Properties
 
+    /// - Insertion: The inserted sting
+    /// - Deletion:  The empty string
     var change: String
+    /// The range of the change in the old string
+    ///
+    /// - Insertion: The location of the insertion and length 0
+    /// - Deletion:  The range of deleted characters
     var range: NSRange
 
 
-    // MARK: - Operations
+    // MARK: - Methods
 
-    /// - returns:  true if predicted change from diff matches the characters
-    ///             from the new string in that range
-    func representsChangesfromOldString(oldString: NSString, toNewString newStr: NSString) -> Bool {
-        if self.range.length == 0 {
-            if !Diff.stringChangeIsCompatible(newStr as String, isInsertion: true, changedRange: NSRange(location: self.range.location, length: (self.change as NSString).length), oldString: oldString) {
-                return false
-            }
-            if newStr.substringWithRange(NSRange(location: self.range.location, length: (self.change as NSString).length)) != self.change {
-                return false
-            }
-        } else {
-            if !Diff.stringChangeIsCompatible(newStr as String, isInsertion: false, changedRange: self.range, oldString: oldString) {
-                return false
-            }
-        }
-
-        return true
+    /// - returns:  true if the diff represents the changes between oldString to
+    ///             newString
+    func representsChanges(from oldString: String, to newString: String) -> Bool {
+        return newString == (oldString as NSString).replacingCharacters(in: range, with: change)
+          && self.change == (newString as NSString).substring(with: self.rangeInNewString())
     }
 
-    /// - returns:  true if the number of characters changed is consistent with
-    ///             the new string
-    private static func stringChangeIsCompatible(newString: NSString, isInsertion insertion: Bool, changedRange range: NSRange, oldString: NSString) -> Bool {
-        let oldLength = insertion ? newString.length - range.length : newString.length + range.length
+    /// - returns: the range of the change in the new string
+    func rangeInNewString() -> NSRange {
+        return NSRange(location: self.range.location, length: isInsertion() ? (self.change as NSString).length : 0)
+    }
 
-        if oldString.length != oldLength {
-            return false
-        }
-        return true
+    /// - returns: true if the change is an insertion
+    func isInsertion() -> Bool {
+        return self.range.length == 0
     }
 }
 
-public class AttributedParsingOperation: NSOperation {
+open class AttributedParsingOperation: Operation {
 
     // MARK: - Types
 
-    public typealias OperationCallback = [(range: NSRange, attributes: Attributes?)] -> Void
+    public typealias OperationCallback = ([(range: NSRange, attributes: Attributes?)]) -> Void
 
 
     // MARK: - Properties
 
-    private let parser: AttributedParser
-    private var operationCallback: OperationCallback
-    private var scopedStringResult: ScopedString
-
-    private var range: NSRange?
-    private var diff: Diff?
+    fileprivate let parser: AttributedParser
+    fileprivate let operationCallback: OperationCallback
+    fileprivate var parsedRange: NSRange?
 
 
     // MARK: - Initializers
@@ -82,51 +72,49 @@ public class AttributedParsingOperation: NSOperation {
     /// Initializer for the first instance in the NSOperationQueue
     ///
     /// Can also be used if no incremental parsing is desired
-    public init(string: String, language: Language, theme: Theme, callback: OperationCallback) {
+    public init(string: String, language: Language, theme: Theme, callback: @escaping OperationCallback) {
         parser = AttributedParser(language: language, theme: theme)
-        parser.string = string
+        parser.toParse = ScopedString(string: string)
         operationCallback = callback
-        scopedStringResult = ScopedString(string: string)
         super.init()
     }
 
-    /// Initializer to use for operations that allow incremental parsing
+    /// Initializer for operations that allow incremental parsing
     ///
     /// The given change has to match the change in the string between the two
-    /// operations. Otherwise the entire string is reparsed. If newCallback is
-    /// nil the callback from the previous operation will be taken.
+    /// operations. Otherwise the entire string will be reparsed. If newCallback
+    /// is nil the callback from the previous operation will be used.
+    ///
+    /// - parameter string:             The new String to parse.
+    /// - parameter previousOperation:  The preceding operation in the queue.
+    /// - parameter insertion:          True if the change was an insertion.
+    /// = parameter range:              Either the range in the old string that
+    ///                                 was deleted or the range in the new
+    ///                                 string that was added.
+    /// - parameter callback:           The callback to call with results.
     public init(string: String, previousOperation: AttributedParsingOperation, changeIsInsertion insertion: Bool, changedRange range: NSRange, newCallback callback: OperationCallback? = nil) {
         parser = previousOperation.parser
-        parser.string = string
         operationCallback = callback ?? previousOperation.operationCallback
-        scopedStringResult = previousOperation.scopedStringResult
 
         super.init()
 
-        let s = string as NSString
         let diff: Diff
         if insertion {
-            diff = Diff(change: s.substringWithRange(range), range: NSRange(location: range.location, length: 0))
+            diff = Diff(change: (string as NSString).substring(with: range), range: NSRange(location: range.location, length: 0))
         } else {
             diff = Diff(change: "", range: range)
         }
 
-        if diff.representsChangesfromOldString(previousOperation.scopedStringResult.underlyingString, toNewString: string) {
-            self.diff = diff
-            self.range = outdatedRangeForChangeInString(string, changeIsInsertion: insertion, changedRange: range)
+        if diff.representsChanges(from: parser.toParse.string, to: string) {
+            self.parsedRange = AttributedParsingOperation.outdatedRange(in: string as NSString, forChange: diff, updatingPreviousResult: &self.parser.toParse)
         }
     }
 
 
     // MARK: - NSOperation Implementation
 
-    public override func main() {
+    open override func main() {
         var resultsArray: [(range: NSRange, attributes: Attributes?)] = []
-
-        var incrementalParsingInfo: (NSRange, Diff, ScopedString)?
-        if range != nil && diff != nil {
-            incrementalParsingInfo = (range: range!, diff: diff!, previousScopes: scopedStringResult)
-        }
 
         let callback = { (_: String, range: NSRange, attributes: Attributes?) in
             if let attributes = attributes {
@@ -134,15 +122,14 @@ public class AttributedParsingOperation: NSOperation {
             }
         }
 
-        if let result = parser.parse(incrementalParsingInfo, match: callback) {
-            scopedStringResult = result
-        }
+        parser.parse(in: self.parsedRange, match: callback)
 
-        operationCallback(resultsArray)
-        parser.string = ""
+        if !parser.aborted {
+            operationCallback(resultsArray)
+        }
     }
 
-    public override func cancel() {
+    open override func cancel() {
         parser.aborted = true
         super.cancel()
     }
@@ -162,40 +149,29 @@ public class AttributedParsingOperation: NSOperation {
     /// only a part of the string has to be reparsed.
     /// In fact passing anything other than this range to parse might lead to
     /// uninteded results but is not prohibited.
-    /// This method is only guaranteed to possibly not return nil if parse was
-    /// called on the old string before this call.
     ///
-    /// - parameter newString:  The examined new string. Should be the product
-    ///                         of previously parsed + change.
-    /// - parameter insertion:  Change is an insertion as opposed to a deletion.
-    /// - parameter range:      The range in which the change occurred. In case
-    ///                         of an insertion the range in the new string that
-    ///                         was inserted. For a deletion it is the range in
-    ///                         the old string that was deleted.
+    /// - parameter newString:  The string that will be parsed next.
+    /// - parameter diff:       A diff representing the changes from
+    ///                         previous.string to newString.
+    /// - parameter previous:   The result of the previous parsing pass.
     ///
     /// - returns:  A range in newString that can be safely re-parsed. Or nil if
     ///             everything has to be reparsed.
-    func outdatedRangeForChangeInString(newString: NSString, changeIsInsertion insertion: Bool, changedRange range: NSRange) -> NSRange? {
-        if !Diff.stringChangeIsCompatible(newString, isInsertion: insertion, changedRange: range, oldString: scopedStringResult.underlyingString) {
-            return nil
-        }
-
-        var potentialNewString = scopedStringResult
-
+    class func outdatedRange(in newString: NSString, forChange diff: Diff, updatingPreviousResult previous: inout ScopedString) -> NSRange? {
         let linesRange: NSRange
-        if insertion {
-            potentialNewString.insertString(newString.substringWithRange(range), atIndex: range.location)
-            linesRange = newString.lineRangeForRange(range)
+        let range: NSRange
+        if diff.isInsertion() {
+            range = diff.rangeInNewString()
+            previous.insert(diff.change, atIndex: range.location)
+            linesRange = newString.lineRange(for: range)
         } else {
-            potentialNewString.deleteCharactersInRange(range)
-            linesRange = newString.lineRangeForRange(NSRange(location: range.location, length: 0))
-        }
-        if potentialNewString.underlyingString != newString {
-            return nil
+            range = diff.range
+            previous.deleteCharacters(in: range)
+            linesRange = newString.lineRange(for: NSRange(location: range.location, length: 0))
         }
 
-        let scopeAtIndex = potentialNewString.topmostScopeAtIndex(NSMaxRange(linesRange) - 1)
-        if scopeAtIndex == potentialNewString.baseScope {
+        let scopeAtIndex = previous.topmostScope(atIndex: NSMaxRange(linesRange) - 1)
+        if scopeAtIndex == previous.baseScope {
             return linesRange
         } else {
             let endOfCurrentScope = NSMaxRange(scopeAtIndex.range)

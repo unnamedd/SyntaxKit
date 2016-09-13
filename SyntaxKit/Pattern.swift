@@ -35,42 +35,42 @@ class Pattern: NSObject {
     var parent: Pattern? { return _parent }
     var subpatterns: [Pattern] = []
 
-    private var _name: String?
-    private var _match: NSRegularExpression?
-    private var _captures: CaptureCollection?
-    private var _begin: NSRegularExpression?
-    private var _beginCaptures: CaptureCollection?
-    private var _end: NSRegularExpression?
-    private var _endCaptures: CaptureCollection?
-    private var _applyEndPatternLast = false
-    private weak var _parent: Pattern?
+    fileprivate var _name: String?
+    fileprivate var _match: NSRegularExpression?
+    fileprivate var _captures: CaptureCollection?
+    fileprivate var _begin: NSRegularExpression?
+    fileprivate var _beginCaptures: CaptureCollection?
+    fileprivate var _end: NSRegularExpression?
+    fileprivate var _endCaptures: CaptureCollection?
+    fileprivate var _applyEndPatternLast = false
+    fileprivate weak var _parent: Pattern?
 
-    private let debug = true
+    fileprivate let debug = true
 
 
     // MARK: - Initializers
 
-    init?(dictionary: [NSObject: AnyObject], parent: Pattern?, withRepository repository: Repository?, withReferenceManager refman: ReferenceManager) {
+    init?(dictionary: [AnyHashable: Any], parent: Pattern?, with repository: Repository?, with manager: ReferenceManager) {
         super.init()
         _parent = parent
         _name = dictionary["name"] as? String
 
         if let matchExpr = dictionary["match"] as? String {
-            _match = try? NSRegularExpression(pattern: matchExpr, options: [.AnchorsMatchLines])
+            _match = try? NSRegularExpression(pattern: matchExpr, options: [.anchorsMatchLines])
             if debug && self.match == nil {
                 print("Problem parsing match expression \(matchExpr)")
             }
         }
 
         if let beginExpr = dictionary["begin"] as? String {
-            _begin = try? NSRegularExpression(pattern: beginExpr, options: [.AnchorsMatchLines])
+            _begin = try? NSRegularExpression(pattern: beginExpr, options: [.anchorsMatchLines])
             if debug && self.begin == nil {
                 print("Problem parsing begin expression \(beginExpr)")
             }
         }
 
         if let endExpr = dictionary["end"] as? String {
-            _end = try? NSRegularExpression(pattern: endExpr, options: [.AnchorsMatchLines])
+            _end = try? NSRegularExpression(pattern: endExpr, options: [.anchorsMatchLines])
             if debug && self.end == nil {
                 print("Problem parsing end expression \(endExpr)")
             }
@@ -78,11 +78,11 @@ class Pattern: NSObject {
 
         _applyEndPatternLast = dictionary["applyEndPatternLast"] as? Bool ?? false
 
-        if let dictionary = dictionary["beginCaptures"] as? [NSObject: AnyObject] {
+        if let dictionary = dictionary["beginCaptures"] as? [AnyHashable: Any] {
             _beginCaptures = CaptureCollection(dictionary: dictionary)
         }
 
-        if let dictionary = dictionary["captures"] as? [NSObject: AnyObject] {
+        if let dictionary = dictionary["captures"] as? [AnyHashable: Any] {
             if match != nil {
                 _captures = CaptureCollection(dictionary: dictionary)
             } else if begin != nil && end != nil {
@@ -91,7 +91,7 @@ class Pattern: NSObject {
             }
         }
 
-        if let dictionary = dictionary["endCaptures"] as? [NSObject: AnyObject] {
+        if let dictionary = dictionary["endCaptures"] as? [AnyHashable: Any] {
             _endCaptures = CaptureCollection(dictionary: dictionary)
         }
 
@@ -104,13 +104,13 @@ class Pattern: NSObject {
         if self.match == nil &&
             self.begin == nil &&
             self.end == nil &&
-            (dictionary["patterns"] as? [[NSObject: AnyObject]] == nil || (dictionary["patterns"] as? [[NSObject: AnyObject]])! == []) {
+            (dictionary["patterns"] as? [[AnyHashable: Any]] == nil || (dictionary["patterns"] as? [[AnyHashable: Any]])!.count == 0) {
                 print("Attention: pattern not recognized: \(self.name)")
                 return nil
         }
 
-        if let array = dictionary["patterns"] as? [[NSObject: AnyObject]] {
-            self.subpatterns = refman.patternsForArray(array, inRepository: repository, caller: self)
+        if let array = dictionary["patterns"] as? [[AnyHashable: Any]] {
+            self.subpatterns = manager.patterns(for: array, in: repository, caller: self)
         }
     }
 
@@ -134,12 +134,12 @@ class Pattern: NSObject {
 }
 
 enum ReferenceType {
-    case ToRepository
-    case ToSelf
-    case ToBase
-    case ToForeign
-    case ToForeignRepository
-    case Resolved
+    case toRepository
+    case toSelf
+    case toBase
+    case toForeign
+    case toForeignRepository
+    case resolved
 }
 
 class Include: Pattern {
@@ -148,38 +148,38 @@ class Include: Pattern {
 
     var type: ReferenceType {return _type}
 
-    private var _type: ReferenceType
-    private let repositoryRef: String?
-    private let languageRef: String?
-    private var associatedRepository: Repository?
+    fileprivate var _type: ReferenceType
+    fileprivate let repositoryRef: String?
+    fileprivate let languageRef: String?
+    fileprivate var associatedRepository: Repository?
 
 
     // MARK: - Initializers
 
-    init(reference: String, inRepository repository: Repository? = nil, parent: Pattern?, bundleManager: BundleManager) {
+    init(reference: String, in repository: Repository? = nil, parent: Pattern?, manager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
-            self._type = .ToRepository
-            self.repositoryRef = reference.substringFromIndex(reference.startIndex.successor())
+            self._type = .toRepository
+            self.repositoryRef = reference.substring(from: reference.characters.index(after: reference.startIndex))
             self.languageRef = nil
         } else if reference == "$self" {
-            self._type = .ToSelf
+            self._type = .toSelf
             self.repositoryRef = nil
             self.languageRef = nil
         } else  if reference == "$base" {
-            self._type = .ToBase
+            self._type = .toBase
             self.repositoryRef = nil
             self.languageRef = nil
-        } else if reference.containsString("#") {
-            self._type = .ToForeignRepository
-            self.repositoryRef = reference.substringFromIndex(reference.rangeOfString("#")!.endIndex)
-            self.languageRef = reference.substringToIndex(reference.rangeOfString("#")!.startIndex)
-            bundleManager.getRawLanguageWithIdentifier(languageRef!)
+        } else if reference.contains("#") {
+            self._type = .toForeignRepository
+            self.repositoryRef = reference.substring(from: reference.range(of: "#")!.upperBound)
+            self.languageRef = reference.substring(to: reference.range(of: "#")!.lowerBound)
+            _ = manager.loadRawLanguage(withIdentifier: languageRef!)
         } else {
-            self._type = .ToForeign
+            self._type = .toForeign
             self.repositoryRef = nil
             self.languageRef = reference
-            bundleManager.getRawLanguageWithIdentifier(languageRef!)
+            _ = manager.loadRawLanguage(withIdentifier: languageRef!)
         }
         super.init()
         _parent = parent
@@ -196,44 +196,44 @@ class Include: Pattern {
 
     // MARK: - Reference Resolution
 
-    func resolveInternalReference(repository: Repository, inLanguage language: Language) {
+    func resolveInternalReference(with repository: Repository, in language: Language) {
         let pattern: Pattern?
-        if type == .ToRepository {
+        if type == .toRepository {
             pattern = (associatedRepository ?? repository)[repositoryRef!]
-        } else if type == .ToSelf {
+        } else if type == .toSelf {
             pattern = language.pattern
         } else {
             return
         }
 
         if pattern != nil {
-            self.replaceWithPattern(pattern!)
+            self.replace(with: pattern!)
         }
-        _type = .Resolved
+        _type = .resolved
     }
 
-    func resolveExternalReference(thisLanguage: Language, inLanguages languages: [String: Language], baseName: String?) {
+    func resolveExternalReference(from thisLanguage: Language, in languages: [String: Language], baseName: String?) {
         let pattern: Pattern?
-        if type == .ToBase {
+        if type == .toBase {
             pattern = languages[baseName!]!.pattern
-        } else if type == .ToForeignRepository {
+        } else if type == .toForeignRepository {
             pattern = languages[languageRef!]?.repository[repositoryRef!]
-        } else if type == .ToForeign {
+        } else if type == .toForeign {
             pattern = languages[languageRef!]?.pattern
         } else {
             return
         }
 
         if pattern != nil {
-            self.replaceWithPattern(pattern!)
+            self.replace(with: pattern!)
         }
-        _type = .Resolved
+        _type = .resolved
     }
 
 
     // MARK: - Private
 
-    private func replaceWithPattern(pattern: Pattern) {
+    fileprivate func replace(with pattern: Pattern) {
         _name = pattern.name
         _match = pattern.match
         _captures = pattern.captures
