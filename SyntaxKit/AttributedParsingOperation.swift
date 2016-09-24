@@ -57,7 +57,11 @@ open class AttributedParsingOperation: Operation {
 
     // MARK: - Types
 
-    public typealias OperationCallback = ([(range: NSRange, attributes: Attributes?)]) -> Void
+    /// Asynchronous or synchronous callback to which the results are passed
+    ///
+    /// The sender is passed in so it can be used to check if the operation was
+    /// cancelled after the call.
+    public typealias OperationCallback = ([(range: NSRange, attributes: Attributes?)], AttributedParsingOperation) -> Void
 
 
     // MARK: - Properties
@@ -88,7 +92,7 @@ open class AttributedParsingOperation: Operation {
     /// - parameter string:             The new String to parse.
     /// - parameter previousOperation:  The preceding operation in the queue.
     /// - parameter insertion:          True if the change was an insertion.
-    /// = parameter range:              Either the range in the old string that
+    /// - parameter range:              Either the range in the old string that
     ///                                 was deleted or the range in the new
     ///                                 string that was added.
     /// - parameter callback:           The callback to call with results.
@@ -126,7 +130,7 @@ open class AttributedParsingOperation: Operation {
         parser.parse(in: self.parsedRange, match: callback)
 
         if !parser.aborted {
-            operationCallback(resultsArray)
+            operationCallback(resultsArray, self)
         }
     }
 
