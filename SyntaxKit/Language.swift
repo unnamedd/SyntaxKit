@@ -23,7 +23,6 @@ public struct Language {
 
     static let globalScope = "GLOBAL"
 
-
     // MARK: - Initializers
 
     init?(dictionary: [String: Any], manager: BundleManager) {

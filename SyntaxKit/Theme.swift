@@ -33,7 +33,6 @@ public struct Theme {
         return attributes[Language.globalScope]?[NSForegroundColorAttributeName] as? Color ?? Color.black
     }
 
-
     // MARK: - Initializers
 
     init?(dictionary: [String: Any]) {

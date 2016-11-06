@@ -17,7 +17,6 @@ class SwiftBaselineHighlightingTests: XCTestCase {
     let manager = getBundleManager()
     var parser: AttributedParser!
 
-
     // MARK: - Tests
 
     override func setUp() {

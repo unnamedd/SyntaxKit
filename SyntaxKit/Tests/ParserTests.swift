@@ -24,7 +24,6 @@ class ParserTests: XCTestCase {
         parser = Parser(language: yaml)
     }
 
-
     func testParsingBeginEnd() {
         var stringQuoted: NSRange?
         var punctuationBegin: NSRange?

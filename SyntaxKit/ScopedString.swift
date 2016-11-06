@@ -84,13 +84,11 @@ struct ScopedString {
         return Scope(identifier: "BaseNameString", range: NSRange(location: 0, length: (string as NSString).length), attribute: nil)
     }
 
-
     // MARK: - Initializers
 
     init(string: String) {
         self.string = string
     }
-
 
     // MARK: - Interface
 
@@ -200,7 +198,7 @@ struct ScopedString {
                     levels[level].remove(at: scope)
                 }
             }
-            if levels[level].count == 0 {
+            if levels[level].isEmpty {
                 levels.remove(at: level)
             }
         }
@@ -242,7 +240,7 @@ struct ScopedString {
                     levels[level][scope].range = theRange
                 }
             }
-            if levels[level].count == 0 {
+            if levels[level].isEmpty {
                 levels.remove(at: level)
             }
         }
@@ -281,7 +279,6 @@ struct ScopedString {
         result += numberString + "\n"
         return result
     }
-
 
     // MARK: - Private
 

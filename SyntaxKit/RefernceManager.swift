@@ -21,13 +21,11 @@ class ReferenceManager {
     fileprivate var includes: [Include] = []
     fileprivate weak var bundleManager: BundleManager?
 
-
     // MARK: - Init
 
     init(bundleManager: BundleManager) {
         self.bundleManager = bundleManager
     }
-
 
     // MARK: - Pattern Creation and Resolution
 

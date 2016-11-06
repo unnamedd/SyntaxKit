@@ -32,7 +32,6 @@ struct Diff {
     /// - Deletion:  The range of deleted characters
     var range: NSRange
 
-
     // MARK: - Methods
 
     /// - returns:  true if the diff represents the changes between oldString to
@@ -63,13 +62,11 @@ open class AttributedParsingOperation: Operation {
     /// cancelled after the call.
     public typealias OperationCallback = ([(range: NSRange, attributes: Attributes?)], AttributedParsingOperation) -> Void
 
-
     // MARK: - Properties
 
     fileprivate let parser: AttributedParser
     fileprivate let operationCallback: OperationCallback
     fileprivate var parsedRange: NSRange?
-
 
     // MARK: - Initializers
 
@@ -116,7 +113,6 @@ open class AttributedParsingOperation: Operation {
         }
     }
 
-
     // MARK: - NSOperation Implementation
 
     open override func main() {
@@ -138,7 +134,6 @@ open class AttributedParsingOperation: Operation {
         parser.aborted = true
         super.cancel()
     }
-
 
     // MARK: - Change Processing
 

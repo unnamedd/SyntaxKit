@@ -14,11 +14,13 @@ struct Capture {
 
     let name: String
 
-
     // MARK: - Initializers
 
     init?(dictionary: [AnyHashable: Any]) {
-        guard let name = dictionary["name"] as? String else { return nil }
+        guard let name = dictionary["name"] as? String else {
+            return nil
+        }
+
         self.name = name
     }
 }

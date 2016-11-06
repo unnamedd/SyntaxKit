@@ -25,7 +25,6 @@ open class BundleManager {
     /// - returns:  A URL pointing to the resource, if found
     public typealias BundleLocationCallback = (_ identifier: String, _ isLanguage: Bool) -> (URL?)
 
-
     // MARK: - Properties
 
     /// You probably want to leave the languageCaching property set to true.
@@ -40,7 +39,6 @@ open class BundleManager {
     fileprivate var dependencies: [Language] = []
     fileprivate var cachedLanguages: [String: Language] = [:]
     fileprivate var cachedThemes: [String: Theme] = [:]
-
 
     // MARK: - Initializers
 
@@ -60,7 +58,6 @@ open class BundleManager {
     public init(callback: @escaping BundleLocationCallback) {
         self.bundleCallback = callback
     }
-
 
     // MARK: - Public
 
@@ -100,7 +97,6 @@ open class BundleManager {
     open func clearLanguageCache() {
         self.cachedLanguages = [:]
     }
-
 
     // MARK: - Internal Interface
 

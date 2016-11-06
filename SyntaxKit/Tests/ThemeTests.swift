@@ -17,7 +17,6 @@ class ThemeTests: XCTestCase {
     var tomorrow: Theme!
     var solarized: Theme!
 
-
     // MARK: - Tests
 
     override func setUp() {

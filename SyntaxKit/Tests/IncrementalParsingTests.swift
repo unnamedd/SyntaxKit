@@ -20,7 +20,6 @@ class IncrementalParsingTests: XCTestCase {
     var totalRange: NSRange?
     var input = ""
 
-
     // MARK: - Tests
 
     override func setUp() {
@@ -92,7 +91,6 @@ class IncrementalParsingTests: XCTestCase {
             self.assertInsertion("/", location: 139, expectedRange: NSRange(location: 139, length: 23))
         }
     }
-
 
     // MARK: - Helpers
 

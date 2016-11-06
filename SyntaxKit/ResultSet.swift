@@ -20,13 +20,11 @@ class ResultSet {
     fileprivate var _results = [Result]()
     fileprivate var _range: NSRange
 
-
     // MARK: - Initializers
 
     init(startingRange range: NSRange) {
         _range = range
     }
-
 
     // MARK: - Adding
 

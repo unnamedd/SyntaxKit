@@ -31,7 +31,7 @@ class Pattern: NSObject {
     var beginCaptures: CaptureCollection? { return _beginCaptures }
     var end: NSRegularExpression? { return _end }
     var endCaptures: CaptureCollection? { return _endCaptures }
-    var applyEndPatternLast: Bool { return _applyEndPatternLast}
+    var applyEndPatternLast: Bool { return _applyEndPatternLast }
     var parent: Pattern? { return _parent }
     var subpatterns: [Pattern] = []
 
@@ -46,7 +46,6 @@ class Pattern: NSObject {
     fileprivate weak var _parent: Pattern?
 
     fileprivate let debug = true
-
 
     // MARK: - Initializers
 
@@ -104,7 +103,7 @@ class Pattern: NSObject {
         if self.match == nil &&
             self.begin == nil &&
             self.end == nil &&
-            (dictionary["patterns"] as? [[AnyHashable: Any]] == nil || (dictionary["patterns"] as? [[AnyHashable: Any]])!.count == 0) {
+            (dictionary["patterns"] as? [[AnyHashable: Any]] == nil || (dictionary["patterns"] as? [[AnyHashable: Any]])!.isEmpty) {
                 print("Attention: pattern not recognized: \(self.name)")
                 return nil
         }
@@ -146,13 +145,12 @@ class Include: Pattern {
 
     // MARK: - Properties
 
-    var type: ReferenceType {return _type}
+    var type: ReferenceType { return _type }
 
     fileprivate var _type: ReferenceType
     fileprivate let repositoryRef: String?
     fileprivate let languageRef: String?
     fileprivate var associatedRepository: Repository?
-
 
     // MARK: - Initializers
 
@@ -193,7 +191,6 @@ class Include: Pattern {
         super.init(pattern: include, parent: parent)
     }
 
-
     // MARK: - Reference Resolution
 
     func resolveInternalReference(with repository: Repository, in language: Language) {
@@ -229,7 +226,6 @@ class Include: Pattern {
         }
         _type = .resolved
     }
-
 
     // MARK: - Private
 

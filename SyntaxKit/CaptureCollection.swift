@@ -20,11 +20,12 @@ struct CaptureCollection {
         return keys
     }
 
-
     // MARK: - Initializers
 
     init?(dictionary: [AnyHashable: Any]) {
-        guard let dictionary = dictionary as? [String: [String: String]]  else { return nil }
+        guard let dictionary = dictionary as? [String: [String: String]] else {
+            return nil
+        }
 
         var captures = [UInt: Capture]()
         for (key, value) in dictionary {
@@ -34,7 +35,6 @@ struct CaptureCollection {
         }
         self.captures = captures
     }
-
 
     // MARK: - Accessing Captures
 

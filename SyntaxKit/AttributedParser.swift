@@ -18,11 +18,9 @@ open class AttributedParser: Parser {
 
     public typealias AttributedCallback = (_ scope: String, _ range: NSRange, _ attributes: Attributes?) -> Void
 
-
     // MARK: - Properties
 
     open let theme: Theme
-
 
     // MARK: - Initializers
 
@@ -30,7 +28,6 @@ open class AttributedParser: Parser {
         self.theme = theme
         super.init(language: language)
     }
-
 
     // MARK: - Parsing
 
@@ -58,12 +55,11 @@ open class AttributedParser: Parser {
         return output
     }
 
-
     // MARK: - Private
 
     fileprivate func attributes(forScope scope: String) -> Attributes? {
         let components = scope.components(separatedBy: ".")
-        if components.count == 0 {
+        if components.isEmpty {
             return nil
         }
 

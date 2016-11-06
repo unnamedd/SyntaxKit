@@ -16,7 +16,6 @@ struct Result: Equatable {
     var range: NSRange
     let attribute: AnyObject?
 
-
     // MARK: - Initializers
 
     init(identifier: String, range: NSRange, attribute: AnyObject? = nil) {

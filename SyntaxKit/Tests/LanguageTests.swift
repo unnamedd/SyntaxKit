@@ -15,7 +15,6 @@ class LanguageTests: XCTestCase {
 
     let manager = getBundleManager()
 
-
     // MARK: - Tests
 
     func testYaml() {

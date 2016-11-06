@@ -16,7 +16,6 @@ open class Parser {
 
     public typealias Callback = (_ scope: String, _ range: NSRange) -> Void
 
-
     // MARK: - Properties
 
     /// The Language that the parser recognizes
@@ -29,13 +28,11 @@ open class Parser {
     /// Set to true to abort the parsing pass
     var aborted = false
 
-
     // MARK: - Initializers
 
     public init(language: Language) {
         self.language = language
     }
-
 
     // MARK: - Public
 
@@ -46,7 +43,6 @@ open class Parser {
         self.toParse = ScopedString(string: string)
         parse(match: callback)
     }
-
 
     // MARK: - Private
 

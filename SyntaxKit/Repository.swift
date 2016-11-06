@@ -16,7 +16,6 @@ class Repository {
     fileprivate var entries: [String: Pattern] = [:]
     fileprivate weak var parentRepository: Repository?
 
-
     // MARK: - Initializers
 
     init(repo: [String: [AnyHashable: Any]], inParent parent: Repository?, with manager: ReferenceManager) {
@@ -32,7 +31,6 @@ class Repository {
             }
         }
     }
-
 
     // MARK: - Accessing Patterns
 
