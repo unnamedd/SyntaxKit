@@ -41,7 +41,7 @@ Once you have a BundleManager, you can get started:
 import SyntaxKit
 
 let manager = BundleManager() { identifier, isLanguage in
-    NSURL(string: "Location of Bundles/" + identifier + ".plist")
+    URL(string: "Location of Bundles/" + identifier + ".plist")
 }
 let yaml = manager.language(withIdentifier: "source.yaml")!
 
