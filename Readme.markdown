@@ -40,7 +40,7 @@ Once you have a BundleManager, you can get started:
 ```swift
 import SyntaxKit
 
-let manager = BundleManager() { identifier, isLanguage in
+let manager = BundleManager() { identifier, kind in
     URL(string: "Location of Bundles/" + identifier + ".plist")
 }
 let yaml = manager.language(withIdentifier: "source.yaml")!
