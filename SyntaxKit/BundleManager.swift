@@ -14,16 +14,20 @@
 
 open class BundleManager {
 
+    public enum TextMateFileType {
+        case Language, Theme
+    }
+
     // MARK: - Types
 
-    /// Given an identifier of a grammar file and the format returns a url to the resource.
+    /// Given an identifier of a grammar file and the format returns a url to 
+    /// the resource.
     ///
     /// - parameter identifier: The identifier of the file. Used to map it to
     ///                         the name of the file.
-    /// - parameter isLanguage: Whether the requested file stores a language
-    ///                         (.tmLanguage)
+    /// - parameter kind:       The kind of file requested
     /// - returns:  A URL pointing to the resource, if found
-    public typealias BundleLocationCallback = (_ identifier: String, _ isLanguage: Bool) -> (URL?)
+    public typealias BundleLocationCallback = (_ identifier: String, _ kind: TextMateFileType) -> (URL?)
 
     // MARK: - Properties
 
@@ -83,7 +87,7 @@ open class BundleManager {
             return theme
         }
 
-        guard let dictURL = self.bundleCallback(identifier, false),
+        guard let dictURL = self.bundleCallback(identifier, .Theme),
             let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
             let newTheme = Theme(dictionary: plist) else {
                 return nil
@@ -108,7 +112,7 @@ open class BundleManager {
         if indexOfStoredLanguage != nil {
             return self.dependencies[indexOfStoredLanguage!]
         } else {
-            guard let dictURL = self.bundleCallback(identifier, true),
+            guard let dictURL = self.bundleCallback(identifier, .Language),
                 let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
                 let newLanguage = Language(dictionary: plist, manager: self) else {
                     return nil

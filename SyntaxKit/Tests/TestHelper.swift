@@ -22,9 +22,9 @@ func fixture(_ name: String, _ type: String) -> String {
 }
 
 func getBundleManager() -> BundleManager {
-    return BundleManager { identifier, isLanguage in
-        let name = isLanguage ? identifier._split(separator: ".")[1] : identifier
-        let ext = isLanguage ? ".tmLanguage" : ".tmTheme"
+    return BundleManager { identifier, kind in
+        let name = kind == .Language ? identifier._split(separator: ".")[1] : identifier
+        let ext = kind == .Language ? ".tmLanguage" : ".tmTheme"
         return Bundle(for: LanguageTests.self).url(forResource: name.capitalized, withExtension: ext) ?? URL(fileURLWithPath: "")
     }
 }
