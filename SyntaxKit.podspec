@@ -14,4 +14,6 @@ Pod::Spec.new do |spec|
   spec.osx.frameworks = 'Foundation', 'AppKit'
 
   spec.source_files = 'SyntaxKit/*.{h,m,swift}'
+  
+  spec.module_name = 'SyntaxKit'
 end
