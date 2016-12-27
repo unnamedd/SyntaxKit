@@ -95,7 +95,7 @@ class IncrementalParsingTests: XCTestCase {
     // MARK: - Helpers
 
     fileprivate func getParsingOperation() -> AttributedParsingOperation {
-        return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)], sender: AttributedParsingOperation) in
+        return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)], _: AttributedParsingOperation) in
             for result in results {
                 if self.totalRange == nil {
                     self.totalRange = result.range

@@ -192,7 +192,7 @@ struct ScopedString {
         assert(NSIntersectionRange(range, baseScope.range).length == range.length)
 
         for level in stride(from: (levels.count - 1), through: 0, by: -1) {
-            for scope in stride(from: (levels[level].count-1), through: 0, by: -1) {
+            for scope in stride(from: (levels[level].count - 1), through: 0, by: -1) {
                 let theScope = levels[level][scope]
                 if range.entirelyContains(theScope.range) {
                     levels[level].remove(at: scope)
@@ -231,7 +231,7 @@ struct ScopedString {
         mutableString?.deleteCharacters(in: range)
         self.string = mutableString?.copy() as? String ?? ""
         for level in stride(from: (levels.count - 1), through: 0, by: -1) {
-            for scope in stride(from: (levels[level].count-1), through: 0, by: -1) {
+            for scope in stride(from: (levels[level].count - 1), through: 0, by: -1) {
                 var theRange = levels[level][scope].range
                 theRange.removeIndexes(from: range)
                 if theRange.isEmpty() {
@@ -271,10 +271,10 @@ struct ScopedString {
             result += levelString + "\n"
         }
         var numberString = ""
-        for i in 0...(string as NSString).length/10 {
-            let numDigits = ("\(i*10)" as NSString).length
+        for i in 0...(string as NSString).length / 10 {
+            let numDigits = ("\(i * 10)" as NSString).length
             let dashes = String(repeating: "-", count: 9 - numDigits)
-            numberString += "\(i*10)\(dashes)|"
+            numberString += "\(i * 10)\(dashes)|"
         }
         result += numberString + "\n"
         return result
