@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import XCTest
 import SyntaxKit
+import XCTest
 
 class SwiftBaselineHighlightingTests: XCTestCase {
 

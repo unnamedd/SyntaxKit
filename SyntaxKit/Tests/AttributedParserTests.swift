@@ -6,8 +6,8 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-import XCTest
 import SyntaxKit
+import XCTest
 
 class AttributedParserTests: XCTestCase {
 
