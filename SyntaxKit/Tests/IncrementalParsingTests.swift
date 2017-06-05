@@ -6,35 +6,30 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-import XCTest
 import SyntaxKit
+import XCTest
 
-class IncrementalParsingTests: XCTestCase {
+internal class IncrementalParsingTests: XCTestCase {
 
     // MARK: - Properties
 
-    let manager = getBundleManager()
-    var parsingOperation: AttributedParsingOperation!
-    var theme: Theme!
-    var language: Language!
-    var totalRange: NSRange?
-    var input = ""
+    fileprivate let manager: BundleManager = getBundleManager()
+    fileprivate var parsingOperation: AttributedParsingOperation?
+    fileprivate var totalRange: NSRange?
+    fileprivate var input: String = ""
 
     // MARK: - Tests
 
     override func setUp() {
         super.setUp()
-        language = manager.language(withIdentifier: "Source.swift")!
-        theme = manager.theme(withIdentifier: "tomorrow")!
-
     }
 
     func testEdits() {
         input = fixture("swifttest.swift", "txt")
         parsingOperation = getParsingOperation()
 
-        parsingOperation.main()
-        XCTAssertEqual(totalRange!, NSRange(location: 0, length: (input as NSString).length))
+        parsingOperation?.main()
+        XCTAssertEqual(totalRange, NSRange(location: 0, length: (input as NSString).length))
 
         assertInsertion("i", location: 162, expectedRange: NSRange(location: 159, length: 5))
 
@@ -47,7 +42,7 @@ class IncrementalParsingTests: XCTestCase {
         input = "Only this!"
         parsingOperation = getParsingOperation()
 
-        parsingOperation.main()
+        parsingOperation?.main()
 
         assertDeletion(NSRange(location: 9, length: 1), expectedRange: NSRange(location: 0, length: 9))
     }
@@ -56,7 +51,7 @@ class IncrementalParsingTests: XCTestCase {
         input = "// test.swift\n/**"
         parsingOperation = getParsingOperation()
 
-        parsingOperation.main()
+        parsingOperation?.main()
         XCTAssertEqual(totalRange, NSRange(location: 0, length: 17))
 
         assertDeletion(NSRange(location: 2, length: 1), expectedRange: NSRange(location: 0, length: 13))
@@ -70,7 +65,7 @@ class IncrementalParsingTests: XCTestCase {
         input = fixture("swifttest.swift", "txt")
         parsingOperation = getParsingOperation()
 
-        parsingOperation.main()
+        parsingOperation?.main()
 
         self.measure {
             self.assertInsertion("Tests", location: 239, expectedRange: NSRange(location: 230, length: 24))
@@ -83,7 +78,7 @@ class IncrementalParsingTests: XCTestCase {
         input = fixture("swifttest.swift", "txt")
         parsingOperation = getParsingOperation()
 
-        parsingOperation.main()
+        parsingOperation?.main()
 
         self.measure {
             self.assertDeletion(NSRange(location: 139, length: 1), expectedRange: NSRange(location: 139, length: 22))
@@ -94,33 +89,47 @@ class IncrementalParsingTests: XCTestCase {
 
     // MARK: - Helpers
 
-    fileprivate func getParsingOperation() -> AttributedParsingOperation {
-        return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)], _: AttributedParsingOperation) in
-            for result in results {
-                if self.totalRange == nil {
-                    self.totalRange = result.range
-                } else {
-                    self.totalRange = NSUnionRange(self.totalRange!, result.range)
+    fileprivate func getParsingOperation() -> AttributedParsingOperation? {
+        if let language = manager.language(withIdentifier: "Source.swift"),
+            let theme = manager.theme(withIdentifier: "tomorrow") {
+            return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)], _: AttributedParsingOperation) in
+                for result in results {
+                    if let range = self.totalRange {
+                        self.totalRange = NSUnionRange(range, result.range)
+                    } else {
+                        self.totalRange = result.range
+                    }
                 }
             }
+        } else {
+            XCTFail()
+            return nil
         }
     }
 
     fileprivate func assertInsertion(_ string: String, location: Int, expectedRange expected: NSRange) {
         input = replace(NSRange(location: location, length: 0), in: input, with: string)
-        parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: true, changedRange: NSRange(location: location, length: (string as NSString).length))
+        if let previousOperation = parsingOperation {
+            parsingOperation = AttributedParsingOperation(string: input, previousOperation: previousOperation, changeIsInsertion: true, changedRange: NSRange(location: location, length: (string as NSString).length))
 
-        totalRange = nil
-        parsingOperation.main()
-        XCTAssertEqual(totalRange!, expected)
+            totalRange = nil
+            parsingOperation?.main()
+            XCTAssertEqual(totalRange, expected)
+        } else {
+            XCTFail()
+        }
     }
 
     fileprivate func assertDeletion(_ range: NSRange, expectedRange expected: NSRange) {
         input = replace(range, in: input, with: "")
-        parsingOperation = AttributedParsingOperation(string: input, previousOperation: parsingOperation, changeIsInsertion: false, changedRange: range)
+        if let previousOperation = parsingOperation {
+            parsingOperation = AttributedParsingOperation(string: input, previousOperation: previousOperation, changeIsInsertion: false, changedRange: range)
 
-        totalRange = nil
-        parsingOperation.main()
-        XCTAssertEqual(totalRange, expected)
+            totalRange = nil
+            parsingOperation?.main()
+            XCTAssertEqual(totalRange, expected)
+        } else {
+            XCTFail()
+        }
     }
 }

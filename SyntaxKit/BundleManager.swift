@@ -15,7 +15,7 @@
 open class BundleManager {
 
     public enum TextMateFileType {
-        case Language, Theme
+        case language, theme
     }
 
     // MARK: - Types
@@ -35,7 +35,7 @@ open class BundleManager {
     ///
     /// - note: Setting it to false will not invalidate or purge the cache. This
     ///         has to be done separately using clearLanguageCache.
-    open var languageCaching = true
+    open var languageCaching: Bool = true
 
     open static var defaultManager: BundleManager?
 
@@ -52,10 +52,10 @@ open class BundleManager {
     /// - parameter callback:   The callback used to find the location of the
     ///                         textmate files.
     open class func initializeDefaultManager(with callback: @escaping BundleLocationCallback) {
-        if defaultManager == nil {
-            defaultManager = BundleManager(callback: callback)
+        if let manager = defaultManager {
+            manager.bundleCallback = callback
         } else {
-            defaultManager!.bundleCallback = callback
+            defaultManager = BundleManager(callback: callback)
         }
     }
 
@@ -87,7 +87,7 @@ open class BundleManager {
             return theme
         }
 
-        guard let dictURL = self.bundleCallback(identifier, .Theme),
+        guard let dictURL = self.bundleCallback(identifier, .theme),
             let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
             let newTheme = Theme(dictionary: plist) else {
                 return nil
@@ -109,10 +109,10 @@ open class BundleManager {
     func loadRawLanguage(withIdentifier identifier: String) -> Language? {
         let indexOfStoredLanguage = self.dependencies.index { (lang: Language) in lang.scopeName == identifier }
 
-        if indexOfStoredLanguage != nil {
-            return self.dependencies[indexOfStoredLanguage!]
+        if let index = indexOfStoredLanguage {
+            return self.dependencies[index]
         } else {
-            guard let dictURL = self.bundleCallback(identifier, .Language),
+            guard let dictURL = self.bundleCallback(identifier, .language),
                 let plist = NSDictionary(contentsOf: dictURL) as? [String: Any],
                 let newLanguage = Language(dictionary: plist, manager: self) else {
                     return nil

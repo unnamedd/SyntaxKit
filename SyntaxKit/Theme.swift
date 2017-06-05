@@ -9,10 +9,10 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-#if !os(OSX)
-    import UIKit
-#else
+#if os(OSX)
     import AppKit
+#else
+    import UIKit
 #endif
 
 public typealias Attributes = [String: AnyObject]

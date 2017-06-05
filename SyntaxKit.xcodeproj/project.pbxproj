@@ -511,6 +511,7 @@
 				2122A6DA1B22B9320006409B /* Frameworks */,
 				2122A6DB1B22B9320006409B /* Headers */,
 				2122A6DC1B22B9320006409B /* Resources */,
+				8CDFB7351EE5BA1200CBB1D1 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -697,6 +698,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8CDFB7351EE5BA1200CBB1D1 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $CLANG_STATIC_ANALYZER_MODE ]; then\n    if which swiftlint >/dev/null; then\n        swiftlint\n    else\n        echo \"Please install SwiftLint\"\n    fi\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		211826D51D257A71003F2BF2 /* Sources */ = {

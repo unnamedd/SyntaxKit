@@ -6,18 +6,10 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-import XCTest
 @testable import SyntaxKit
+import XCTest
 
-class ScopedStringTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-    }
-
-    override func tearDown() {
-        super.tearDown()
-    }
+internal class ScopedStringTests: XCTestCase {
 
     func testScopesString() {
         var newScopedString = ScopedString(string: "Test")

@@ -24,9 +24,9 @@ open class Parser {
     /// String that is used in parse(in:). May already contain lexical
     /// information from previous calls to parse for incremental parsing.
     /// Stores the recognized lexical scopes after a successful call to parse.
-    var toParse = ScopedString(string: "")
+    var toParse: ScopedString = ScopedString(string: "")
     /// Set to true to abort the parsing pass
-    var aborted = false
+    var aborted: Bool = false
 
     // MARK: - Initializers
 
@@ -132,31 +132,39 @@ open class Parser {
 
                 let bestMatchForMiddle = match(pattern.subpatterns, in: range)
 
-                if pattern.end != nil {
-                    let endMatchResult = self.match(pattern.end!, in: range, captures: pattern.endCaptures)
-                    if endMatchResult != nil && (bestMatchForMiddle == nil || bestMatchForMiddle != nil &&
-                        (!pattern.applyEndPatternLast && endMatchResult!.range.location <= bestMatchForMiddle!.match.range.location || endMatchResult!.range.location < bestMatchForMiddle!.match.range.location)) {
-                        result.add(endMatchResult!)
+                if let patternEnd = pattern.end,
+                    let endMatchResult = self.match(patternEnd, in: range, captures: pattern.endCaptures) {
+                    if let middleMatch = bestMatchForMiddle {
+                        if !pattern.applyEndPatternLast && endMatchResult.range.location <= middleMatch.match.range.location || endMatchResult.range.location < middleMatch.match.range.location {
+                            result.add(endMatchResult)
+                            return result
+                        }
+                    } else {
+                        result.add(endMatchResult)
                         return result
                     }
                 }
 
-                if bestMatchForMiddle != nil {
+                if let middleMatch = bestMatchForMiddle {
                     let resultForMiddle: ResultSet?
-                    if bestMatchForMiddle!.pattern.match != nil {
-                        resultForMiddle = bestMatchForMiddle!.match
+                    if middleMatch.pattern.match != nil {
+                        resultForMiddle = middleMatch.match
                     } else {
-                        resultForMiddle = matchAfterBegin(of: bestMatchForMiddle!.pattern, beginResults: bestMatchForMiddle!.match)
+                        resultForMiddle = matchAfterBegin(of: middleMatch.pattern, beginResults: middleMatch.match)
                     }
 
-                    if resultForMiddle == nil || resultForMiddle!.range.length == 0 {
+                    if let middleResult = resultForMiddle {
+                        if middleResult.range.length != 0 {
+                            result.add(middleResult)
+                            let newStart = NSMaxRange(middleResult.range)
+                            range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
+                            lineEnd = max(lineEnd, newStart)
+                        } else {
+                            break
+                        }
+                    } else {
                         break
                     }
-
-                    result.add(resultForMiddle!)
-                    let newStart = NSMaxRange(resultForMiddle!.range)
-                    range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
-                    lineEnd = max(lineEnd, newStart)
                 } else {
                     break
                 }
@@ -185,9 +193,16 @@ open class Parser {
             let currentMatch = self.firstMatch(of: pattern, in: range)
             if currentMatch?.match.range.location == range.location {
                 return currentMatch
-            } else if currentMatch != nil && (bestResult == nil || currentMatch != nil && currentMatch!.match.range.location < bestResult!.match.range.location) {
-                bestResult = currentMatch
-                interestingBounds.length = currentMatch!.match.range.location - interestingBounds.location
+            } else if let currMatch = currentMatch {
+                if let best = bestResult {
+                    if currMatch.match.range.location < best.match.range.location {
+                        bestResult = currentMatch
+                        interestingBounds.length = currMatch.match.range.location - interestingBounds.location
+                    }
+                } else {
+                    bestResult = currentMatch
+                    interestingBounds.length = currMatch.match.range.location - interestingBounds.location
+                }
             }
         }
         return bestResult
@@ -233,8 +248,8 @@ open class Parser {
             }
 
             let result = ResultSet(startingRange: endResults.range)
-            if pattern.name != nil {
-                result.add(Result(identifier: pattern.name!, range: NSUnionRange(begin.range, endResults.range)))
+            if let patternName = pattern.name {
+                result.add(Result(identifier: patternName, range: NSUnionRange(begin.range, endResults.range)))
             }
             result.add(Scope(identifier: pattern.name ?? "", range: NSRange(location: begin.range.location + begin.range.length, length: NSUnionRange(begin.range, endResults.range).length - begin.range.length), attribute: pattern))
             result.add(begin)
@@ -261,8 +276,8 @@ open class Parser {
         }
 
         let resultSet = ResultSet(startingRange: result.range)
-        if baseSelector != nil {
-            resultSet.add(Result(identifier: baseSelector!, range: result.range))
+        if let base = baseSelector {
+            resultSet.add(Result(identifier: base, range: result.range))
         }
 
         if let captures = captures {

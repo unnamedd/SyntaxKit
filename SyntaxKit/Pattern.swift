@@ -20,7 +20,7 @@
 //
 
 @objc(SKPattern)
-class Pattern: NSObject {
+internal class Pattern: NSObject {
 
     // MARK: - Properties
 
@@ -42,10 +42,10 @@ class Pattern: NSObject {
     fileprivate var _beginCaptures: CaptureCollection?
     fileprivate var _end: NSRegularExpression?
     fileprivate var _endCaptures: CaptureCollection?
-    fileprivate var _applyEndPatternLast = false
+    fileprivate var _applyEndPatternLast: Bool = false
     fileprivate weak var _parent: Pattern?
 
-    fileprivate let debug = true
+    fileprivate let debug: Bool = true
 
     // MARK: - Initializers
 
@@ -102,10 +102,16 @@ class Pattern: NSObject {
 
         if self.match == nil &&
             self.begin == nil &&
-            self.end == nil &&
-            (dictionary["patterns"] as? [[AnyHashable: Any]] == nil || (dictionary["patterns"] as? [[AnyHashable: Any]])!.isEmpty) {
+            self.end == nil {
+            if let patterns = dictionary["patterns"] as? [[AnyHashable: Any]] {
+                if patterns.isEmpty {
+                    print("Attention: pattern not recognized: \(String(describing: self.name))")
+                    return nil
+                }
+            } else {
                 print("Attention: pattern not recognized: \(String(describing: self.name))")
                 return nil
+            }
         }
 
         if let array = dictionary["patterns"] as? [[AnyHashable: Any]] {
@@ -132,24 +138,20 @@ class Pattern: NSObject {
     }
 }
 
-enum ReferenceType {
-    case toRepository
-    case toSelf
-    case toBase
-    case toForeign
-    case toForeignRepository
-    case resolved
-}
-
-class Include: Pattern {
+internal class Include: Pattern {
 
     // MARK: - Properties
 
-    var type: ReferenceType { return _type }
+    enum ReferenceType {
+        case toRepository (repositoryRef: String)
+        case toSelf
+        case toBase
+        case toForeign (languageRef: String)
+        case toForeignRepository (repositoryRef: String, languageRef: String)
+        case resolved
+    }
 
-    fileprivate var _type: ReferenceType
-    fileprivate let repositoryRef: String?
-    fileprivate let languageRef: String?
+    fileprivate var type: ReferenceType
     fileprivate var associatedRepository: Repository?
 
     // MARK: - Initializers
@@ -157,36 +159,30 @@ class Include: Pattern {
     init(reference: String, in repository: Repository? = nil, parent: Pattern?, manager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
-            self._type = .toRepository
-            self.repositoryRef = reference.substring(from: reference.characters.index(after: reference.startIndex))
-            self.languageRef = nil
+            self.type = .toRepository(repositoryRef: reference.substring(from: reference.characters.index(after: reference.startIndex)))
         } else if reference == "$self" {
-            self._type = .toSelf
-            self.repositoryRef = nil
-            self.languageRef = nil
+            self.type = .toSelf
         } else  if reference == "$base" {
-            self._type = .toBase
-            self.repositoryRef = nil
-            self.languageRef = nil
+            self.type = .toBase
         } else if reference.contains("#") {
-            self._type = .toForeignRepository
-            self.repositoryRef = reference.substring(from: reference.range(of: "#")!.upperBound)
-            self.languageRef = reference.substring(to: reference.range(of: "#")!.lowerBound)
-            _ = manager.loadRawLanguage(withIdentifier: languageRef!)
+            if let hashRange = reference.range(of: "#") {
+                let languagePart = reference.substring(to: hashRange.lowerBound)
+                self.type = .toForeignRepository(repositoryRef: reference.substring(from: hashRange.upperBound), languageRef: languagePart)
+                _ = manager.loadRawLanguage(withIdentifier: languagePart)
+            } else {
+                assert(false)
+                type = .toSelf
+            }
         } else {
-            self._type = .toForeign
-            self.repositoryRef = nil
-            self.languageRef = reference
-            _ = manager.loadRawLanguage(withIdentifier: languageRef!)
+            self.type = .toForeign(languageRef: reference)
+            _ = manager.loadRawLanguage(withIdentifier: reference)
         }
         super.init()
         _parent = parent
     }
 
     init(include: Include, parent: Pattern?) {
-        self._type = include.type
-        self.repositoryRef = include.repositoryRef
-        self.languageRef = include.languageRef
+        self.type = include.type
         self.associatedRepository = include.associatedRepository
         super.init(pattern: include, parent: parent)
     }
@@ -195,36 +191,43 @@ class Include: Pattern {
 
     func resolveInternalReference(with repository: Repository, in language: Language) {
         let pattern: Pattern?
-        if type == .toRepository {
-            pattern = (associatedRepository ?? repository)[repositoryRef!]
-        } else if type == .toSelf {
+        switch type {
+        case .toRepository(let repositoryRef):
+            pattern = (associatedRepository ?? repository)[repositoryRef]
+        case .toSelf:
             pattern = language.pattern
-        } else {
+        default:
             return
         }
 
-        if pattern != nil {
-            self.replace(with: pattern!)
+        if let pat = pattern {
+            self.replace(with: pat)
         }
-        _type = .resolved
+        type = .resolved
     }
 
     func resolveExternalReference(from thisLanguage: Language, in languages: [String: Language], baseName: String?) {
         let pattern: Pattern?
-        if type == .toBase {
-            pattern = languages[baseName!]!.pattern
-        } else if type == .toForeignRepository {
-            pattern = languages[languageRef!]?.repository[repositoryRef!]
-        } else if type == .toForeign {
-            pattern = languages[languageRef!]?.pattern
-        } else {
+        switch type {
+        case .toBase:
+            if let base = baseName {
+                pattern = languages[base]?.pattern
+            } else {
+                assert(false)
+                pattern = nil
+            }
+        case .toForeignRepository(let repositoryRef, let languageRef):
+            pattern = languages[languageRef]?.repository[repositoryRef]
+        case .toForeign(let languageRef):
+            pattern = languages[languageRef]?.pattern
+        default:
             return
         }
 
-        if pattern != nil {
-            self.replace(with: pattern!)
+        if let pat = pattern {
+            self.replace(with: pat)
         }
-        _type = .resolved
+        type = .resolved
     }
 
     // MARK: - Private

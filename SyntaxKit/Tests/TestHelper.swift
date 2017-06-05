@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import XCTest
 @testable import SyntaxKit
+import XCTest
 
-func fixture(_ name: String, _ type: String) -> String {
+internal func fixture(_ name: String, _ type: String) -> String {
     if let path = Bundle(for: LanguageTests.self).path(forResource: name, ofType: type) {
         do {
             return try String(contentsOfFile: path)
@@ -21,15 +21,15 @@ func fixture(_ name: String, _ type: String) -> String {
     return ""
 }
 
-func getBundleManager() -> BundleManager {
+internal func getBundleManager() -> BundleManager {
     return BundleManager { identifier, kind in
-        let name = kind == .Language ? identifier._split(separator: ".")[1] : identifier
-        let ext = kind == .Language ? ".tmLanguage" : ".tmTheme"
+        let name = kind == .language ? identifier._split(separator: ".")[1] : identifier
+        let ext = kind == .language ? ".tmLanguage" : ".tmTheme"
         return Bundle(for: LanguageTests.self).url(forResource: name.capitalized, withExtension: ext) ?? URL(fileURLWithPath: "")
     }
 }
 
-func simpleTheme() -> Theme {
+internal func simpleTheme() -> Theme? {
     return Theme(dictionary: [
         "uuid": "123e4567-e89b-12d3-a456-426655440000",
         "name": "Simple",
@@ -53,53 +53,24 @@ func simpleTheme() -> Theme {
                 ]
             ]
         ]
-    ])!
+    ])
 }
 
-func replace(_ range: NSRange, in string: String, with inserted: String) -> String {
+internal func replace(_ range: NSRange, in string: String, with inserted: String) -> String {
     let newInput = string.mutableCopy() as? NSMutableString
     newInput?.replaceCharacters(in: range, with: inserted)
-    return newInput!.copy() as? String ?? ""
+    return newInput?.copy() as? String ?? ""
 }
 
-#if !os(OSX)
-import UIKit
-extension Color {
-    var redComponent: CGFloat {
-        var value: CGFloat = 0.0
-        getRed(&value, green: nil, blue: nil, alpha: nil)
-        return value
-    }
-
-    var greenComponent: CGFloat {
-        var value: CGFloat = 0.0
-        getRed(nil, green: &value, blue: nil, alpha: nil)
-        return value
-    }
-
-    var blueComponent: CGFloat {
-        var value: CGFloat = 0.0
-        getRed(nil, green: nil, blue: &value, alpha: nil)
-        return value
-    }
-
-    var alphaComponent: CGFloat {
-        var value: CGFloat = 0.0
-        getRed(nil, green: nil, blue: nil, alpha: &value)
-        return value
-    }
-}
-#endif
-
-func assertEqualColors(_ color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.005) {
-    if color1 == nil || color2 == nil {
+internal func assertEqualColors(_ color1: Color?, _ color2: Color?, accuracy: CGFloat = 0.005) {
+    guard let lhColor = color1, let rhColor = color2 else {
         XCTAssert(false, "colors have to be non-nil")
         return
     }
-    XCTAssertEqualWithAccuracy(color1!.redComponent, color2!.redComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(color1!.greenComponent, color2!.greenComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(color1!.blueComponent, color2!.blueComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(color1!.alphaComponent, color2!.alphaComponent, accuracy: accuracy)
+    XCTAssertEqualWithAccuracy(lhColor.redComponent, rhColor.redComponent, accuracy: accuracy)
+    XCTAssertEqualWithAccuracy(lhColor.greenComponent, rhColor.greenComponent, accuracy: accuracy)
+    XCTAssertEqualWithAccuracy(lhColor.blueComponent, rhColor.blueComponent, accuracy: accuracy)
+    XCTAssertEqualWithAccuracy(lhColor.alphaComponent, rhColor.alphaComponent, accuracy: accuracy)
 }
 
 extension NSRange: Equatable {}

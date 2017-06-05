@@ -8,7 +8,7 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-class ResultSet {
+internal class ResultSet {
 
     // MARK: - Properties
 
@@ -17,7 +17,7 @@ class ResultSet {
     /// associated with the contained results.
     var range: NSRange { return _range }
 
-    fileprivate var _results = [Result]()
+    fileprivate var _results: [Result] = []
     fileprivate var _range: NSRange
 
     // MARK: - Initializers

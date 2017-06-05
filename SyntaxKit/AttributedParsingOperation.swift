@@ -19,7 +19,7 @@
 //
 
 /// Represents one change (insertion or deletion) between two strings
-struct Diff {
+internal struct Diff {
 
     // MARK: - Properties
 

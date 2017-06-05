@@ -9,7 +9,7 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-class Repository {
+internal class Repository {
 
     // MARK: - Properties
 

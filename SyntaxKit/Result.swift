@@ -8,7 +8,7 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-struct Result: Equatable {
+internal struct Result: Equatable {
 
     // MARK: - Properties
 
@@ -25,7 +25,7 @@ struct Result: Equatable {
     }
 }
 
-func == (lhs: Result, rhs: Result) -> Bool {
+internal func == (lhs: Result, rhs: Result) -> Bool {
     return lhs.patternIdentifier == rhs.patternIdentifier &&
         lhs.range.toRange() == rhs.range.toRange()
 }

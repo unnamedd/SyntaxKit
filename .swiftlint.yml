@@ -1,0 +1,43 @@
+disabled_rules:
+  - line_length
+
+opt_in_rules:
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - conditional_returns_on_newline
+  - empty_count
+  - explicit_init
+  - explicit_top_level_acl
+  - explicit_type_interface
+  - fatal_error_message
+  - file_header
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - implicitly_unwrapped_optional
+  - missing_docs
+  - nimble_operator
+  - no_extension_access_modifier
+  - number_separator
+  - object_literal
+  - operator_usage_whitespace
+  - overridden_super_call
+  - private_outlet
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - redundant_nil_coalesing
+  - sorted_imports
+  - switch_case_on_newline
+
+file_header:
+  required_pattern: |
+                    \/\/
+                    \/\/  .*?\.swift
+                    \/\/  SyntaxKit
+                    \/\/(
+                    \/\/ .*
+                    \/\/)?
+                    \/\/  Created by .*? on \d{1,2}\/\d{1,2}\/\d{2}\.
+                    \/\/  Copyright © \d{4}(-\d{4})? .*?\. All rights reserved\.
+                    \/\/

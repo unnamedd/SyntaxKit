@@ -8,7 +8,7 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-struct CaptureCollection {
+internal struct CaptureCollection {
 
     // MARK: - Properties
 

@@ -14,7 +14,7 @@
 //  Copyright © 2016 Alexander Hedges. All rights reserved.
 //
 
-class ReferenceManager {
+internal class ReferenceManager {
 
     // MARK: - Properties
 
@@ -30,10 +30,14 @@ class ReferenceManager {
     // MARK: - Pattern Creation and Resolution
 
     func patterns(for patterns: [[AnyHashable: Any]], in repository: Repository?, caller: Pattern?) -> [Pattern] {
+        guard let manager = bundleManager else {
+            assert(false)
+            return []
+        }
         var results: [Pattern] = []
         for rawPattern in patterns {
             if let include = rawPattern["include"] as? String {
-                let reference = Include(reference: include, in: repository, parent: caller, manager: bundleManager!)
+                let reference = Include(reference: include, in: repository, parent: caller, manager: manager)
                 self.includes.append(reference)
                 results.append(reference)
             } else if let pattern = Pattern(dictionary: rawPattern, parent: caller, with: repository, with: self) {

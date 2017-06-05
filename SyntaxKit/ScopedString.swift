@@ -71,7 +71,7 @@ extension NSRange {
 /// agreement, please respect ;).
 typealias Scope = Result
 
-struct ScopedString {
+internal struct ScopedString {
 
     // MARK: - Properties
 
@@ -160,11 +160,10 @@ struct ScopedString {
         let indexRange = NSRange(location: index, length: 0)
         for i in stride(from: (levels.count - 1), through: 0, by: -1) {
             let level = levels[i]
-            let theScope = findScopeIntersection(with: indexRange, at: level)
-            if theScope != nil {
+            if let theScope = findScopeIntersection(with: indexRange, at: level) {
                 if foundScope {
                     return scope
-                } else if theScope! == scope {
+                } else if theScope == scope {
                     foundScope = true
                 }
             }
@@ -175,10 +174,8 @@ struct ScopedString {
     func level(for scope: Scope) -> Int {
         for i in 0 ..< levels.count {
             let level = levels[i]
-            for currentScope in level {
-                if scope == currentScope {
-                    return i + 1
-                }
+            if level.contains(scope) {
+                return i + 1
             }
         }
         if scope == baseScope {

@@ -21,7 +21,7 @@ public struct Language {
     let referenceManager: ReferenceManager
     let repository: Repository
 
-    static let globalScope = "GLOBAL"
+    static let globalScope: String = "GLOBAL"
 
     // MARK: - Initializers
 
