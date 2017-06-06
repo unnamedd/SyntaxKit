@@ -145,29 +145,17 @@ open class Parser {
                     }
                 }
 
-                if let middleMatch = bestMatchForMiddle {
-                    let resultForMiddle: ResultSet?
-                    if middleMatch.pattern.match != nil {
-                        resultForMiddle = middleMatch.match
-                    } else {
-                        resultForMiddle = matchAfterBegin(of: middleMatch.pattern, beginResults: middleMatch.match)
-                    }
-
-                    if let middleResult = resultForMiddle {
-                        if middleResult.range.length != 0 {
-                            result.add(middleResult)
-                            let newStart = NSMaxRange(middleResult.range)
-                            range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
-                            lineEnd = max(lineEnd, newStart)
-                        } else {
-                            break
-                        }
-                    } else {
-                        break
-                    }
-                } else {
+                guard let middleMatch = bestMatchForMiddle,
+                    let middleResult = middleMatch.pattern.match != nil ? middleMatch.match : matchAfterBegin(of: middleMatch.pattern, beginResults: middleMatch.match) else {
                     break
                 }
+                if middleResult.range.length == 0 {
+                    break
+                }
+                result.add(middleResult)
+                let newStart = NSMaxRange(middleResult.range)
+                range = NSRange(location: newStart, length: max(0, range.length - (newStart - range.location)))
+                lineEnd = max(lineEnd, newStart)
             }
 
             lineStart = lineEnd

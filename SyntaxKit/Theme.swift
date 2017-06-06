@@ -57,8 +57,6 @@ public struct Theme {
                 setting[NSBackgroundColorAttributeName] = Color(hex: value)
             }
 
-            // TODO: caret, invisibles, lightHighlight, selection, font style
-
             if let patternIdentifiers = raw["scope"] as? String {
                 for patternIdentifier in patternIdentifiers.components(separatedBy: ",") {
                     let key = patternIdentifier.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)

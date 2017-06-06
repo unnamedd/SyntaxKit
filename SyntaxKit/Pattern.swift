@@ -45,8 +45,6 @@ internal class Pattern: NSObject {
     fileprivate var _applyEndPatternLast: Bool = false
     fileprivate weak var _parent: Pattern?
 
-    fileprivate let debug: Bool = true
-
     // MARK: - Initializers
 
     init?(dictionary: [AnyHashable: Any], parent: Pattern?, with repository: Repository?, with manager: ReferenceManager) {
@@ -56,23 +54,14 @@ internal class Pattern: NSObject {
 
         if let matchExpr = dictionary["match"] as? String {
             _match = try? NSRegularExpression(pattern: matchExpr, options: [.anchorsMatchLines])
-            if debug && self.match == nil {
-                print("Problem parsing match expression \(matchExpr)")
-            }
         }
 
         if let beginExpr = dictionary["begin"] as? String {
             _begin = try? NSRegularExpression(pattern: beginExpr, options: [.anchorsMatchLines])
-            if debug && self.begin == nil {
-                print("Problem parsing begin expression \(beginExpr)")
-            }
         }
 
         if let endExpr = dictionary["end"] as? String {
             _end = try? NSRegularExpression(pattern: endExpr, options: [.anchorsMatchLines])
-            if debug && self.end == nil {
-                print("Problem parsing end expression \(endExpr)")
-            }
         }
 
         _applyEndPatternLast = dictionary["applyEndPatternLast"] as? Bool ?? false
@@ -94,24 +83,10 @@ internal class Pattern: NSObject {
             _endCaptures = CaptureCollection(dictionary: dictionary)
         }
 
-        if dictionary["match"] as? String != nil && self.match == nil {
+        if dictionary["match"] as? String != nil && self.match == nil ||
+            dictionary["begin"] as? String != nil && (self.begin == nil || self.end == nil) ||
+            self.match == nil && self.begin == nil && self.end == nil && ((dictionary["patterns"] as? [[AnyHashable: Any]])?.isEmpty ?? true) {
             return nil
-        } else if dictionary["begin"] as? String != nil && (self.begin == nil || self.end == nil) {
-            return nil
-        }
-
-        if self.match == nil &&
-            self.begin == nil &&
-            self.end == nil {
-            if let patterns = dictionary["patterns"] as? [[AnyHashable: Any]] {
-                if patterns.isEmpty {
-                    print("Attention: pattern not recognized: \(String(describing: self.name))")
-                    return nil
-                }
-            } else {
-                print("Attention: pattern not recognized: \(String(describing: self.name))")
-                return nil
-            }
         }
 
         if let array = dictionary["patterns"] as? [[AnyHashable: Any]] {
