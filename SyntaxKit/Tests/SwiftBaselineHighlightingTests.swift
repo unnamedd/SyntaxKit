@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import SyntaxKit
+@testable import SyntaxKit
 import XCTest
 
 internal class SwiftBaselineHighlightingTests: XCTestCase {

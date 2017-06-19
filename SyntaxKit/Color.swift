@@ -11,7 +11,7 @@
     public typealias ColorType = NSColor
 
     extension NSColor {
-        public convenience init(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
+        convenience init(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
             self.init(srgbRed: red, green: green, blue: blue, alpha: alpha)
         }
     }
@@ -49,7 +49,7 @@
 public typealias Color = ColorType
 
 extension Color {
-    public convenience init?(hex representation: String) {
+    convenience init?(hex representation: String) {
         var hex = representation as NSString
 
         // Remove `#` and `0x`
