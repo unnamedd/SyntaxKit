@@ -44,7 +44,7 @@ open class AttributedParser: Parser {
     }
 
     open func attributedString(for string: String, base: Attributes? = nil) -> NSAttributedString {
-        let output = NSMutableAttributedString(string: string, attributes: base)
+		let output = NSMutableAttributedString(string: string, attributes: base)
         output.beginEditing()
         parse(string) { _, range, attributes in
             if let attributes = attributes {
