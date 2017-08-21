@@ -26,11 +26,11 @@ public struct Theme {
     public let attributes: [String: Attributes]
 
     public var backgroundColor: Color {
-		return attributes[Language.globalScope]?[NSAttributedStringKey.backgroundColor] as? Color ?? Color.white
+        return attributes[Language.globalScope]?[NSAttributedStringKey.backgroundColor] as? Color ?? Color.white
     }
 
     public var foregroundColor: Color {
-		return attributes[Language.globalScope]?[NSAttributedStringKey.foregroundColor] as? Color ?? Color.black
+        return attributes[Language.globalScope]?[NSAttributedStringKey.foregroundColor] as? Color ?? Color.black
     }
 
     // MARK: - Initializers
@@ -49,11 +49,11 @@ public struct Theme {
         for raw in rawSettings {
             guard var setting = raw["settings"] as? [NSAttributedStringKey: Any] else { continue }
 
-			if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "foreground")) as? String {
+            if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "foreground")) as? String {
 				setting[NSAttributedStringKey.foregroundColor] = Color(hex: value)
             }
 
-			if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "background")) as? String {
+            if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "background")) as? String {
 				setting[NSAttributedStringKey.backgroundColor] = Color(hex: value)
             }
 

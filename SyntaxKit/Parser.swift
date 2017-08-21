@@ -274,7 +274,7 @@ open class Parser {
                     print("Attention unexpected capture (\(index) to \(result.numberOfRanges)): \(expression.pattern)")
                     continue
                 }
-				let range = result.range(at: Int(index))
+                let range = result.range(at: Int(index))
                 if range.location == NSNotFound {
                     continue
                 }
