@@ -50,11 +50,11 @@ public struct Theme {
             guard var setting = raw["settings"] as? [NSAttributedStringKey: Any] else { continue }
 
             if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "foreground")) as? String {
-				setting[NSAttributedStringKey.foregroundColor] = Color(hex: value)
+                setting[NSAttributedStringKey.foregroundColor] = Color(hex: value)
             }
 
             if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "background")) as? String {
-				setting[NSAttributedStringKey.backgroundColor] = Color(hex: value)
+                setting[NSAttributedStringKey.backgroundColor] = Color(hex: value)
             }
 
             if let patternIdentifiers = raw["scope"] as? String {
