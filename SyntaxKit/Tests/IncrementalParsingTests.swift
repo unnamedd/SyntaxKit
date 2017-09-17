@@ -13,10 +13,10 @@ internal class IncrementalParsingTests: XCTestCase {
 
     // MARK: - Properties
 
-    fileprivate let manager: BundleManager = getBundleManager()
-    fileprivate var parsingOperation: AttributedParsingOperation?
-    fileprivate var totalRange: NSRange?
-    fileprivate var input: String = ""
+    private let manager: BundleManager = getBundleManager()
+    private var parsingOperation: AttributedParsingOperation?
+    private var totalRange: NSRange?
+    private var input: String = ""
 
     // MARK: - Tests
 
@@ -89,7 +89,7 @@ internal class IncrementalParsingTests: XCTestCase {
 
     // MARK: - Helpers
 
-    fileprivate func getParsingOperation() -> AttributedParsingOperation? {
+    private func getParsingOperation() -> AttributedParsingOperation? {
         if let language = manager.language(withIdentifier: "Source.swift"),
             let theme = manager.theme(withIdentifier: "tomorrow") {
             return AttributedParsingOperation(string: input, language: language, theme: theme) { (results: [(range: NSRange, attributes: Attributes?)], _: AttributedParsingOperation) in
@@ -102,12 +102,12 @@ internal class IncrementalParsingTests: XCTestCase {
                 }
             }
         } else {
-            XCTFail()
+            XCTFail("Should be able to load swift language fixture")
             return nil
         }
     }
 
-    fileprivate func assertInsertion(_ string: String, location: Int, expectedRange expected: NSRange) {
+    private func assertInsertion(_ string: String, location: Int, expectedRange expected: NSRange) {
         input = replace(NSRange(location: location, length: 0), in: input, with: string)
         if let previousOperation = parsingOperation {
             parsingOperation = AttributedParsingOperation(string: input, previousOperation: previousOperation, changeIsInsertion: true, changedRange: NSRange(location: location, length: (string as NSString).length))
@@ -116,11 +116,11 @@ internal class IncrementalParsingTests: XCTestCase {
             parsingOperation?.main()
             XCTAssertEqual(totalRange, expected)
         } else {
-            XCTFail()
+            XCTFail("Should have been able to get parsing operation")
         }
     }
 
-    fileprivate func assertDeletion(_ range: NSRange, expectedRange expected: NSRange) {
+    private func assertDeletion(_ range: NSRange, expectedRange expected: NSRange) {
         input = replace(range, in: input, with: "")
         if let previousOperation = parsingOperation {
             parsingOperation = AttributedParsingOperation(string: input, previousOperation: previousOperation, changeIsInsertion: false, changedRange: range)
@@ -129,7 +129,7 @@ internal class IncrementalParsingTests: XCTestCase {
             parsingOperation?.main()
             XCTAssertEqual(totalRange, expected)
         } else {
-            XCTFail()
+            XCTFail("Should have been able to get parsing operation")
         }
     }
 }

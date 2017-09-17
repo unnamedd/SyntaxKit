@@ -12,7 +12,7 @@ internal struct CaptureCollection {
 
     // MARK: - Properties
 
-    fileprivate let captures: [UInt: Capture]
+    private let captures: [UInt: Capture]
 
     var captureIndexes: [UInt] {
         var keys = Array(captures.keys)

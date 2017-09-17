@@ -77,7 +77,7 @@ internal struct ScopedString {
 
     var string: String
 
-    fileprivate var levels: [[Scope]] = []
+    private var levels: [[Scope]] = []
 
     /// The inplicit scope at the base of each ScopedString
     var baseScope: Scope {
@@ -279,7 +279,7 @@ internal struct ScopedString {
 
     // MARK: - Private
 
-    fileprivate func findScopeIntersection(with range: NSRange, at level: [Scope]) -> Scope? {
+    private func findScopeIntersection(with range: NSRange, at level: [Scope]) -> Scope? {
         for scope in level {
             if scope.range.partiallyContains(range) {
                 return scope
@@ -288,7 +288,7 @@ internal struct ScopedString {
         return nil
     }
 
-    fileprivate func insertionPoint(for range: NSRange, at level: [Scope]) -> Int {
+    private func insertionPoint(for range: NSRange, at level: [Scope]) -> Int {
         var i = 0
         for scope in level {
             if range.location < scope.range.location {

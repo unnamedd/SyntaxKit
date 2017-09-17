@@ -13,8 +13,8 @@ internal class AttributedParserTests: XCTestCase {
 
     // MARK: - Properties
 
-    fileprivate let manager: BundleManager = getBundleManager()
-    fileprivate var parser: AttributedParser?
+    private let manager: BundleManager = getBundleManager()
+    private var parser: AttributedParser?
 
     // MARK: - Tests
 
@@ -24,7 +24,7 @@ internal class AttributedParserTests: XCTestCase {
             let theme = simpleTheme() {
             parser = AttributedParser(language: yaml, theme: theme)
         } else {
-            XCTFail()
+            XCTFail("Should be able to load yaml")
         }
 
     }

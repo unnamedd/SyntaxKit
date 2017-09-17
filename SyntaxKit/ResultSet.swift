@@ -17,8 +17,8 @@ internal class ResultSet {
     /// associated with the contained results.
     var range: NSRange { return _range }
 
-    fileprivate var _results: [Result] = []
-    fileprivate var _range: NSRange
+    private var _results: [Result] = []
+    private var _range: NSRange
 
     // MARK: - Initializers
 

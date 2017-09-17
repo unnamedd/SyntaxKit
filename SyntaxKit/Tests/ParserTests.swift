@@ -13,8 +13,8 @@ internal class ParserTests: XCTestCase {
 
     // MARK: - Properties
 
-    fileprivate var parser: Parser?
-    fileprivate let manager: BundleManager = getBundleManager()
+    private var parser: Parser?
+    private let manager: BundleManager = getBundleManager()
 
     // MARK: - Tests
 
@@ -23,7 +23,7 @@ internal class ParserTests: XCTestCase {
         if let yaml = manager.language(withIdentifier: "source.YAML") {
             parser = Parser(language: yaml)
         } else {
-            XCTFail()
+            XCTFail("Should be able to load yaml language fixture")
         }
     }
 
@@ -32,17 +32,17 @@ internal class ParserTests: XCTestCase {
         var punctuationBegin: NSRange?
         var punctuationEnd: NSRange?
 
-        parser?.parse("title: \"Hello World\"\n") { (result: (scope: String, range: NSRange)) in
-            if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
-                stringQuoted = result.range
+        parser?.parse("title: \"Hello World\"\n") { (scope: String, range: NSRange) in
+            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
+                stringQuoted = range
             }
 
-            if punctuationBegin == nil && result.scope.hasPrefix("punctuation.definition.string.begin") {
-                punctuationBegin = result.range
+            if punctuationBegin == nil && scope.hasPrefix("punctuation.definition.string.begin") {
+                punctuationBegin = range
             }
 
-            if punctuationEnd == nil && result.scope.hasPrefix("punctuation.definition.string.end") {
-                punctuationEnd = result.range
+            if punctuationEnd == nil && scope.hasPrefix("punctuation.definition.string.end") {
+                punctuationEnd = range
             }
         }
 
@@ -54,9 +54,9 @@ internal class ParserTests: XCTestCase {
     func testParsingBeginEndGarbage() {
         var stringQuoted: NSRange?
 
-        parser?.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (result: (scope: String, range: NSRange)) in
-            if stringQuoted == nil && result.scope.hasPrefix("string.quoted.double") {
-                stringQuoted = result.range
+        parser?.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { (scope: String, range: NSRange) in
+            if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
+                stringQuoted = range
             }
         }
 
@@ -64,17 +64,17 @@ internal class ParserTests: XCTestCase {
     }
 
     func testParsingGarbage() {
-        parser?.parse("") { _ in }
-        parser?.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _ in }
+        parser?.parse("") { _, _ in }
+        parser?.parse("ainod adlkf ac\nv a;skcja\nsd flaksdfj [awiefasdvxzc\\vzxcx c\n\n\nx \ncvas\ndv\nas \ndf as]pkdfa \nsd\nfa sdos[a \n\n a\ns cvsa\ncd\n a \ncd\n \n\n\n asdcp[vk sa\n\ndd'; \nssv[ das \n\n\nlkjs") { _, _ in }
     }
 
     func testRuby() {
         if let ruby = manager.language(withIdentifier: "source.Ruby") {
             parser = Parser(language: ruby)
             let input = fixture("test.rb", "txt")
-            parser?.parse(input, match: { _ in return })
+            parser?.parse(input) { _, _ in return }
         } else {
-            XCTFail()
+            XCTFail("Should be able to load ruby language fixture")
         }
     }
 }

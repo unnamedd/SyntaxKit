@@ -27,5 +27,5 @@ internal struct Result: Equatable {
 
 internal func == (lhs: Result, rhs: Result) -> Bool {
     return lhs.patternIdentifier == rhs.patternIdentifier &&
-        lhs.range.toRange() == rhs.range.toRange()
+        Range(lhs.range) == Range(rhs.range)
 }

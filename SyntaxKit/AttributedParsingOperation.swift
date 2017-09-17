@@ -64,9 +64,9 @@ open class AttributedParsingOperation: Operation {
 
     // MARK: - Properties
 
-    fileprivate let parser: AttributedParser
-    fileprivate let operationCallback: OperationCallback
-    fileprivate var parsedRange: NSRange?
+    private let parser: AttributedParser
+    private let operationCallback: OperationCallback
+    private var parsedRange: NSRange?
 
     // MARK: - Initializers
 

@@ -23,7 +23,7 @@ internal func fixture(_ name: String, _ type: String) -> String {
 
 internal func getBundleManager() -> BundleManager {
     return BundleManager { identifier, kind in
-        let name = kind == .language ? identifier._split(separator: ".")[1] : identifier
+        let name = kind == .language ? String(identifier.split(separator: ".")[1]) : identifier
         let ext = kind == .language ? ".tmLanguage" : ".tmTheme"
         return Bundle(for: LanguageTests.self).url(forResource: name.capitalized, withExtension: ext) ?? URL(fileURLWithPath: "")
     }
@@ -67,14 +67,8 @@ internal func assertEqualColors(_ color1: Color?, _ color2: Color?, accuracy: CG
         XCTAssert(false, "colors have to be non-nil")
         return
     }
-    XCTAssertEqualWithAccuracy(lhColor.redComponent, rhColor.redComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(lhColor.greenComponent, rhColor.greenComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(lhColor.blueComponent, rhColor.blueComponent, accuracy: accuracy)
-    XCTAssertEqualWithAccuracy(lhColor.alphaComponent, rhColor.alphaComponent, accuracy: accuracy)
-}
-
-extension NSRange: Equatable {}
-
-public func == (lhs: NSRange, rhs: NSRange) -> Bool {
-    return lhs.location == rhs.location && lhs.length == rhs.length
+    XCTAssertEqual(lhColor.redComponent, rhColor.redComponent, accuracy: accuracy)
+    XCTAssertEqual(lhColor.greenComponent, rhColor.greenComponent, accuracy: accuracy)
+    XCTAssertEqual(lhColor.blueComponent, rhColor.blueComponent, accuracy: accuracy)
+    XCTAssertEqual(lhColor.alphaComponent, rhColor.alphaComponent, accuracy: accuracy)
 }

@@ -57,7 +57,7 @@ open class AttributedParser: Parser {
 
     // MARK: - Private
 
-    fileprivate func attributes(forScope scope: String) -> Attributes? {
+    private func attributes(forScope scope: String) -> Attributes? {
         let components = scope.components(separatedBy: ".")
         if components.isEmpty {
             return nil

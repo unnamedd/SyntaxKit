@@ -13,8 +13,8 @@ internal class Repository {
 
     // MARK: - Properties
 
-    fileprivate var entries: [String: Pattern] = [:]
-    fileprivate weak var parentRepository: Repository?
+    private var entries: [String: Pattern] = [:]
+    private weak var parentRepository: Repository?
 
     // MARK: - Initializers
 

@@ -39,10 +39,10 @@ open class BundleManager {
 
     open static var defaultManager: BundleManager?
 
-    fileprivate var bundleCallback: BundleLocationCallback
-    fileprivate var dependencies: [Language] = []
-    fileprivate var cachedLanguages: [String: Language] = [:]
-    fileprivate var cachedThemes: [String: Theme] = [:]
+    private var bundleCallback: BundleLocationCallback
+    private var dependencies: [Language] = []
+    private var cachedLanguages: [String: Language] = [:]
+    private var cachedThemes: [String: Theme] = [:]
 
     // MARK: - Initializers
 

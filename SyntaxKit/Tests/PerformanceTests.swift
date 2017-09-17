@@ -13,8 +13,8 @@ internal class PerformanceTests: XCTestCase {
 
     // MARK: - Properties
 
-    fileprivate let manager: BundleManager = getBundleManager()
-    fileprivate var parser: AttributedParser?
+    private let manager: BundleManager = getBundleManager()
+    private var parser: AttributedParser?
 
     override func setUp() {
         super.setUp()
@@ -22,7 +22,7 @@ internal class PerformanceTests: XCTestCase {
             let solarized = manager.theme(withIdentifier: "Solarized") {
             parser = AttributedParser(language: latex, theme: solarized)
         } else {
-            XCTFail()
+            XCTFail("Should be able to load latex language fixture")
         }
     }
 

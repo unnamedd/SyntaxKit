@@ -18,8 +18,8 @@ internal class ReferenceManager {
 
     // MARK: - Properties
 
-    fileprivate var includes: [Include] = []
-    fileprivate weak var bundleManager: BundleManager?
+    private var includes: [Include] = []
+    private weak var bundleManager: BundleManager?
 
     // MARK: - Init
 

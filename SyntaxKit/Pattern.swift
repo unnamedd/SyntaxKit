@@ -35,6 +35,7 @@ internal class Pattern: NSObject {
     var parent: Pattern? { return _parent }
     var subpatterns: [Pattern] = []
 
+    // swiftlint:disable strict_fileprivate
     fileprivate var _name: String?
     fileprivate var _match: NSRegularExpression?
     fileprivate var _captures: CaptureCollection?
@@ -44,6 +45,7 @@ internal class Pattern: NSObject {
     fileprivate var _endCaptures: CaptureCollection?
     fileprivate var _applyEndPatternLast: Bool = false
     fileprivate weak var _parent: Pattern?
+    // swiftlint:enable strict_fileprivate
 
     // MARK: - Initializers
 
@@ -126,23 +128,23 @@ internal class Include: Pattern {
         case resolved
     }
 
-    fileprivate var type: ReferenceType
-    fileprivate var associatedRepository: Repository?
+    private var type: ReferenceType
+    private var associatedRepository: Repository?
 
     // MARK: - Initializers
 
     init(reference: String, in repository: Repository? = nil, parent: Pattern?, manager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
-            self.type = .toRepository(repositoryRef: reference.substring(from: reference.characters.index(after: reference.startIndex)))
+            self.type = .toRepository(repositoryRef: String(reference[reference.characters.index(after: reference.startIndex)...]))
         } else if reference == "$self" {
             self.type = .toSelf
         } else  if reference == "$base" {
             self.type = .toBase
         } else if reference.contains("#") {
             if let hashRange = reference.range(of: "#") {
-                let languagePart = reference.substring(to: hashRange.lowerBound)
-                self.type = .toForeignRepository(repositoryRef: reference.substring(from: hashRange.upperBound), languageRef: languagePart)
+                let languagePart = String(reference[..<hashRange.lowerBound])
+                self.type = .toForeignRepository(repositoryRef: String(reference[hashRange.upperBound...]), languageRef: languagePart)
                 _ = manager.loadRawLanguage(withIdentifier: languagePart)
             } else {
                 assert(false)
@@ -191,7 +193,7 @@ internal class Include: Pattern {
                 assert(false)
                 pattern = nil
             }
-        case .toForeignRepository(let repositoryRef, let languageRef):
+        case .toForeignRepository(let (repositoryRef, languageRef)):
             pattern = languages[languageRef]?.repository[repositoryRef]
         case .toForeign(let languageRef):
             pattern = languages[languageRef]?.pattern
@@ -207,7 +209,7 @@ internal class Include: Pattern {
 
     // MARK: - Private
 
-    fileprivate func replace(with pattern: Pattern) {
+    private func replace(with pattern: Pattern) {
         _name = pattern.name
         _match = pattern.match
         _captures = pattern.captures
@@ -215,6 +217,7 @@ internal class Include: Pattern {
         _beginCaptures = pattern.beginCaptures
         _end = pattern.end
         _endCaptures = pattern.endCaptures
+        _applyEndPatternLast = pattern.applyEndPatternLast
         self.subpatterns = pattern.subpatterns
     }
 }

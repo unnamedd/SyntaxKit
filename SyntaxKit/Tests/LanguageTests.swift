@@ -13,7 +13,7 @@ internal class LanguageTests: XCTestCase {
 
     // MARK: - Properties
 
-    fileprivate let manager: BundleManager = getBundleManager()
+    private let manager: BundleManager = getBundleManager()
 
     // MARK: - Tests
 
@@ -36,7 +36,7 @@ internal class LanguageTests: XCTestCase {
             XCTAssertEqual("string.unquoted.yaml", pattern.name)
             XCTAssertEqual("punctuation.definition.entry.yaml", pattern.captures?[1]?.name)
         } else {
-            XCTFail()
+            XCTFail("Should be able to load yaml language fixture")
         }
     }
 
@@ -50,7 +50,7 @@ internal class LanguageTests: XCTestCase {
             XCTAssertEqual(4, swift.pattern.subpatterns[1].subpatterns.count)
             XCTAssertEqual("comment.line.double-slash.swift", swift.pattern.subpatterns[1].subpatterns[3].subpatterns[0].name)
         } else {
-            XCTFail()
+            XCTFail("Should be able to load swift language fixture")
         }
     }
 }
