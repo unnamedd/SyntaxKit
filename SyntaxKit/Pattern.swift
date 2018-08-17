@@ -136,7 +136,7 @@ internal class Include: Pattern {
     init(reference: String, in repository: Repository? = nil, parent: Pattern?, manager: BundleManager) {
         self.associatedRepository = repository
         if reference.hasPrefix("#") {
-            self.type = .toRepository(repositoryRef: String(reference[reference.characters.index(after: reference.startIndex)...]))
+            self.type = .toRepository(repositoryRef: String(reference[reference.index(after: reference.startIndex)...]))
         } else if reference == "$self" {
             self.type = .toSelf
         } else  if reference == "$base" {
