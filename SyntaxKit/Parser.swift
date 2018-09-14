@@ -19,7 +19,7 @@ open class Parser {
     // MARK: - Properties
 
     /// The Language that the parser recognizes
-    open let language: Language
+    public let language: Language
 
     /// String that is used in parse(in:). May already contain lexical
     /// information from previous calls to parse for incremental parsing.

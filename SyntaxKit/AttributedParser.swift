@@ -20,7 +20,7 @@ open class AttributedParser: Parser {
 
     // MARK: - Properties
 
-    open let theme: Theme
+    public let theme: Theme
 
     // MARK: - Initializers
 

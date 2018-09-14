@@ -37,7 +37,7 @@ open class BundleManager {
     ///         has to be done separately using clearLanguageCache.
     open var languageCaching: Bool = true
 
-    open static var defaultManager: BundleManager?
+    public static var defaultManager: BundleManager?
 
     private var bundleCallback: BundleLocationCallback
     private var dependencies: [Language] = []

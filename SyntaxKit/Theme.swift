@@ -15,7 +15,7 @@
     import UIKit
 #endif
 
-public typealias Attributes = [NSAttributedStringKey: Any]
+public typealias Attributes = [NSAttributedString.Key: Any]
 
 public struct Theme {
 
@@ -26,11 +26,11 @@ public struct Theme {
     public let attributes: [String: Attributes]
 
     public var backgroundColor: Color {
-        return attributes[Language.globalScope]?[NSAttributedStringKey.backgroundColor] as? Color ?? Color.white
+        return attributes[Language.globalScope]?[NSAttributedString.Key.backgroundColor] as? Color ?? Color.white
     }
 
     public var foregroundColor: Color {
-        return attributes[Language.globalScope]?[NSAttributedStringKey.foregroundColor] as? Color ?? Color.black
+        return attributes[Language.globalScope]?[NSAttributedString.Key.foregroundColor] as? Color ?? Color.black
     }
 
     // MARK: - Initializers
@@ -47,14 +47,14 @@ public struct Theme {
 
         var attributes = [String: Attributes]()
         for raw in rawSettings {
-            guard var setting = raw["settings"] as? [NSAttributedStringKey: Any] else { continue }
+            guard var setting = raw["settings"] as? [NSAttributedString.Key: Any] else { continue }
 
-            if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "foreground")) as? String {
-                setting[NSAttributedStringKey.foregroundColor] = Color(hex: value)
+            if let value = setting.removeValue(forKey: NSAttributedString.Key(rawValue: "foreground")) as? String {
+                setting[NSAttributedString.Key.foregroundColor] = Color(hex: value)
             }
 
-            if let value = setting.removeValue(forKey: NSAttributedStringKey(rawValue: "background")) as? String {
-                setting[NSAttributedStringKey.backgroundColor] = Color(hex: value)
+            if let value = setting.removeValue(forKey: NSAttributedString.Key(rawValue: "background")) as? String {
+                setting[NSAttributedString.Key.backgroundColor] = Color(hex: value)
             }
 
             if let patternIdentifiers = raw["scope"] as? String {

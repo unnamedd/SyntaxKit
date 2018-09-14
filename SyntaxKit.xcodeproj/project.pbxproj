@@ -577,7 +577,7 @@
 					};
 					211989A61B2EC3B600F0D786 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 1000;
 					};
 					211989AF1B2EC3B600F0D786 = {
 						CreatedOnToolsVersion = 7.0;
@@ -971,7 +971,7 @@
 				PRODUCT_NAME = SyntaxKit;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -994,7 +994,7 @@
 				PRODUCT_NAME = SyntaxKit;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
