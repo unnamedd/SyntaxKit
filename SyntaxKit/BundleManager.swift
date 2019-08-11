@@ -107,7 +107,7 @@ open class BundleManager {
     /// - parameter identifier: The identifier of the requested language.
     /// - returns:  The Language with unresolved extenal references, if found
     func loadRawLanguage(withIdentifier identifier: String) -> Language? {
-        let indexOfStoredLanguage = self.dependencies.index { (lang: Language) in lang.scopeName == identifier }
+        let indexOfStoredLanguage = self.dependencies.firstIndex { (lang: Language) in lang.scopeName == identifier }
 
         if let index = indexOfStoredLanguage {
             return self.dependencies[index]
