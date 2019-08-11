@@ -581,7 +581,7 @@
 					};
 					211989AF1B2EC3B600F0D786 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 1030;
 					};
 					2122A6DD1B22B9320006409B = {
 						CreatedOnToolsVersion = 6.3.2;
@@ -1013,7 +1013,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.samsoffes.syntaxkit-ios.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -1029,7 +1029,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.samsoffes.syntaxkit-ios.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

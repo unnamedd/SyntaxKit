@@ -33,25 +33,25 @@ internal class SwiftBaselineHighlightingTests: XCTestCase {
         let input = fixture("swifttest.swift", "txt")
         if let string = parser?.attributedString(for: input) {
             // line comment
-            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 10, effectiveRange: nil)[NSAttributedStringKey.foregroundColor] as? Color)
-            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 135, effectiveRange: nil)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 10, effectiveRange: nil)[NSAttributedString.Key.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 135, effectiveRange: nil)[NSAttributedString.Key.foregroundColor] as? Color)
 
             // block comment
             //        print((string.string as NSString).substringWithRange(NSRange(location: 157, length: 20)))
-            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 157, effectiveRange: nil)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#93A1A1"), string.attributes(at: 157, effectiveRange: nil)[NSAttributedString.Key.foregroundColor] as? Color)
 
             // string literal
             //        print((string.string as NSString).substringWithRange(NSRange(location: 744, length: 6)))
-            assertEqualColors(Color(hex: "#839496"), string.attributes(at: 744, effectiveRange: nil)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#839496"), string.attributes(at: 744, effectiveRange: nil)[NSAttributedString.Key.foregroundColor] as? Color)
             var stringRange = NSRange()
-            assertEqualColors(Color(hex: "#2aa198"), string.attributes(at: 745, effectiveRange: &stringRange)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#2aa198"), string.attributes(at: 745, effectiveRange: &stringRange)[NSAttributedString.Key.foregroundColor] as? Color)
             XCTAssertEqual(stringRange.length, 4)
-            assertEqualColors(Color(hex: "#839496"), string.attributes(at: 749, effectiveRange: nil)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#839496"), string.attributes(at: 749, effectiveRange: nil)[NSAttributedString.Key.foregroundColor] as? Color)
 
             // number literal
             var numberRange = NSRange()
             //        print((string.string as NSString).substringWithRange(NSRange(location: 715, length: 3)))
-            assertEqualColors(Color(hex: "#d33682"), string.attributes(at: 715, effectiveRange: &numberRange)[NSAttributedStringKey.foregroundColor] as? Color)
+            assertEqualColors(Color(hex: "#d33682"), string.attributes(at: 715, effectiveRange: &numberRange)[NSAttributedString.Key.foregroundColor] as? Color)
             XCTAssertEqual(numberRange, NSRange(location: 715, length: 1))
         } else {
             XCTFail("Parser loading should have succeeded")
