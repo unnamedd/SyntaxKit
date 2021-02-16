@@ -19,7 +19,9 @@
 //  Copyright © 2014-2015 Sam Soffes. All rights reserved.
 //
 
-@objc(SKPattern)
+import Foundation
+
+//@objc(SKPattern)
 internal class Pattern: NSObject {
 
     // MARK: - Properties
@@ -193,7 +195,7 @@ internal class Include: Pattern {
                 assert(false)
                 pattern = nil
             }
-        case .toForeignRepository(let (repositoryRef, languageRef)):
+        case let .toForeignRepository(repositoryRef, languageRef):
             pattern = languages[languageRef]?.repository[repositoryRef]
         case .toForeign(let languageRef):
             pattern = languages[languageRef]?.pattern
